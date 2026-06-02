@@ -1,3 +1,0 @@
-<!DOCTYPE html>
-<html class=main>
-<link rel=stylesheet href=gnatdoc.css><body class=content><h1>Ada_CRDT.Sequences</h1><h2>Entities</h2><h2>Description</h2><p>Modular sequence engine hierarchy for Ada_CRDT. Provides compile-time polymorphism between different RGA algorithms:<ul><li><p>Yjs â Chunk-based splitting block engine (default)<li><p>Naive â Per-element linked list for educational use<li><p>Fugue â Tree-based identifiers to prevent interleaving</ul><p>Each engine implements the same public API surface: Insert, Insert_Bulk, Delete, Delete_Node, Merge Get, Size, Count, Compact Cursor-based and for-of iteration Protocol-versioned serialization State vector delta sync

@@ -1,7 +1,0 @@
-<!DOCTYPE html>
-<html class=main>
-<link rel=stylesheet href=gnatdoc.css><body class=content><h1>Ada_CRDT.Protected.Shared_LWW</h1><h2>Entities</h2><h3>Generic formal parameters</h3><ul><li><a href=#01c80c7db83887167a11bff0d4030b3c6b037552ea94b38a77d7253ed65a8a0a>Element_Type</a><li><a href=#b7ee1a5055e1f1c48cf521cad7898bc3f8d4a279ed641ae98f206e5078fd211e>Max_Set_Size</a></ul><h3>Protected Types and Protected Objects</h3><ul><li><a href=4de4927721342470b8e0250584798822a00bd583ffb5ea965899183ee688446b.html>Shared_Set</a></ul><h3>Generic Instantiations</h3><ul><li><a href=#63bec333bd104c9d54cb46493f8a1f6c713c97c3a003d55efee46d20bd4c08eb>LWW_Pkg</a></ul><h2>Description</h2><p>Thread-safe LWW-Element-Set.<h4 id=01c80c7db83887167a11bff0d4030b3c6b037552ea94b38a77d7253ed65a8a0a>Element_Type</h4><pre class=ada-code-snippet><code>type Element_Type is private;
-</code></pre><h4 id=63bec333bd104c9d54cb46493f8a1f6c713c97c3a003d55efee46d20bd4c08eb>LWW_Pkg</h4><pre class=ada-code-snippet><code>package LWW_Pkg is new Ada_CRDT.Lww_Element_Sets
-  (Element_Type, Max_Set_Size);
-</code></pre><h4 id=b7ee1a5055e1f1c48cf521cad7898bc3f8d4a279ed641ae98f206e5078fd211e>Max_Set_Size</h4><pre class=ada-code-snippet><code>Max_Set_Size : Positive;
-</code></pre>

@@ -67,7 +67,7 @@ Package: `Ada_CRDT.Lww_Element_Sets` (generic over `Element_Type`, `Capacity`)
 
 ### RGA Sequence
 
-Three backend engines, same API. See [API docs](docs/index.html) for full details.
+Three backend engines, same API. See [API docs](docs/api-docs/index.md) for full details.
 
 ```ada
 with Ada_CRDT.Rga;
@@ -207,10 +207,10 @@ All serialized CRDT state begins with `Core.Protocol_Version` (currently `1`):
 | `make build` | Build library + tests |
 | `make run` / `make test` | Run test suite (103 tests) |
 | `make prove` | SPARK proofs via `alr gnatprove` |
-| `make doc` | Generate HTML docs via `gnatdoc` (see `docs/`) |
+| `make doc` | Generate Markdown API docs (see `docs/api-docs/`) |
 | `make clean` | Remove build artifacts |
 
-Prerequisites: [Alire](https://alire.ada.dev) (manages GNAT automatically).
+Prerequisites: [Alire](https://alire.ada.dev) (manages GNAT automatically), Python 3 for `make doc`.
 
 ---
 
