@@ -6,7 +6,7 @@ CRDT (Conflict-Free Replicated Data Types) library for Ada/SPARK.
 
 ### Alire Community Index
 
-```
+```bash
 alr with crdt
 ```
 
@@ -16,11 +16,10 @@ Will work once added to the community index.
 
 ```bash
 alr index --add git+https://codeberg.org/bladeacer/ada_crdt.git --name crdt
-cd /path/to/your-project
 alr with crdt
 ```
 
-Then `with "crdt";` in your `.gpr` file.
+Then, include `with "crdt";` in your `.gpr` file.
 
 ## Development
 
@@ -37,7 +36,8 @@ make run
 
 ### PN-Counter (Actor Map)
 
-Per-replica increments/decrements. Fixed memory (3 replicas = 3 slots), regardless of op count.
+Per-replica increments/decrements. Fixed memory (3 replicas = 3 slots),
+regardless of op count.
 
 ```ada
 with CRDT.Pn_Counters;
@@ -77,7 +77,8 @@ Package: `CRDT.Lww_Element_Sets` (generic over `Element_Type`, `Capacity`)
 
 ### RGA Sequence
 
-Three backend engines, same API. See [API docs](docs/api-docs/index.md) for full details.
+Three backend engines, same API. See [API docs](docs/api-docs/index.md) for
+full details.
 
 ```ada
 with CRDT.Rga;
@@ -215,32 +216,39 @@ All serialized CRDT state begins with `Core.Protocol_Version` (currently `1`):
 | Command | Action |
 |---------|--------|
 | `make build` | Build library + tests |
-| `make run` / `make test` | Run test suite (122 tests) |
+| `make run` / `make test` | Run test suite |
 | `make prove` | SPARK proofs via `alr gnatprove` |
 | `make doc` | Generate Markdown API docs (see `docs/api-docs/`) |
 | `make clean` | Remove build artifacts |
 
-Prerequisites: [Alire](https://alire.ada.dev) (manages GNAT automatically), Python 3 for `make doc`.
+Prerequisites: [Alire](https://alire.ada.dev) (manages GNAT automatically),
+[Python 3](https://www.python.org/downloads/) for `make doc`.
 
 ---
 
 ## SPARK Proof
 
-Core packages (`CRDT.Pn_Counters`) SPARK-proven for run-time check elimination. Generics (Sequences, LWW, RGA) are instantiation-dependent.
+Core packages (`CRDT.Pn_Counters`) SPARK-proven for run-time check elimination.
+Generics (Sequences, LWW, RGA) are instantiation-dependent.
 
 ---
 
 ## Credits
 
-Technology:
-- [SPARK / Ada 2012](https://www.adacore.com/sparkpro) (AdaCore): formal verification
+Technology Stack:
+
+- [SPARK / Ada 2012](https://www.adacore.com/languages/spark) (AdaCore): formal verification
 - [Alire](https://alire.ada.dev): Ada/SPARK package manager
 
 Inspired by:
-- PN-Counter: [Apache Cassandra](https://cassandra.apache.org) distributed counters, [Riak](https://riak.com) CRDTs
-- LWW-Element-Set: [Redis Enterprise](https://redis.io), [SoundCloud Roshi](https://github.com/soundcloud/roshi); Lamport (1978)
+
+- PN-Counter: [Apache Cassandra](https://cassandra.apache.org) distributed
+counters, [Riak](https://riak.com) CRDTs
+- LWW-Element-Set: [Redis Enterprise](https://redis.io),
+[SoundCloud Roshi](https://github.com/soundcloud/roshi); Lamport (1978)
 - RGA: [Yjs / YATA](https://github.com/yjs/yjs) (Kevin Jahns): block CRDT text editing
-- [Automerge](https://github.com/automerge/automerge) (Martin Kleppmann et al.): JSON CRDT
+- [Automerge](https://github.com/automerge/automerge)
+(Martin Kleppmann et al.): JSON CRDT
 - Fugue: tree-based interleaving prevention
 
 ## License
