@@ -120,7 +120,7 @@ def parse_blocks(text):
 
 
 def render_index(packages):
-    lines = ["# Ada_CRDT API Reference", "", "## Packages", ""]
+    lines = ["# CRDT API Reference", "", "## Packages", ""]
     for title in sorted(packages, key=lambda p: (p.count("."), p.lower())):
         lines.append(f"- [{title}]({packages[title]})")
     lines.append("")

@@ -3,16 +3,16 @@ with Ada.Numerics.Discrete_Random;
 with Ada.Numerics.Float_Random;
 with Ada.Streams;
 with Ada.Streams.Stream_IO;
-with Ada_CRDT.Core;
-with Ada_CRDT.Pn_Counters;
-with Ada_CRDT.Lww_Element_Sets;
-with Ada_CRDT.Rga;
-with Ada_CRDT.Rgas;
-with Ada_CRDT.Sync;
-with Ada_CRDT.Sync.State_Based;
-with Ada_CRDT.Sync.Op_Based;
-with Ada_CRDT.Sequences.Yjs;
-with Ada_CRDT.Sequences.Naive;
+with CRDT.Core;
+with CRDT.Pn_Counters;
+with CRDT.Lww_Element_Sets;
+with CRDT.Rga;
+with CRDT.Rgas;
+with CRDT.Sync;
+with CRDT.Sync.State_Based;
+with CRDT.Sync.Op_Based;
+with CRDT.Sequences.Yjs;
+with CRDT.Sequences.Naive;
 
 procedure Test_Crdt is
 
@@ -37,37 +37,37 @@ procedure Test_Crdt is
    -----------------------
    procedure Test_PN_Counter is
       Max_A : constant Positive := 5;
-      C     : Ada_CRDT.Pn_Counters.PN_Counter (Max_A);
+      C     : CRDT.Pn_Counters.PN_Counter (Max_A);
       V     : Integer;
    begin
       New_Line;
       Put_Line ("[PN-Counter]");
 
-      V := Ada_CRDT.Pn_Counters.Value (C);
+      V := CRDT.Pn_Counters.Value (C);
       Check (V = 0, "Initial value = 0 (got" & Integer'Image (V) & ")");
 
-      Ada_CRDT.Pn_Counters.Increment (C, 5, 1);
-      V := Ada_CRDT.Pn_Counters.Value (C);
+      CRDT.Pn_Counters.Increment (C, 5, 1);
+      V := CRDT.Pn_Counters.Value (C);
       Check (V = 5, "After Increment (C, 5, Actor=>1): value = 5 (got" & Integer'Image (V) & ")");
 
-      Ada_CRDT.Pn_Counters.Decrement (C, 3, 1);
-      V := Ada_CRDT.Pn_Counters.Value (C);
+      CRDT.Pn_Counters.Decrement (C, 3, 1);
+      V := CRDT.Pn_Counters.Value (C);
       Check (V = 2, "After Decrement (C, 3, Actor=>1): value = 2 (got" & Integer'Image (V) & ")");
 
-      Ada_CRDT.Pn_Counters.Increment (C, 1, 1);
-      V := Ada_CRDT.Pn_Counters.Value (C);
+      CRDT.Pn_Counters.Increment (C, 1, 1);
+      V := CRDT.Pn_Counters.Value (C);
       Check (V = 3, "After Increment (C, 1, Actor=>1): value = 3 (got" & Integer'Image (V) & ")");
 
-      Ada_CRDT.Pn_Counters.Decrement (C, 4, 1);
-      V := Ada_CRDT.Pn_Counters.Value (C);
+      CRDT.Pn_Counters.Decrement (C, 4, 1);
+      V := CRDT.Pn_Counters.Value (C);
       Check (V = -1, "After Decrement (C, 4, Actor=>1): value = -1 (got" & Integer'Image (V) & ")");
 
       declare
-         D : Ada_CRDT.Pn_Counters.PN_Counter (Max_A);
+         D : CRDT.Pn_Counters.PN_Counter (Max_A);
       begin
-         Ada_CRDT.Pn_Counters.Increment (D, 10, 2);
-         Ada_CRDT.Pn_Counters.Merge (C, D);
-         V := Ada_CRDT.Pn_Counters.Value (C);
+         CRDT.Pn_Counters.Increment (D, 10, 2);
+         CRDT.Pn_Counters.Merge (C, D);
+         V := CRDT.Pn_Counters.Value (C);
          Check (V = 9, "After Merge with D (Actor2 P=10): value = P(5+10) - N(6) = 9 (got" & Integer'Image (V) & ")");
       end;
 
@@ -80,12 +80,12 @@ procedure Test_Crdt is
    procedure Test_LWW_Set is
       Max_Size : constant Positive := 10;
 
-      package LWW is new Ada_CRDT.Lww_Element_Sets (Integer, Max_Size);
+      package LWW is new CRDT.Lww_Element_Sets (Integer, Max_Size);
 
       S : LWW.LWW_Element_Set (Max_Size);
 
-      function Lamport (S : Natural; N : Ada_CRDT.Core.Replica_Id)
-                        return Ada_CRDT.Core.Lamport_Time is
+      function Lamport (S : Natural; N : CRDT.Core.Replica_Id)
+                        return CRDT.Core.Lamport_Time is
         (Stamp => S, Node => N);
    begin
       New_Line;
@@ -142,7 +142,7 @@ procedure Test_Crdt is
       Max_Sz  : constant Positive := 10;
       Seq     : Natural := 0;
 
-      package RGA_Str is new Ada_CRDT.Rga (Character, Max_Sz);
+      package RGA_Str is new CRDT.Rga (Character, Max_Sz);
 
       R : RGA_Str.RGA (Max_Sz);
 
@@ -197,7 +197,7 @@ procedure Test_Crdt is
       Max_Sz  : constant Positive := 10;
       Max_Cnt : constant Positive := 5;
 
-      package RGAs_Pkg is new Ada_CRDT.Rgas (Character, Max_Sz, Max_Cnt);
+      package RGAs_Pkg is new CRDT.Rgas (Character, Max_Sz, Max_Cnt);
 
       RS : RGAs_Pkg.RGAs (Max_Cnt);
       R1 : RGAs_Pkg.RGA_Entry;
@@ -260,19 +260,19 @@ procedure Test_Crdt is
       --------------------
       declare
          Max_PN : constant Positive := 10;
-         A : Ada_CRDT.Pn_Counters.PN_Counter (Max_PN);
-         B : Ada_CRDT.Pn_Counters.PN_Counter (Max_PN);
-         C : Ada_CRDT.Pn_Counters.PN_Counter (Max_PN);
-         D : Ada_CRDT.Pn_Counters.PN_Counter (Max_PN);
-         E : Ada_CRDT.Pn_Counters.PN_Counter (Max_PN);
+         A : CRDT.Pn_Counters.PN_Counter (Max_PN);
+         B : CRDT.Pn_Counters.PN_Counter (Max_PN);
+         C : CRDT.Pn_Counters.PN_Counter (Max_PN);
+         D : CRDT.Pn_Counters.PN_Counter (Max_PN);
+         E : CRDT.Pn_Counters.PN_Counter (Max_PN);
          Op : Natural;
       begin
          for I in 1 .. Num_Ops loop
             Op := Pos_Random.Random (Pos_Gen) mod 2;
             if Op = 0 then
-               Ada_CRDT.Pn_Counters.Increment (A, Nat_Random.Random (Nat_Gen) mod 20 + 1, 1);
+               CRDT.Pn_Counters.Increment (A, Nat_Random.Random (Nat_Gen) mod 20 + 1, 1);
             else
-               Ada_CRDT.Pn_Counters.Decrement (A, Nat_Random.Random (Nat_Gen) mod 20 + 1, 1);
+               CRDT.Pn_Counters.Decrement (A, Nat_Random.Random (Nat_Gen) mod 20 + 1, 1);
             end if;
          end loop;
 
@@ -281,9 +281,9 @@ procedure Test_Crdt is
          for I in 1 .. Num_Ops loop
             Op := Pos_Random.Random (Pos_Gen) mod 2;
             if Op = 0 then
-               Ada_CRDT.Pn_Counters.Increment (B, Nat_Random.Random (Nat_Gen) mod 20 + 1, 2);
+               CRDT.Pn_Counters.Increment (B, Nat_Random.Random (Nat_Gen) mod 20 + 1, 2);
             else
-               Ada_CRDT.Pn_Counters.Decrement (B, Nat_Random.Random (Nat_Gen) mod 20 + 1, 2);
+               CRDT.Pn_Counters.Decrement (B, Nat_Random.Random (Nat_Gen) mod 20 + 1, 2);
             end if;
          end loop;
 
@@ -292,35 +292,35 @@ procedure Test_Crdt is
          for I in 1 .. Num_Ops loop
             Op := Pos_Random.Random (Pos_Gen) mod 2;
             if Op = 0 then
-               Ada_CRDT.Pn_Counters.Increment (C, Nat_Random.Random (Nat_Gen) mod 20 + 1, 3);
+               CRDT.Pn_Counters.Increment (C, Nat_Random.Random (Nat_Gen) mod 20 + 1, 3);
             else
-               Ada_CRDT.Pn_Counters.Decrement (C, Nat_Random.Random (Nat_Gen) mod 20 + 1, 3);
+               CRDT.Pn_Counters.Decrement (C, Nat_Random.Random (Nat_Gen) mod 20 + 1, 3);
             end if;
          end loop;
 
          D := A;
-         Ada_CRDT.Pn_Counters.Merge (D, B);
+         CRDT.Pn_Counters.Merge (D, B);
          E := B;
-         Ada_CRDT.Pn_Counters.Merge (E, A);
-         Check (Ada_CRDT.Pn_Counters.Value (D) = Ada_CRDT.Pn_Counters.Value (E),
+         CRDT.Pn_Counters.Merge (E, A);
+         Check (CRDT.Pn_Counters.Value (D) = CRDT.Pn_Counters.Value (E),
                 "PN-Counter commutativity: Merge(A,B) = Merge(B,A)");
 
          D := A;
-         Ada_CRDT.Pn_Counters.Merge (D, A);
-         Check (Ada_CRDT.Pn_Counters.Value (D) = Ada_CRDT.Pn_Counters.Value (A),
+         CRDT.Pn_Counters.Merge (D, A);
+         Check (CRDT.Pn_Counters.Value (D) = CRDT.Pn_Counters.Value (A),
                 "PN-Counter idempotency: Merge(A,A) = A");
 
          D := A;
-         Ada_CRDT.Pn_Counters.Merge (D, B);
-         Ada_CRDT.Pn_Counters.Merge (D, C);
+         CRDT.Pn_Counters.Merge (D, B);
+         CRDT.Pn_Counters.Merge (D, C);
          E := A;
          declare
-            Tmp : Ada_CRDT.Pn_Counters.PN_Counter (Max_PN) := B;
+            Tmp : CRDT.Pn_Counters.PN_Counter (Max_PN) := B;
          begin
-            Ada_CRDT.Pn_Counters.Merge (Tmp, C);
-            Ada_CRDT.Pn_Counters.Merge (E, Tmp);
+            CRDT.Pn_Counters.Merge (Tmp, C);
+            CRDT.Pn_Counters.Merge (E, Tmp);
          end;
-         Check (Ada_CRDT.Pn_Counters.Value (D) = Ada_CRDT.Pn_Counters.Value (E),
+         Check (CRDT.Pn_Counters.Value (D) = CRDT.Pn_Counters.Value (E),
                 "PN-Counter associativity: Merge(Merge(A,B),C) = Merge(A,Merge(B,C))");
       end;
 
@@ -330,7 +330,7 @@ procedure Test_Crdt is
       declare
          Max_LWW : constant Positive := 500;
 
-         package LWW is new Ada_CRDT.Lww_Element_Sets (Integer, Max_LWW);
+         package LWW is new CRDT.Lww_Element_Sets (Integer, Max_LWW);
 
          use type LWW.LWW_Element_Set;
 
@@ -402,7 +402,7 @@ procedure Test_Crdt is
          Seq_B   : Natural := 0;
          Seq_C   : Natural := 0;
 
-         package RGA_Ch is new Ada_CRDT.Rga (Character, Max_RGA);
+         package RGA_Ch is new CRDT.Rga (Character, Max_RGA);
 
          use type RGA_Ch.RGA;
 
@@ -483,7 +483,7 @@ procedure Test_Crdt is
       Max_RGA : constant Positive := 50;
       Seq     : Natural := 0;
 
-      package RGA_Str is new Ada_CRDT.Rga (Character, Max_RGA);
+      package RGA_Str is new CRDT.Rga (Character, Max_RGA);
 
       function El (C : Character) return Character is (C);
 
@@ -573,7 +573,7 @@ procedure Test_Crdt is
    procedure Test_Tombstone_Edge_Cases is
       Max_RGA : constant Positive := 20;
 
-      package RGA_Str is new Ada_CRDT.Rga (Character, Max_RGA);
+      package RGA_Str is new CRDT.Rga (Character, Max_RGA);
 
       R : RGA_Str.RGA (Max_RGA);
 
@@ -624,7 +624,7 @@ procedure Test_Crdt is
    -----------------------------------------------
    procedure Test_Structural_Splitting is
       Max_RGA : constant Positive := 20;
-      package RGA_Str is new Ada_CRDT.Rga (Character, Max_RGA, Max_Stride => 10);
+      package RGA_Str is new CRDT.Rga (Character, Max_RGA, Max_Stride => 10);
       R : RGA_Str.RGA (Max_RGA);
       Seq : Natural := 0;
    begin
@@ -659,7 +659,7 @@ procedure Test_Crdt is
    -----------------------------------------------
    procedure Test_Delta_Sync is
       Max_RGA : constant Positive := 20;
-      package RGA_Str is new Ada_CRDT.Rga (Character, Max_RGA);
+      package RGA_Str is new CRDT.Rga (Character, Max_RGA);
       A : RGA_Str.RGA (Max_RGA);
       B : RGA_Str.RGA (Max_RGA);
       SV : RGA_Str.Replica_Max_Seq_Array (1 .. 10);
@@ -695,7 +695,7 @@ procedure Test_Crdt is
    -----------------------------------------------
    procedure Test_Tombstone_GC is
       Max_RGA : constant Positive := 20;
-      package RGA_Str is new Ada_CRDT.Rga (Character, Max_RGA);
+      package RGA_Str is new CRDT.Rga (Character, Max_RGA);
       R : RGA_Str.RGA (Max_RGA);
    begin
       New_Line;
@@ -724,7 +724,7 @@ procedure Test_Crdt is
    -----------------------------------------------
    procedure Test_Serialization is
       Max_RGA : constant Positive := 20;
-      package RGA_Str is new Ada_CRDT.Rga (Character, Max_RGA);
+      package RGA_Str is new CRDT.Rga (Character, Max_RGA);
       Src : RGA_Str.RGA (Max_RGA);
       Dst : RGA_Str.RGA (Max_RGA);
       use Ada.Streams.Stream_IO;
@@ -738,12 +738,12 @@ procedure Test_Crdt is
       RGA_Str.Insert_Bulk (Src, 3, (2, 1), " Ada");
 
       -- Write to temp file
-      Create (F, Out_File, "/tmp/ada_crdt_serialize_test.bin");
+      Create (F, Out_File, "/tmp/crdt_serialize_test.bin");
       RGA_Str.RGA'Write (Stream (F), Src);
       Close (F);
 
       -- Read back
-      Open (F, In_File, "/tmp/ada_crdt_serialize_test.bin");
+      Open (F, In_File, "/tmp/crdt_serialize_test.bin");
       RGA_Str.RGA'Read (Stream (F), Dst);
       Close (F);
 
@@ -771,7 +771,7 @@ procedure Test_Crdt is
       Max_RGA : constant Positive := 20;
       Seq     : Natural := 0;
 
-      package RGA_Str is new Ada_CRDT.Sequences.Yjs (Character, Max_RGA);
+      package RGA_Str is new CRDT.Sequences.Yjs (Character, Max_RGA);
 
       R : RGA_Str.RGA (Max_RGA);
 
@@ -822,7 +822,7 @@ procedure Test_Crdt is
       Max_RGA : constant Positive := 20;
       Seq     : Natural := 0;
 
-      package RGA_Str is new Ada_CRDT.Sequences.Naive (Character, Max_RGA);
+      package RGA_Str is new CRDT.Sequences.Naive (Character, Max_RGA);
 
       R : RGA_Str.RGA (Max_RGA);
 
@@ -890,46 +890,46 @@ procedure Test_Crdt is
    --  Sync Layer Tests                        --
    -----------------------------------------------
    procedure Test_Sync_Layer is
-      use type Ada_CRDT.Sync.Op_Based.Op_Kind;
+      use type CRDT.Sync.Op_Based.Op_Kind;
    begin
       New_Line;
       Put_Line ("[Sync Layer]");
 
       declare
-         Config : Ada_CRDT.Sync.State_Based.Sync_Config :=
+         Config : CRDT.Sync.State_Based.Sync_Config :=
            (Max_Replicas => 4, Delta_Sync => True, HLC_Node => 1);
-         Local  : Ada_CRDT.Sync.State_Based.Replica_State :=
-           Ada_CRDT.Sync.State_Based.Create (Config);
-         Remote : Ada_CRDT.Sync.State_Based.Replica_State :=
-           Ada_CRDT.Sync.State_Based.Create (Config);
+         Local  : CRDT.Sync.State_Based.Replica_State :=
+           CRDT.Sync.State_Based.Create (Config);
+         Remote : CRDT.Sync.State_Based.Replica_State :=
+           CRDT.Sync.State_Based.Create (Config);
       begin
-         Ada_CRDT.Sync.State_Based.Merge (Local, Remote);
+         CRDT.Sync.State_Based.Merge (Local, Remote);
          Check (True, "State-based sync: merge completed without error");
       end;
 
       declare
-         Log : Ada_CRDT.Sync.Op_Based.Op_Log (Capacity => 100);
+         Log : CRDT.Sync.Op_Based.Op_Log (Capacity => 100);
       begin
-         Ada_CRDT.Sync.Op_Based.Append (Log,
-           (Kind => Ada_CRDT.Sync.Op_Based.Op_Insert, Seq => 1, Node => 1, Position => 1));
-         Ada_CRDT.Sync.Op_Based.Append (Log,
-           (Kind => Ada_CRDT.Sync.Op_Based.Op_Delete, Seq => 2, Node => 1, Del_Position => 1));
-         Check (Ada_CRDT.Sync.Op_Based.Size (Log) = 2,
+         CRDT.Sync.Op_Based.Append (Log,
+           (Kind => CRDT.Sync.Op_Based.Op_Insert, Seq => 1, Node => 1, Position => 1));
+         CRDT.Sync.Op_Based.Append (Log,
+           (Kind => CRDT.Sync.Op_Based.Op_Delete, Seq => 2, Node => 1, Del_Position => 1));
+         Check (CRDT.Sync.Op_Based.Size (Log) = 2,
                 "Op-based sync: log size = 2");
 
-         Ada_CRDT.Sync.Op_Based.Acknowledge (Log, 1);
-         Check (Ada_CRDT.Sync.Op_Based.Size (Log) = 1,
+         CRDT.Sync.Op_Based.Acknowledge (Log, 1);
+         Check (CRDT.Sync.Op_Based.Size (Log) = 1,
                 "Op-based sync: after ack up to seq 1, size = 1");
 
-         Ada_CRDT.Sync.Op_Based.Compact (Log);
-         Check (Ada_CRDT.Sync.Op_Based.Size (Log) = 1,
+         CRDT.Sync.Op_Based.Compact (Log);
+         Check (CRDT.Sync.Op_Based.Size (Log) = 1,
                 "Op-based sync: after compact, size = 1");
 
          declare
-            Op : constant Ada_CRDT.Sync.Op_Based.Operation :=
-              Ada_CRDT.Sync.Op_Based.Get (Log, 1);
+            Op : constant CRDT.Sync.Op_Based.Operation :=
+              CRDT.Sync.Op_Based.Get (Log, 1);
          begin
-            Check (Op.Kind = Ada_CRDT.Sync.Op_Based.Op_Delete,
+            Check (Op.Kind = CRDT.Sync.Op_Based.Op_Delete,
                    "Op-based sync: Get remaining op = Delete");
          end;
       end;
@@ -944,7 +944,7 @@ procedure Test_Crdt is
       Max_RGA : constant Positive := 50;
       Seq     : Natural := 0;
 
-      package RGA_Str is new Ada_CRDT.Rga (Character, Max_RGA);
+      package RGA_Str is new CRDT.Rga (Character, Max_RGA);
 
       function To_String (R : RGA_Str.RGA) return String is
          Buf : String (1 .. RGA_Str.Size (R));
@@ -955,7 +955,7 @@ procedure Test_Crdt is
          return Buf;
       end To_String;
 
-      function Next_Id (Rep : Ada_CRDT.Core.Replica_Id) return RGA_Str.Node_Id is
+      function Next_Id (Rep : CRDT.Core.Replica_Id) return RGA_Str.Node_Id is
       begin
          Seq := Seq + 1;
          return (Replica => Rep, Seq => Seq);
@@ -1060,7 +1060,7 @@ procedure Test_Crdt is
    ---------------------------------------------------
    procedure Test_Byte_Boundary is
       Max_RGA : constant Positive := 20;
-      package RGA_Str is new Ada_CRDT.Rga (Character, Max_RGA);
+      package RGA_Str is new CRDT.Rga (Character, Max_RGA);
       Src : RGA_Str.RGA (Max_RGA);
       Dst : RGA_Str.RGA (Max_RGA);
       use Ada.Streams.Stream_IO;
@@ -1070,10 +1070,10 @@ procedure Test_Crdt is
       Put_Line ("[Byte-Boundary Round-tripping]");
 
       -- Empty RGA round-trip
-      Create (F, Out_File, "/tmp/ada_crdt_serialize_empty.bin");
+      Create (F, Out_File, "/tmp/crdt_serialize_empty.bin");
       RGA_Str.RGA'Write (Stream (F), Src);
       Close (F);
-      Open (F, In_File, "/tmp/ada_crdt_serialize_empty.bin");
+      Open (F, In_File, "/tmp/crdt_serialize_empty.bin");
       RGA_Str.RGA'Read (Stream (F), Dst);
       Close (F);
       Check (RGA_Str.Size (Dst) = 0,
@@ -1086,10 +1086,10 @@ procedure Test_Crdt is
 
       -- Null byte (Character'Val(0))
       RGA_Str.Insert (Src, 1, (1, 1), Character'Val (0));
-      Create (F, Out_File, "/tmp/ada_crdt_serialize_0.bin");
+      Create (F, Out_File, "/tmp/crdt_serialize_0.bin");
       RGA_Str.RGA'Write (Stream (F), Src);
       Close (F);
-      Open (F, In_File, "/tmp/ada_crdt_serialize_0.bin");
+      Open (F, In_File, "/tmp/crdt_serialize_0.bin");
       RGA_Str.RGA'Read (Stream (F), Dst);
       Close (F);
       Check (RGA_Str.Get (Dst, 1) = Character'Val (0),
@@ -1102,10 +1102,10 @@ procedure Test_Crdt is
 
       -- High byte (Character'Val(255))
       RGA_Str.Insert (Src, 2, (1, 2), Character'Val (255));
-      Create (F, Out_File, "/tmp/ada_crdt_serialize_255.bin");
+      Create (F, Out_File, "/tmp/crdt_serialize_255.bin");
       RGA_Str.RGA'Write (Stream (F), Src);
       Close (F);
-      Open (F, In_File, "/tmp/ada_crdt_serialize_255.bin");
+      Open (F, In_File, "/tmp/crdt_serialize_255.bin");
       RGA_Str.RGA'Read (Stream (F), Dst);
       Close (F);
       Check (RGA_Str.Get (Dst, 1) = Character'Val (0),
@@ -1126,7 +1126,7 @@ procedure Test_Crdt is
    ---------------------------------------------------
    procedure Test_Out_Of_Order_Delta is
       Max_RGA : constant Positive := 20;
-      package RGA_Str is new Ada_CRDT.Rga (Character, Max_RGA);
+      package RGA_Str is new CRDT.Rga (Character, Max_RGA);
       A : RGA_Str.RGA (Max_RGA);
       B : RGA_Str.RGA (Max_RGA);
       SV : RGA_Str.Replica_Max_Seq_Array (1 .. 10);
@@ -1189,7 +1189,7 @@ procedure Test_Crdt is
    end Test_Out_Of_Order_Delta;
 
 begin
-   Put_Line ("=== Ada_CRDT CRDT Test Suite ===");
+   Put_Line ("=== CRDT Test Suite ===");
    Put_Line ("Running unit tests, property-based fuzzing, and chaos simulations...");
 
    Test_PN_Counter;

@@ -1,6 +1,6 @@
 name = "crdt"
 description = "CRDT library for Ada/SPARK"
-version = "1.1.0"
+version = "1.0.0"
 
 authors = ["bladeacer"]
 maintainers = ["bladeacer <wg.nick.exe@gmail.com>"]
@@ -16,3 +16,11 @@ gnatprove = "^15.1.0"
 
 [[depends-on]]
 gnatdoc_bin = "^26.0.0"
+
+[origin]
+hashes = [
+"sha256:2b23f1aa314d1c01ef68d8674c04aa445cef41edcb4e7e38a4d6814f2f102fe2",
+"sha512:b712b3e1ec21c7a3e4ee94183ad902409536e3d913f2365163ca0924a2832178358cb78b93d4becad24eae6f93e832af91ddb8822a5fdd422a049dcb11a55651",
+]
+url = "https://codeberg.org/bladeacer/CRDT/archive/v1.0.0.tar.gz"
+

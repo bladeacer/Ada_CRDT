@@ -16,3 +16,9 @@ gnatprove = "^15.1.0"
 
 [[depends-on]]
 gnatdoc_bin = "^26.0.0"
+
+[origin]
+url = "https://codeberg.org/bladeacer/Ada_CRDT/archive/v1.1.0.tar.gz"
+
+[origin]
+url = "https://codeberg.org/bladeacer/Ada_CRDT/archive/v1.1.0.tar.gz"

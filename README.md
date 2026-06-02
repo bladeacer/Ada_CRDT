@@ -1,24 +1,34 @@
-# Ada_CRDT
+# CRDT
 
 CRDT (Conflict-Free Replicated Data Types) library for Ada/SPARK.
 
 ## Install
 
-```bash
-alr index --add git+https://codeberg.org/bladeacer/Ada_CRDT.git --name ada_crdt
-cd /path/to/your-project
-alr with ada_crdt
+### Alire Community Index
+
+```
+alr with crdt
 ```
 
-Then `with "ada_crdt";` in your `.gpr` file.
+Will work once added to the community index.
+
+### Local Index
+
+```bash
+alr index --add git+https://codeberg.org/bladeacer/ada_crdt.git --name crdt
+cd /path/to/your-project
+alr with crdt
+```
+
+Then `with "crdt";` in your `.gpr` file.
 
 ## Development
 
 Clone and build locally:
 
 ```bash
-git clone https://codeberg.org/bladeacer/Ada_CRDT.git
-cd Ada_CRDT
+git clone https://codeberg.org/bladeacer/ada_crdt.git
+cd ada_crdt
 make build
 make run
 ```
@@ -30,26 +40,26 @@ make run
 Per-replica increments/decrements. Fixed memory (3 replicas = 3 slots), regardless of op count.
 
 ```ada
-with Ada_CRDT.Pn_Counters;
+with CRDT.Pn_Counters;
 
-A : Ada_CRDT.Pn_Counters.PN_Counter (Max_Actors => 5);
-B : Ada_CRDT.Pn_Counters.PN_Counter (Max_Actors => 5);
+A : CRDT.Pn_Counters.PN_Counter (Max_Actors => 5);
+B : CRDT.Pn_Counters.PN_Counter (Max_Actors => 5);
 
-Ada_CRDT.Pn_Counters.Increment (A, 5, Actor => 1);
-Ada_CRDT.Pn_Counters.Increment (B, 10, Actor => 2);
+CRDT.Pn_Counters.Increment (A, 5, Actor => 1);
+CRDT.Pn_Counters.Increment (B, 10, Actor => 2);
 
-Ada_CRDT.Pn_Counters.Merge (A, B);  -- value = 15
+CRDT.Pn_Counters.Merge (A, B);  -- value = 15
 ```
 
-Package: `Ada_CRDT.Pn_Counters`
+Package: `CRDT.Pn_Counters`
 
 ### LWW-Element-Set (Lamport Timestamps)
 
 Last-Writer-Wins set using logical clocks (no wall-clock skew).
 
 ```ada
-with Ada_CRDT.Lww_Element_Sets;
-package Int_Set is new Ada_CRDT.Lww_Element_Sets (Integer, 100);
+with CRDT.Lww_Element_Sets;
+package Int_Set is new CRDT.Lww_Element_Sets (Integer, 100);
 
 S1 : Int_Set.LWW_Element_Set (Capacity => 100);
 S2 : Int_Set.LWW_Element_Set (Capacity => 100);
@@ -63,15 +73,15 @@ Int_Set.Merge (S1, S2);
 -- S1: contains 42 only if re-added with Stamp > 200
 ```
 
-Package: `Ada_CRDT.Lww_Element_Sets` (generic over `Element_Type`, `Capacity`)
+Package: `CRDT.Lww_Element_Sets` (generic over `Element_Type`, `Capacity`)
 
 ### RGA Sequence
 
 Three backend engines, same API. See [API docs](docs/api-docs/index.md) for full details.
 
 ```ada
-with Ada_CRDT.Rga;
-package Seq is new Ada_CRDT.Rga (Character, 100);
+with CRDT.Rga;
+package Seq is new CRDT.Rga (Character, 100);
 use Seq;
 
 A : RGA (Capacity => 100);
@@ -91,20 +101,20 @@ while Has_Element (Pos) loop
 end loop;
 ```
 
-Package: `Ada_CRDT.Rga` (default engine) or `Ada_CRDT.Sequences.<Engine>`
+Package: `CRDT.Rga` (default engine) or `CRDT.Sequences.<Engine>`
 
 ### Engine Comparison
 
 | Engine | Package | Design | Trade-off |
 |--------|---------|--------|-----------|
-| Yjs (default) | `Ada_CRDT.Rga` / `Ada_CRDT.Sequences.Yjs` | Chunk-based blocks, structural splitting | Fast bulk ops, larger tombstone overhead |
-| Naive | `Ada_CRDT.Sequences.Naive` | Flat linked-list per element | Simple, O(n) lookups |
-| Fugue | `Ada_CRDT.Sequences.Fugue` | BST tree with Depth ordering | Anti-interleaving, no GC rebalancing yet |
+| Yjs (default) | `CRDT.Rga` / `CRDT.Sequences.Yjs` | Chunk-based blocks, structural splitting | Fast bulk ops, larger tombstone overhead |
+| Naive | `CRDT.Sequences.Naive` | Flat linked-list per element | Simple, O(n) lookups |
+| Fugue | `CRDT.Sequences.Fugue` | BST tree with Depth ordering | Anti-interleaving, no GC rebalancing yet |
 
 ```ada
 -- Switch engine by changing the with line
-with Ada_CRDT.Sequences.Naive;
-package S is new Ada_CRDT.Sequences.Naive (Character, 100);
+with CRDT.Sequences.Naive;
+package S is new CRDT.Sequences.Naive (Character, 100);
 ```
 
 ### Sync Layer
@@ -112,7 +122,7 @@ package S is new Ada_CRDT.Sequences.Naive (Character, 100);
 State-based (CvRDT) with delta sync and HLC:
 
 ```ada
-with Ada_CRDT.Sync.State_Based;
+with CRDT.Sync.State_Based;
 
 Config : Sync_Config := (Max_Replicas => 4, Delta_Sync => True, HLC_Node => 1);
 Local  : Replica_State := Create (Config);
@@ -124,7 +134,7 @@ Merge (Local, Remote);
 Operation-based (CmRDT) with bounded op log and ack/GC:
 
 ```ada
-with Ada_CRDT.Sync.Op_Based;
+with CRDT.Sync.Op_Based;
 
 Log : Op_Log (Capacity => 1000);
 
@@ -141,27 +151,27 @@ Compact (Log);                       -- purge acknowledged ops
 
 Safety/constraint layers on top of core types.
 
-### Thread-Safe (`Ada_CRDT.Protected`)
+### Thread-Safe (`CRDT.Protected`)
 
 Protected-object wrappers (no manual locking):
 
 ```ada
-with Ada_CRDT.Protected;
+with CRDT.Protected;
 
-C : Ada_CRDT.Protected.Shared_PN_Counter (Max_Actors => 3);
+C : CRDT.Protected.Shared_PN_Counter (Max_Actors => 3);
 C.Increment (5, Actor => 1);
 C.Decrement (2, Actor => 1);
 ```
 
 Also: `Shared_LWW` and `Shared_RGA` generics.
 
-### Bounded (`Ada_CRDT.Bounded`)
+### Bounded (`CRDT.Bounded`)
 
 Compile-time bounded, zero heap allocation:
 
 ```ada
-with Ada_CRDT.Bounded;
-package Bnd_RGA is new Ada_CRDT.Bounded.Bounded_RGA (Character, 100);
+with CRDT.Bounded;
+package Bnd_RGA is new CRDT.Bounded.Bounded_RGA (Character, 100);
 R : Bnd_RGA.Sequence;  -- fully bounded, heap-free
 ```
 
@@ -171,18 +181,18 @@ R : Bnd_RGA.Sequence;  -- fully bounded, heap-free
 
 | Package | Role |
 |---------|------|
-| `Ada_CRDT.Core` | `Replica_Id`, `Lamport_Time`, `Protocol_Version`, VTime types |
-| `Ada_CRDT.HLC` | Hybrid Logical Clock (physical + logical timestamp) |
-| `Ada_CRDT.Rgas` | Multi-RGA container |
+| `CRDT.Core` | `Replica_Id`, `Lamport_Time`, `Protocol_Version`, VTime types |
+| `CRDT.HLC` | Hybrid Logical Clock (physical + logical timestamp) |
+| `CRDT.Rgas` | Multi-RGA container |
 
 ### HLC Example
 
 ```ada
-with Ada_CRDT.HLC;
+with CRDT.HLC;
 
-Clock : Ada_CRDT.HLC.Instance := Ada_CRDT.HLC.Create (Node => 1);
-Ada_CRDT.HLC.Tick (Clock);   -- before sending
-Ada_CRDT.HLC.Recv (Clock, Remote);  -- on receive, reconcile with remote time
+Clock : CRDT.HLC.Instance := CRDT.HLC.Create (Node => 1);
+CRDT.HLC.Tick (Clock);   -- before sending
+CRDT.HLC.Recv (Clock, Remote);  -- on receive, reconcile with remote time
 ```
 
 ---
@@ -205,7 +215,7 @@ All serialized CRDT state begins with `Core.Protocol_Version` (currently `1`):
 | Command | Action |
 |---------|--------|
 | `make build` | Build library + tests |
-| `make run` / `make test` | Run test suite (103 tests) |
+| `make run` / `make test` | Run test suite (122 tests) |
 | `make prove` | SPARK proofs via `alr gnatprove` |
 | `make doc` | Generate Markdown API docs (see `docs/api-docs/`) |
 | `make clean` | Remove build artifacts |
@@ -216,7 +226,7 @@ Prerequisites: [Alire](https://alire.ada.dev) (manages GNAT automatically), Pyth
 
 ## SPARK Proof
 
-Core packages (`Ada_CRDT.Pn_Counters`) SPARK-proven for run-time check elimination. Generics (Sequences, LWW, RGA) are instantiation-dependent.
+Core packages (`CRDT.Pn_Counters`) SPARK-proven for run-time check elimination. Generics (Sequences, LWW, RGA) are instantiation-dependent.
 
 ---
 

@@ -3,7 +3,7 @@
 .DEFAULT_GOAL := help
 
 help:
-	@echo 'Ada_CRDT - CRDT library for Ada/SPARK'
+	@echo 'CRDT - CRDT library for Ada/SPARK'
 	@echo ''
 	@echo 'Usage: make <target>'
 	@echo ''
@@ -12,7 +12,7 @@ help:
 	@echo '  test     Alias for run'
 	@echo '  prove    Run SPARK proofs (alr gnatprove)'
 	@echo '  doc      Generate Markdown API docs (docs/api-docs/)'
-	@echo '  release  Tag, update Alire index, and push. Use VERSION=x.y.z to set custom version'
+	@echo '  release  Tag, update index+releases (Codeberg URL), push. Use VERSION=x.y.z'
 	@echo '  clean    Remove build artifacts'
 	@echo '  help     Show this message'
 
@@ -31,30 +31,38 @@ doc: api-docs
 
 api-docs:
 	mkdir -p obj
-	alr exec -- gnatdoc -P ada_crdt.gpr --backend=rst --output-dir=obj/gnatdoc-rst
+	alr exec -- gnatdoc -P crdt.gpr --backend=rst --output-dir=obj/gnatdoc-rst
 	python3 tools/rst2md.py obj/gnatdoc-rst docs/api-docs
 
 release:
 	@if [ -n "$(VERSION)" ]; then \
 		version="$(VERSION)"; \
 		sed -i 's/^version = ".*"/version = "'$$version'"/' alire.toml; \
-		git add alire.toml; \
 	else \
 		version=$$(sed -n 's/^version = "\(.*\)"/\1/p' alire.toml); \
 	fi; \
 	commit=$$(git rev-parse HEAD); \
-	index_file="index/ad/ada_crdt/ada_crdt-$$version.toml"; \
+	index_file="index/ad/crdt/crdt-$$version.toml"; \
 	if [ ! -f "$$index_file" ]; then \
-		cp index/ad/ada_crdt/ada_crdt-0.1.0-dev.toml "$$index_file"; \
+		cp index/ad/crdt/crdt-0.1.0-dev.toml "$$index_file"; \
 	fi; \
 	sed -i 's/^version = ".*"/version = "'$$version'"/' "$$index_file"; \
 	sed -i 's/^commit = ".*"/commit = "'$$commit'"/' "$$index_file"; \
+	release_file="alire/releases/crdt-$$version.toml"; \
+	if [ ! -f "$$release_file" ]; then \
+		sed 's/^version = ".*"/version = "'$$version'"/' alire/releases/crdt-0.0.0.toml > "$$release_file"; \
+	fi; \
+	sed -i 's/^version = ".*"/version = "'$$version'"/' "$$release_file"; \
+	sed -i '/^\[origin\]/,$d' "$$release_file"; \
+	echo "" >> "$$release_file"; \
+	echo "[origin]" >> "$$release_file"; \
+	echo "url = \"https://codeberg.org/bladeacer/Ada_CRDT/archive/v$$version.tar.gz\"" >> "$$release_file"; \
 	git add -A; \
 	git commit -m "Release $$version" || true; \
 	git tag -a "v$$version" -m "Release $$version" || true; \
 	echo "Tagged v$$version at $$commit"; \
-	git push -f origin && git push -f origin --tags; \
-	echo "Pushed commit and all tags to origin"
+	git push origin HEAD && git push origin "v$$version"; \
+	echo "Pushed commit and tag v$$version"
 
 clean:
 	alr clean
