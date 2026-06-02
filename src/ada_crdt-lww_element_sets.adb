@@ -1,8 +1,8 @@
-package body Ardt.Lww_Element_Sets with
+package body Ada_CRDT.Lww_Element_Sets with
   SPARK_Mode
 is
 
-   use type Ardt.Core.Timestamp;
+   use type Core.Lamport_Time;
 
    function Find_Index (A    : Timestamp_Array;
                         Size : Natural;
@@ -33,7 +33,7 @@ is
 
    procedure Add (S  : in out LWW_Element_Set;
                   E  : Element_Type;
-                  TS : Core.Timestamp) is
+                  TS : Core.Lamport_Time) is
       Add_I    : Natural;
       Remove_I : Natural;
    begin
@@ -55,7 +55,7 @@ is
 
    procedure Remove (S  : in out LWW_Element_Set;
                      E  : Element_Type;
-                     TS : Core.Timestamp) is
+                     TS : Core.Lamport_Time) is
       Add_I    : Natural;
       Remove_I : Natural;
    begin
@@ -89,4 +89,4 @@ is
       end loop;
    end Merge;
 
-end Ardt.Lww_Element_Sets;
+end Ada_CRDT.Lww_Element_Sets;

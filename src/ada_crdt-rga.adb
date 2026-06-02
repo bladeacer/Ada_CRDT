@@ -1,10 +1,8 @@
-with Ada.Unchecked_Deallocation;
-
-package body Ardt.Rga with
+package body Ada_CRDT.Rga with
   SPARK_Mode => Off
 is
 
-   use type Ardt.Core.Replica_Id;
+   use type Core.Replica_Id;
 
    --------------------
    --  Id utilities  --
@@ -140,8 +138,6 @@ is
       end if;
    end Append_Item;
 
-   -- Find item and 1-based offset for physical position Pos.
-   -- If Pos > Total, returns Item=0 and Offset=Pos-Total.
    procedure Find_Physical_Pos
      (R        : RGA;
       Pos      : Positive;
@@ -164,11 +160,6 @@ is
       Offset := (if P = 0 then 1 else P);
    end Find_Physical_Pos;
 
-   -- Split item at Idx at the given offset.
-   -- Offset is 1-based: the element at Offset becomes the first element
-   -- of the right part. The new item for the inserted content is NOT
-   -- created here; only the right split is created and returned.
-   -- The original item (Idx) becomes the left part with Len = Offset - 1.
    procedure Split_At (R          : in out RGA;
                        Idx        : Natural;
                        Offset     : Positive;
@@ -241,7 +232,7 @@ is
                           Pos    : Positive;
                           Id     : Node_Id;
                           Values : Element_Array) is
-      VLen  : constant Natural := Values'Length;
+      VLen     : constant Natural := Values'Length;
       Item_Idx : Natural;
       Offset   : Positive;
       New_Idx  : Natural;
@@ -255,7 +246,6 @@ is
            "Insert_Bulk: values length exceeds Max_Stride";
       end if;
 
-      -- Empty list
       if R.Head = 0 then
          New_Idx := New_Item (R, Id, Values (Values'First), VLen);
          if New_Idx > 0 then
@@ -269,7 +259,6 @@ is
 
       Find_Physical_Pos (R, Pos, Item_Idx, Offset);
 
-      -- Append at end
       if Item_Idx = 0 then
          New_Idx := New_Item (R, Id, Values (Values'First), VLen);
          if New_Idx > 0 then
@@ -281,7 +270,6 @@ is
          return;
       end if;
 
-      -- Insert at start of an existing item
       if Offset = 1 then
          New_Idx := New_Item (R, Id, Values (Values'First), VLen);
          if New_Idx > 0 then
@@ -293,18 +281,15 @@ is
          return;
       end if;
 
-      -- Insert in the middle: split the existing item
       declare
          Right_Idx : Natural;
       begin
          Split_At (R, Item_Idx, Offset, Right_Idx);
-         -- Now Item_Idx is the left part, Right_Idx is the right part
          New_Idx := New_Item (R, Id, Values (Values'First), VLen);
          if New_Idx > 0 then
             for I in 1 .. VLen loop
                R.Items (New_Idx).Content (I) := Values (Values'First + I - 1);
             end loop;
-            -- Link: Left -> New -> Right
             R.Items (Item_Idx).Next := New_Idx;
             R.Items (New_Idx).Next := Right_Idx;
          end if;
@@ -427,8 +412,9 @@ is
       end loop;
    end Compute_State_Vector;
 
-   function Is_Newer (Item : RGA_Item; Remote_SV : Replica_Max_Seq_Array;
-                      SV_Count : Natural) return Boolean
+   function Is_Newer (Item     : RGA_Item;
+                      Remote_SV : Replica_Max_Seq_Array;
+                      SV_Count  : Natural) return Boolean
    is
    begin
       for I in 1 .. SV_Count loop
@@ -452,8 +438,8 @@ is
            and then Find_Node (Target, Source.Items (S_Idx).Id) = 0
          then
             declare
-               T_Idx : Natural := Target.Head;
-               Ins   : Boolean := False;
+               T_Idx   : Natural := Target.Head;
+               Ins     : Boolean := False;
                New_Idx : constant Natural :=
                  Copy_Item (Target, Source.Items (S_Idx));
             begin
@@ -489,7 +475,6 @@ is
       while Cur /= 0 loop
          Next := R.Items (Cur).Next;
          if R.Items (Cur).Deleted then
-            -- Unlink and free
             if Prev = 0 then
                R.Head := Next;
             else
@@ -513,6 +498,8 @@ is
    is
       use Ada.Streams;
    begin
+      -- Protocol version header
+      Natural'Write (Stream, Core.Protocol_Version);
       -- Write total elements
       Natural'Write (Stream, Item.Total);
       -- Write number of items
@@ -522,13 +509,9 @@ is
          Cur : Natural := Item.Head;
       begin
          while Cur /= 0 loop
-            -- Write Id
             Node_Id'Write (Stream, Item.Items (Cur).Id);
-            -- Write Len
             Natural'Write (Stream, Item.Items (Cur).Len);
-            -- Write Deleted
             Boolean'Write (Stream, Item.Items (Cur).Deleted);
-            -- Write content
             for I in 1 .. Item.Items (Cur).Len loop
                Element_Type'Write (Stream, Item.Items (Cur).Content (I));
             end loop;
@@ -542,14 +525,22 @@ is
       Item   : out RGA)
    is
       use Ada.Streams;
-      Total   : Natural;
+      Ver       : Natural;
+      Total     : Natural;
       Num_Items : Natural;
-      Id      : Node_Id;
-      Len     : Natural;
-      Deleted : Boolean;
-      Prev_Idx : Natural := 0;
-      New_Idx  : Natural;
+      Id        : Node_Id;
+      Len       : Natural;
+      Deleted   : Boolean;
+      Prev_Idx  : Natural := 0;
+      New_Idx   : Natural;
    begin
+      -- Read and verify protocol version
+      Natural'Read (Stream, Ver);
+      if Ver /= Core.Protocol_Version then
+         raise Constraint_Error with
+           "RGA Read_RGA: unsupported protocol version";
+      end if;
+
       Natural'Read (Stream, Total);
       Natural'Read (Stream, Num_Items);
       Item.Total := Total;
@@ -564,7 +555,7 @@ is
 
          New_Idx := Alloc_Item (Item);
          if New_Idx > 0 then
-            Item.Count := J;  -- ensure Count tracks properly
+            Item.Count := J;
          end if;
 
          if New_Idx > 0 then
@@ -584,4 +575,4 @@ is
       end loop;
    end Read_RGA;
 
-end Ardt.Rga;
+end Ada_CRDT.Rga;

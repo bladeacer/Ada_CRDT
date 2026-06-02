@@ -3,11 +3,11 @@ with Ada.Numerics.Discrete_Random;
 with Ada.Numerics.Float_Random;
 with Ada.Streams;
 with Ada.Streams.Stream_IO;
-with Ardt.Core;
-with Ardt.Pn_Counters;
-with Ardt.Lww_Element_Sets;
-with Ardt.Rga;
-with Ardt.Rgas;
+with Ada_CRDT.Core;
+with Ada_CRDT.Pn_Counters;
+with Ada_CRDT.Lww_Element_Sets;
+with Ada_CRDT.Rga;
+with Ada_CRDT.Rgas;
 
 procedure Test_Crdt is
 
@@ -31,38 +31,39 @@ procedure Test_Crdt is
    --  PN-Counter Tests --
    -----------------------
    procedure Test_PN_Counter is
-      C : Ardt.Pn_Counters.PN_Counter;
-      V : Integer;
+      Max_A : constant Positive := 5;
+      C     : Ada_CRDT.Pn_Counters.PN_Counter (Max_A);
+      V     : Integer;
    begin
       New_Line;
       Put_Line ("[PN-Counter]");
 
-      V := Ardt.Pn_Counters.Value (C);
+      V := Ada_CRDT.Pn_Counters.Value (C);
       Check (V = 0, "Initial value = 0 (got" & Integer'Image (V) & ")");
 
-      Ardt.Pn_Counters.Increment (C, 5);
-      V := Ardt.Pn_Counters.Value (C);
-      Check (V = 5, "After Increment (C, 5): value = 5 (got" & Integer'Image (V) & ")");
+      Ada_CRDT.Pn_Counters.Increment (C, 5, 1);
+      V := Ada_CRDT.Pn_Counters.Value (C);
+      Check (V = 5, "After Increment (C, 5, Actor=>1): value = 5 (got" & Integer'Image (V) & ")");
 
-      Ardt.Pn_Counters.Decrement (C, 3);
-      V := Ardt.Pn_Counters.Value (C);
-      Check (V = 2, "After Decrement (C, 3): value = 2 (got" & Integer'Image (V) & ")");
+      Ada_CRDT.Pn_Counters.Decrement (C, 3, 1);
+      V := Ada_CRDT.Pn_Counters.Value (C);
+      Check (V = 2, "After Decrement (C, 3, Actor=>1): value = 2 (got" & Integer'Image (V) & ")");
 
-      Ardt.Pn_Counters.Increment (C, 1);
-      V := Ardt.Pn_Counters.Value (C);
-      Check (V = 3, "After Increment (C, 1): value = 3 (got" & Integer'Image (V) & ")");
+      Ada_CRDT.Pn_Counters.Increment (C, 1, 1);
+      V := Ada_CRDT.Pn_Counters.Value (C);
+      Check (V = 3, "After Increment (C, 1, Actor=>1): value = 3 (got" & Integer'Image (V) & ")");
 
-      Ardt.Pn_Counters.Decrement (C, 4);
-      V := Ardt.Pn_Counters.Value (C);
-      Check (V = -1, "After Decrement (C, 4): value = -1 (got" & Integer'Image (V) & ")");
+      Ada_CRDT.Pn_Counters.Decrement (C, 4, 1);
+      V := Ada_CRDT.Pn_Counters.Value (C);
+      Check (V = -1, "After Decrement (C, 4, Actor=>1): value = -1 (got" & Integer'Image (V) & ")");
 
       declare
-         D : Ardt.Pn_Counters.PN_Counter;
+         D : Ada_CRDT.Pn_Counters.PN_Counter (Max_A);
       begin
-         Ardt.Pn_Counters.Increment (D, 10);
-         Ardt.Pn_Counters.Merge (C, D);
-         V := Ardt.Pn_Counters.Value (C);
-         Check (V = 3, "After Merge with D (P=10,N=0): value = 3 (got" & Integer'Image (V) & ")");
+         Ada_CRDT.Pn_Counters.Increment (D, 10, 2);
+         Ada_CRDT.Pn_Counters.Merge (C, D);
+         V := Ada_CRDT.Pn_Counters.Value (C);
+         Check (V = 9, "After Merge with D (Actor2 P=10): value = P(5+10) - N(6) = 9 (got" & Integer'Image (V) & ")");
       end;
 
       Put_Line ("[PN-Counter] done.");
@@ -74,48 +75,56 @@ procedure Test_Crdt is
    procedure Test_LWW_Set is
       Max_Size : constant Positive := 10;
 
-      package LWW is new Ardt.Lww_Element_Sets (Integer, Max_Size);
+      package LWW is new Ada_CRDT.Lww_Element_Sets (Integer, Max_Size);
 
       S : LWW.LWW_Element_Set (Max_Size);
+
+      function Lamport (S : Natural; N : Ada_CRDT.Core.Replica_Id)
+                        return Ada_CRDT.Core.Lamport_Time is
+        (Stamp => S, Node => N);
    begin
       New_Line;
       Put_Line ("[LWW-Element-Set]");
 
       Check (not LWW.Contains (S, 42), "Empty set: Contains (42) = False");
 
-      LWW.Add (S, 42, 100);
-      Check (LWW.Contains (S, 42), "Add (42, ts=100): Contains (42) = True");
+      LWW.Add (S, 42, Lamport (100, 1));
+      Check (LWW.Contains (S, 42), "Add (42, ts=100/1): Contains (42) = True");
 
-      LWW.Add (S, 7, 200);
-      Check (LWW.Contains (S, 7), "Add (7, ts=200): Contains (7) = True");
+      LWW.Add (S, 7, Lamport (200, 1));
+      Check (LWW.Contains (S, 7), "Add (7, ts=200/1): Contains (7) = True");
 
-      LWW.Remove (S, 42, 150);
+      LWW.Remove (S, 42, Lamport (150, 1));
       Check (not LWW.Contains (S, 42),
-             "Remove (42, ts=150): Contains (42) = False (150 > 100)");
+             "Remove (42, ts=150/1): Contains (42) = False (150 > 100)");
 
-      LWW.Add (S, 42, 200);
+      LWW.Add (S, 42, Lamport (200, 1));
       Check (LWW.Contains (S, 42),
-             "Re-add (42, ts=200): Contains (42) = True (200 > 150)");
+             "Re-add (42, ts=200/1): Contains (42) = True (200 > 150)");
 
-      LWW.Remove (S, 42, 250);
+      LWW.Remove (S, 42, Lamport (250, 1));
       Check (not LWW.Contains (S, 42),
-             "Remove (42, ts=250): Contains (42) = False (250 > 200)");
+             "Remove (42, ts=250/1): Contains (42) = False (250 > 200)");
 
-      LWW.Remove (S, 7, 300);
+      LWW.Remove (S, 7, Lamport (300, 2));
       Check (not LWW.Contains (S, 7),
-             "Remove (7, ts=300): Contains (7) = False (300 > 200)");
+             "Remove (7, ts=300/2): Contains (7) = False");
 
-      LWW.Add (S, 7, 350);
+      LWW.Add (S, 7, Lamport (350, 1));
       Check (LWW.Contains (S, 7),
-             "Re-add (7, ts=350): Contains (7) = True (350 > 300)");
+             "Re-add (7, ts=350/1): Contains (7) = True (350 > 300)");
+
+      -- Ordered by Stamp first, then Node for tie-breaking:
+      -- Remove(7, 300/2) vs Add(7, 350/1): 350 > 300, so present.
+      -- If stamps were equal, node 1 would win over node 2.
 
       declare
          T : LWW.LWW_Element_Set (Max_Size);
       begin
-         LWW.Add (T, 99, 500);
+         LWW.Add (T, 99, Lamport (500, 3));
          LWW.Merge (S, T);
          Check (LWW.Contains (S, 99),
-                "Merge with set containing (99, ts=500): Contains (99) = True");
+                "Merge with set containing (99, ts=500/3): Contains (99) = True");
       end;
 
       Put_Line ("[LWW-Element-Set] done.");
@@ -128,7 +137,7 @@ procedure Test_Crdt is
       Max_Sz  : constant Positive := 10;
       Seq     : Natural := 0;
 
-      package RGA_Str is new Ardt.Rga (Character, Max_Sz);
+      package RGA_Str is new Ada_CRDT.Rga (Character, Max_Sz);
 
       R : RGA_Str.RGA (Max_Sz);
 
@@ -183,7 +192,7 @@ procedure Test_Crdt is
       Max_Sz  : constant Positive := 10;
       Max_Cnt : constant Positive := 5;
 
-      package RGAs_Pkg is new Ardt.Rgas (Character, Max_Sz, Max_Cnt);
+      package RGAs_Pkg is new Ada_CRDT.Rgas (Character, Max_Sz, Max_Cnt);
 
       RS : RGAs_Pkg.RGAs (Max_Cnt);
       R1 : RGAs_Pkg.RGA_Entry;
@@ -245,19 +254,20 @@ procedure Test_Crdt is
       --  PN-Counter    --
       --------------------
       declare
-         A : Ardt.Pn_Counters.PN_Counter;
-         B : Ardt.Pn_Counters.PN_Counter;
-         C : Ardt.Pn_Counters.PN_Counter;
-         D : Ardt.Pn_Counters.PN_Counter;
-         E : Ardt.Pn_Counters.PN_Counter;
+         Max_PN : constant Positive := 10;
+         A : Ada_CRDT.Pn_Counters.PN_Counter (Max_PN);
+         B : Ada_CRDT.Pn_Counters.PN_Counter (Max_PN);
+         C : Ada_CRDT.Pn_Counters.PN_Counter (Max_PN);
+         D : Ada_CRDT.Pn_Counters.PN_Counter (Max_PN);
+         E : Ada_CRDT.Pn_Counters.PN_Counter (Max_PN);
          Op : Natural;
       begin
          for I in 1 .. Num_Ops loop
             Op := Pos_Random.Random (Pos_Gen) mod 2;
             if Op = 0 then
-               Ardt.Pn_Counters.Increment (A, Nat_Random.Random (Nat_Gen) mod 20 + 1);
+               Ada_CRDT.Pn_Counters.Increment (A, Nat_Random.Random (Nat_Gen) mod 20 + 1, 1);
             else
-               Ardt.Pn_Counters.Decrement (A, Nat_Random.Random (Nat_Gen) mod 20 + 1);
+               Ada_CRDT.Pn_Counters.Decrement (A, Nat_Random.Random (Nat_Gen) mod 20 + 1, 1);
             end if;
          end loop;
 
@@ -266,9 +276,9 @@ procedure Test_Crdt is
          for I in 1 .. Num_Ops loop
             Op := Pos_Random.Random (Pos_Gen) mod 2;
             if Op = 0 then
-               Ardt.Pn_Counters.Increment (B, Nat_Random.Random (Nat_Gen) mod 20 + 1);
+               Ada_CRDT.Pn_Counters.Increment (B, Nat_Random.Random (Nat_Gen) mod 20 + 1, 2);
             else
-               Ardt.Pn_Counters.Decrement (B, Nat_Random.Random (Nat_Gen) mod 20 + 1);
+               Ada_CRDT.Pn_Counters.Decrement (B, Nat_Random.Random (Nat_Gen) mod 20 + 1, 2);
             end if;
          end loop;
 
@@ -277,35 +287,35 @@ procedure Test_Crdt is
          for I in 1 .. Num_Ops loop
             Op := Pos_Random.Random (Pos_Gen) mod 2;
             if Op = 0 then
-               Ardt.Pn_Counters.Increment (C, Nat_Random.Random (Nat_Gen) mod 20 + 1);
+               Ada_CRDT.Pn_Counters.Increment (C, Nat_Random.Random (Nat_Gen) mod 20 + 1, 3);
             else
-               Ardt.Pn_Counters.Decrement (C, Nat_Random.Random (Nat_Gen) mod 20 + 1);
+               Ada_CRDT.Pn_Counters.Decrement (C, Nat_Random.Random (Nat_Gen) mod 20 + 1, 3);
             end if;
          end loop;
 
          D := A;
-         Ardt.Pn_Counters.Merge (D, B);
+         Ada_CRDT.Pn_Counters.Merge (D, B);
          E := B;
-         Ardt.Pn_Counters.Merge (E, A);
-         Check (Ardt.Pn_Counters.Value (D) = Ardt.Pn_Counters.Value (E),
+         Ada_CRDT.Pn_Counters.Merge (E, A);
+         Check (Ada_CRDT.Pn_Counters.Value (D) = Ada_CRDT.Pn_Counters.Value (E),
                 "PN-Counter commutativity: Merge(A,B) = Merge(B,A)");
 
          D := A;
-         Ardt.Pn_Counters.Merge (D, A);
-         Check (Ardt.Pn_Counters.Value (D) = Ardt.Pn_Counters.Value (A),
+         Ada_CRDT.Pn_Counters.Merge (D, A);
+         Check (Ada_CRDT.Pn_Counters.Value (D) = Ada_CRDT.Pn_Counters.Value (A),
                 "PN-Counter idempotency: Merge(A,A) = A");
 
          D := A;
-         Ardt.Pn_Counters.Merge (D, B);
-         Ardt.Pn_Counters.Merge (D, C);
+         Ada_CRDT.Pn_Counters.Merge (D, B);
+         Ada_CRDT.Pn_Counters.Merge (D, C);
          E := A;
          declare
-            Tmp : Ardt.Pn_Counters.PN_Counter := B;
+            Tmp : Ada_CRDT.Pn_Counters.PN_Counter (Max_PN) := B;
          begin
-            Ardt.Pn_Counters.Merge (Tmp, C);
-            Ardt.Pn_Counters.Merge (E, Tmp);
+            Ada_CRDT.Pn_Counters.Merge (Tmp, C);
+            Ada_CRDT.Pn_Counters.Merge (E, Tmp);
          end;
-         Check (Ardt.Pn_Counters.Value (D) = Ardt.Pn_Counters.Value (E),
+         Check (Ada_CRDT.Pn_Counters.Value (D) = Ada_CRDT.Pn_Counters.Value (E),
                 "PN-Counter associativity: Merge(Merge(A,B),C) = Merge(A,Merge(B,C))");
       end;
 
@@ -315,7 +325,7 @@ procedure Test_Crdt is
       declare
          Max_LWW : constant Positive := 500;
 
-         package LWW is new Ardt.Lww_Element_Sets (Integer, Max_LWW);
+         package LWW is new Ada_CRDT.Lww_Element_Sets (Integer, Max_LWW);
 
          use type LWW.LWW_Element_Set;
 
@@ -326,12 +336,11 @@ procedure Test_Crdt is
          E : LWW.LWW_Element_Set (Max_LWW);
          Op : Natural;
          El : Integer;
-         TS : Ardt.Core.Timestamp;
       begin
          for I in 1 .. 50 loop
-            LWW.Add (A, I, Ardt.Core.Timestamp (I * 100));
-            LWW.Add (B, I, Ardt.Core.Timestamp (I * 100 + 50));
-            LWW.Add (C, I, Ardt.Core.Timestamp (I * 100 + 25));
+            LWW.Add (A, I, (Stamp => I * 100, Node => 1));
+            LWW.Add (B, I, (Stamp => I * 100 + 50, Node => 2));
+            LWW.Add (C, I, (Stamp => I * 100 + 25, Node => 3));
          end loop;
 
          D := A;
@@ -388,7 +397,7 @@ procedure Test_Crdt is
          Seq_B   : Natural := 0;
          Seq_C   : Natural := 0;
 
-         package RGA_Ch is new Ardt.Rga (Character, Max_RGA);
+         package RGA_Ch is new Ada_CRDT.Rga (Character, Max_RGA);
 
          use type RGA_Ch.RGA;
 
@@ -469,7 +478,7 @@ procedure Test_Crdt is
       Max_RGA : constant Positive := 50;
       Seq     : Natural := 0;
 
-      package RGA_Str is new Ardt.Rga (Character, Max_RGA);
+      package RGA_Str is new Ada_CRDT.Rga (Character, Max_RGA);
 
       function El (C : Character) return Character is (C);
 
@@ -542,7 +551,7 @@ procedure Test_Crdt is
          RGA_Str.Merge (M, R2);
          N := R2;
          RGA_Str.Merge (N, R1);
-         Check (M = N, "Merge(R1,R2) = Merge(R2,R1) — convergent");
+         Check (M = N, "Merge(R1,R2) = Merge(R2,R1) - convergent");
          Put_Line ("    Converged result: '" & To_String (M) & "'");
 
          RGA_Str.Merge (R1, R2);
@@ -559,7 +568,7 @@ procedure Test_Crdt is
    procedure Test_Tombstone_Edge_Cases is
       Max_RGA : constant Positive := 20;
 
-      package RGA_Str is new Ardt.Rga (Character, Max_RGA);
+      package RGA_Str is new Ada_CRDT.Rga (Character, Max_RGA);
 
       R : RGA_Str.RGA (Max_RGA);
 
@@ -610,7 +619,7 @@ procedure Test_Crdt is
    -----------------------------------------------
    procedure Test_Structural_Splitting is
       Max_RGA : constant Positive := 20;
-      package RGA_Str is new Ardt.Rga (Character, Max_RGA, Max_Stride => 10);
+      package RGA_Str is new Ada_CRDT.Rga (Character, Max_RGA, Max_Stride => 10);
       R : RGA_Str.RGA (Max_RGA);
       Seq : Natural := 0;
    begin
@@ -626,7 +635,6 @@ procedure Test_Crdt is
       Check (RGA_Str.Count (R) = 1, "1 item after bulk insert");
 
       -- Insert a character in the middle of the bulk (between 'l' and 'l' at pos 3)
-      -- This should split the item at offset 3: left="He", right="llo", new="X"
       RGA_Str.Insert (R, 3, (1, 2), 'X');
       Check (RGA_Str.Size (R) = 6, "After split insert: size = 6");
       Check (RGA_Str.Get (R, 1) = 'H', "Split: Get (1) = 'H'");
@@ -636,7 +644,6 @@ procedure Test_Crdt is
       Check (RGA_Str.Get (R, 5) = 'l', "Split: Get (5) = 'l'");
       Check (RGA_Str.Get (R, 6) = 'o', "Split: Get (6) = 'o'");
 
-      -- The original item was split into 3: left 2 chars + new 1 char + right 3 chars
       Check (RGA_Str.Count (R) >= 3, "At least 3 items after split");
 
       Put_Line ("[Structural Splitting] done.");
@@ -647,7 +654,7 @@ procedure Test_Crdt is
    -----------------------------------------------
    procedure Test_Delta_Sync is
       Max_RGA : constant Positive := 20;
-      package RGA_Str is new Ardt.Rga (Character, Max_RGA);
+      package RGA_Str is new Ada_CRDT.Rga (Character, Max_RGA);
       A : RGA_Str.RGA (Max_RGA);
       B : RGA_Str.RGA (Max_RGA);
       SV : RGA_Str.Replica_Max_Seq_Array (1 .. 10);
@@ -656,28 +663,20 @@ procedure Test_Crdt is
       New_Line;
       Put_Line ("[Delta Sync]");
 
-      -- A has chars written by replica 1
       RGA_Str.Insert (A, 1, (1, 1), 'A');
       RGA_Str.Insert (A, 2, (1, 2), 'B');
       RGA_Str.Insert (A, 3, (1, 3), 'C');
 
-      -- B has a char written by replica 2
       RGA_Str.Insert (B, 1, (2, 1), 'X');
 
-      -- Compute state vector for B
       RGA_Str.Compute_State_Vector (B, SV, SV_Cnt);
       Check (SV_Cnt >= 1, "State vector has at least 1 entry");
       Check (SV_Cnt <= 10, "State vector within bounds");
 
-      -- Sync B's state vector to A: A sends only items newer than B's vector.
-      -- B has (2,1) at Seq=1, so A's items (1,1) through (1,3) are all new to B.
-      -- Use A as source, B as target
       RGA_Str.Sync_Delta (B, A, SV, SV_Cnt);
       Check (RGA_Str.Size (B) >= 4,
              "After delta sync B size >= 4 (got" &
              Natural'Image (RGA_Str.Size (B)) & ")");
-      -- Items ordered by (Seq, Replica): (1,1) < (2,1) < (1,2) < (1,3)
-      -- So final order: A, X, B, C
       Check (RGA_Str.Get (B, 1) = 'A', "Delta: Get (1) = 'A'");
       Check (RGA_Str.Get (B, 2) = 'X', "Delta: Get (2) = 'X'");
       Check (RGA_Str.Get (B, 3) = 'B', "Delta: Get (3) = 'B'");
@@ -691,7 +690,7 @@ procedure Test_Crdt is
    -----------------------------------------------
    procedure Test_Tombstone_GC is
       Max_RGA : constant Positive := 20;
-      package RGA_Str is new Ardt.Rga (Character, Max_RGA);
+      package RGA_Str is new Ada_CRDT.Rga (Character, Max_RGA);
       R : RGA_Str.RGA (Max_RGA);
    begin
       New_Line;
@@ -704,11 +703,9 @@ procedure Test_Crdt is
       Check (RGA_Str.Size (R) = 3, "Before delete: size = 3");
       Check (RGA_Str.Count (R) = 3, "Before delete: item count = 3");
 
-      -- Delete B
       RGA_Str.Delete (R, 2);
       Check (RGA_Str.Size (R) = 3, "After delete: size = 3 (tombstone still counts)");
 
-      -- Compact should remove tombstoned item
       RGA_Str.Compact (R);
       Check (RGA_Str.Size (R) = 2, "After compact: size = 2");
       Check (RGA_Str.Get (R, 1) = 'A', "Compact: Get (1) = 'A'");
@@ -722,7 +719,7 @@ procedure Test_Crdt is
    -----------------------------------------------
    procedure Test_Serialization is
       Max_RGA : constant Positive := 20;
-      package RGA_Str is new Ardt.Rga (Character, Max_RGA);
+      package RGA_Str is new Ada_CRDT.Rga (Character, Max_RGA);
       Src : RGA_Str.RGA (Max_RGA);
       Dst : RGA_Str.RGA (Max_RGA);
       use Ada.Streams.Stream_IO;
@@ -736,12 +733,12 @@ procedure Test_Crdt is
       RGA_Str.Insert_Bulk (Src, 3, (2, 1), " Ada");
 
       -- Write to temp file
-      Create (F, Out_File, "/tmp/ardt_serialize_test.bin");
+      Create (F, Out_File, "/tmp/ada_crdt_serialize_test.bin");
       RGA_Str.RGA'Write (Stream (F), Src);
       Close (F);
 
       -- Read back
-      Open (F, In_File, "/tmp/ardt_serialize_test.bin");
+      Open (F, In_File, "/tmp/ada_crdt_serialize_test.bin");
       RGA_Str.RGA'Read (Stream (F), Dst);
       Close (F);
 
@@ -763,7 +760,7 @@ procedure Test_Crdt is
    end Test_Serialization;
 
 begin
-   Put_Line ("=== ARDT CRDT Test Suite ===");
+   Put_Line ("=== Ada_CRDT CRDT Test Suite ===");
    Put_Line ("Running unit tests, property-based fuzzing, and chaos simulations...");
 
    Test_PN_Counter;

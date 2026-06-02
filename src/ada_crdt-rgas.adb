@@ -1,4 +1,4 @@
-package body Ardt.Rgas with
+package body Ada_CRDT.Rgas with
   SPARK_Mode
 is
 
@@ -29,4 +29,4 @@ is
       end loop;
    end Merge_All;
 
-end Ardt.Rgas;
+end Ada_CRDT.Rgas;

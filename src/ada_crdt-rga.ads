@@ -1,12 +1,12 @@
 with Ada.Streams;
-with Ardt.Core;
+with Ada_CRDT.Core;
 
 generic
    type Element_Type is private;
-   Max_Items   : Positive;
-   Max_Stride  : Positive := 64;
+   Max_Items    : Positive;
+   Max_Stride   : Positive := 64;
    Max_Replicas : Positive := 32;
-package Ardt.Rga with
+package Ada_CRDT.Rga with
   SPARK_Mode
 is
 
@@ -64,14 +64,11 @@ is
 
    type Replica_Max_Seq_Array is array (Positive range <>) of Replica_Max_Seq;
 
-   -- Compute state vector: max seq per replica
    procedure Compute_State_Vector
      (R     : RGA;
       SV    : out Replica_Max_Seq_Array;
       Count : out Natural);
 
-   -- Delta-sync: merge only items from Source that are newer than
-   -- what the remote side's state vector reports
    procedure Sync_Delta
      (Target    : in out RGA;
       Source    : RGA;
@@ -80,16 +77,18 @@ is
 
    -- === Tombstone Garbage Collection ===
 
-   -- Compact: physically remove all tombstoned items, reclaiming slots
    procedure Compact (R : in out RGA);
 
-   -- === Stream Serialization ===
+   -- === Stream Serialization with Protocol Version ===
 
-   -- Write all items in RGA order into a stream
+   -- Wire format: [Protocol_Version : Natural] [Total : Natural]
+   --   [Num_Items : Natural] [Item ...]
+   -- Each Item: [Node_Id] [Len : Natural] [Deleted : Boolean]
+   --   [Content : Element_Type array of length Len]
+
    procedure Write_RGA (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
                         Item   : RGA);
 
-   -- Read items from a stream and populate RGA
    procedure Read_RGA  (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
                         Item   : out RGA);
 
@@ -112,10 +111,10 @@ private
       Head    : Natural := 0;
       Count   : Natural := 0;
       Free    : Natural := 0;
-      Total   : Natural := 0;  -- sum of Len across all items (incl tombstones)
+      Total   : Natural := 0;
    end record;
 
    for RGA'Write use Write_RGA;
    for RGA'Read  use Read_RGA;
 
-end Ardt.Rga;
+end Ada_CRDT.Rga;

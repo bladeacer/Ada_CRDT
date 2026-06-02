@@ -1,4 +1,4 @@
-with Ardt.Rga;
+with Ada_CRDT.Rga;
 
 generic
    type Element_Type is private;
@@ -6,11 +6,11 @@ generic
    Max_RGA_Count  : Positive;
    Max_Stride     : Positive := 64;
    Max_Replicas   : Positive := 32;
-package Ardt.Rgas with
+package Ada_CRDT.Rgas with
   SPARK_Mode
 is
 
-   package RGA_Pkg is new Ardt.Rga
+   package RGA_Pkg is new Ada_CRDT.Rga
      (Element_Type,
       Max_Items     => Max_RGA_Size,
       Max_Stride    => Max_Stride,
@@ -37,4 +37,4 @@ private
       Sz   : Natural := 0;
    end record;
 
-end Ardt.Rgas;
+end Ada_CRDT.Rgas;

@@ -1,4 +1,4 @@
-project Ardt is
+project Ada_CRDT is
 
    for Languages use ("Ada");
    for Source_Dirs use ("src");
@@ -25,4 +25,4 @@ project Ardt is
         ("-E");
    end Binder;
 
-end Ardt;
+end Ada_CRDT;

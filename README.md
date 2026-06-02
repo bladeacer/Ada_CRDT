@@ -1,39 +1,70 @@
-# ardt
+# Ada_CRDT
 
 CRDT (Conflict-Free Replicated Data Types) library for Ada/SPARK.
 
 ## Provided Types
 
-### PN-Counter
+### PN-Counter (Actor Map)
 
-Positive-Negative Counter composed of two G-Counters (P for increments,
-N for decrements).  Merge takes the element-wise maximum of P and N.
-Value = P - N (can be negative).  Fully SPARK-proven.
+Positive-Negative Counter backed by a per-replica actor map.
+Each replica tracks its own P (increment) and N (decrement) counts.
+Merge takes the element-wise maximum of P and N for each actor.
+Value = sum(P) - sum(N). Fixed memory: 3 nodes = 3 slots regardless
+of millions of increments.
 
-**Package:** `Ardt.Pn_Counters`
+**Package:** `Ada_CRDT.Pn_Counters`
 
-### LWW-Element-Set
+### LWW-Element-Set (Lamport Timestamps)
 
-Last-Writer-Wins Element Set.  Stores (element, timestamp) pairs for
-adds and removes.  An element is present iff its add-timestamp exceeds
-its remove-timestamp.  Generic over `Element_Type`.
+Last-Writer-Wins Element Set using Lamport timestamps (logical counter +
+node ID) instead of wall clocks to avoid clock skew in distributed
+systems. An element is present iff its add-timestamp exceeds its
+remove-timestamp. Generic over `Element_Type`.
 
-**Package:** `Ardt.Lww_Element_Sets`
+**Package:** `Ada_CRDT.Lww_Element_Sets`
 
-### RGA
+### RGA (Chunk-Based)
 
-Replicated Growable Array — an ordered sequence with convergent merge.
+Replicated Growable Array with chunk-based content storage.
+Contiguous elements are stored in sized blocks (`Max_Stride`),
+dramatically reducing allocation overhead vs. per-character nodes.
 Each element has a unique `Node_Id` (Replica + sequence number).
-Deleted elements become tombstones.  Generic over `Element_Type`.
+Deleted elements become tombstones. Generic over `Element_Type`.
 
-**Package:** `Ardt.Rga`
+**Package:** `Ada_CRDT.Rga`
 
 ### RGAs
 
-Container for managing multiple RGA instances.  Provides `Append` to
+Container for managing multiple RGA instances. Provides `Append` to
 collect replicas and `Merge_All` to converge all into the first entry.
 
-**Package:** `Ardt.Rgas`
+**Package:** `Ada_CRDT.Rgas`
+
+### Thread-Safe Wrappers
+
+Protected-object wrappers for all CRDT types, providing out-of-the-box
+concurrent access without manual locking.
+
+**Package:** `Ada_CRDT.Protected`
+
+### Bounded Containers
+
+Pre-allocated bounded variants using compile-time capacities,
+eliminating runtime heap allocation for mission-critical systems.
+
+**Package:** `Ada_CRDT.Bounded`
+
+### Hybrid Logical Clock (HLC)
+
+HLC implementation combining physical wall-clock time with a logical
+counter to preserve causality across clock-skewed nodes.
+
+**Package:** `Ada_CRDT.HLC`
+
+## Wire Protocol
+
+All serialized CRDT state begins with a `Protocol_Version` header byte,
+enabling forward/backward compatibility during rolling upgrades.
 
 ## Installation
 
@@ -64,127 +95,100 @@ Accept the defaults; it downloads and manages them automatically.
 ### Getting the library
 
 ```bash
-git clone --depth 1 https://codeberg.org/bladeacer/ardt.git
-cd ardt
+git clone --depth 1 https://codeberg.org/bladeacer/Ada_CRDT.git
+cd Ada_CRDT
 make build     # or: alr build
 make run       # or: alr run
 ```
 
-To use `ardt` in your own Alire project:
+To use `Ada_CRDT` in your own Alire project:
 
 ```bash
 cd /path/to/your-project
-alr with --use /path/to/ardt
+alr with --use /path/to/Ada_CRDT
 ```
 
-Then add `with Ardt.Pn_Counters;` (or the relevant package) to your Ada code.
+Then add `with Ada_CRDT.Pn_Counters;` (or the relevant package) to your Ada code.
 
 ## Usage
 
 | CRDT Type | Package | Description |
 |------|---------|-------------|
-| **PN-Counter** | `Ardt.Pn_Counters` | Positive-Negative Counter — two G-Counters merged element-wise |
-| **LWW-Element-Set** | `Ardt.Lww_Element_Sets` | Last-Writer-Wins Set — (element, timestamp) pairs for add/remove |
-| **RGA** | `Ardt.Rga` | Replicated Growable Array — ordered sequence with merge |
-| **RGAs** | `Ardt.Rgas` | Multi-RGA container with convergent merge |
+| **PN-Counter** | `Ada_CRDT.Pn_Counters` | Per-replica actor map P/N counter |
+| **LWW-Element-Set** | `Ada_CRDT.Lww_Element_Sets` | Lamport-timestamped LWW Set |
+| **RGA** | `Ada_CRDT.Rga` | Chunk-based Replicated Growable Array |
+| **RGAs** | `Ada_CRDT.Rgas` | Multi-RGA container with convergent merge |
+| **Protected** | `Ada_CRDT.Protected` | Thread-safe protected-object wrappers |
+| **Bounded** | `Ada_CRDT.Bounded` | Compile-time bounded pre-allocated types |
+| **HLC** | `Ada_CRDT.HLC` | Hybrid Logical Clock for causal ordering |
 
 
-### PN-Counter (state-based, no generics)
+### PN-Counter (Actor Map)
 
 ```ada
-with Ardt.Pn_Counters;
+with Ada_CRDT.Pn_Counters;
 
 procedure Example is
-   C : Ardt.Pn_Counters.PN_Counter;
+   C : Ada_CRDT.Pn_Counters.PN_Counter (Max_Actors => 5);
 begin
-   Ardt.Pn_Counters.Increment (C, 5);
-   Ardt.Pn_Counters.Decrement (C, 2);
+   Ada_CRDT.Pn_Counters.Increment (C, 5, Actor => 1);
+   Ada_CRDT.Pn_Counters.Decrement (C, 2, Actor => 1);
    -- Value = 3
 end;
 ```
 
-### LWW-Element-Set (generic)
+### LWW-Element-Set (Lamport Timestamps)
 
 ```ada
-with Ardt.Lww_Element_Sets;
+with Ada_CRDT.Lww_Element_Sets;
 
 procedure Example is
-   package Int_Set is new Ardt.Lww_Element_Sets (Integer, 100);
+   package Int_Set is new Ada_CRDT.Lww_Element_Sets (Integer, 100);
    S : Int_Set.LWW_Element_Set (Capacity => 100);
 begin
-   Int_Set.Add (S, 42, 1000);
-   Int_Set.Add (S, 7,  2000);
-
-   if Int_Set.Contains (S, 42) then
-      null;  -- true: add-ts (1000) > remove-ts (0, not present)
-   end if;
-
-   Int_Set.Remove (S, 42, 1500);
-   -- now Contains (S, 42) = false: add-ts 1000 < remove-ts 1500
+   Int_Set.Add (S, 42, (Stamp => 1000, Node => 1));
+   Int_Set.Add (S, 7,  (Stamp => 2000, Node => 1));
+   Int_Set.Remove (S, 42, (Stamp => 1500, Node => 1));
 end;
 ```
 
-### RGA (generic)
+### RGA (Chunk-Based)
 
 ```ada
-with Ardt.Rga;
+with Ada_CRDT.Rga;
 
 procedure Example is
-   package Char_RGA is new Ardt.Rga (Character, 50);
+   package Char_RGA is new Ada_CRDT.Rga (Character, 50);
    R : Char_RGA.RGA (Capacity => 50);
 
    function Next_Id return Char_RGA.Node_Id is
-     (Replica => 1, Seq => 1);  -- unique per insert
+     (Replica => 1, Seq => 1);
 begin
    Char_RGA.Insert (R, 1, Next_Id, 'a');
    Char_RGA.Insert (R, 2, Next_Id, 'b');
    Char_RGA.Delete (R, 1);
-
-   -- Get (R, 1) raises exception (deleted tombstone)
-   -- Size (R)  = 2 (tombstone still counted)
 end;
 ```
 
-### RGAs (multi-RGA container)
+### Thread-Safe Protected Wrapper
 
 ```ada
-with Ardt.Rgas;
+with Ada_CRDT.Protected;
 
 procedure Example is
-   package RGAs_Pkg is new Ardt.Rgas (Character, 50, 10);
-   RS : RGAs_Pkg.RGAs (Count => 10);
-   R1 : RGAs_Pkg.RGA_Entry;
-   R2 : RGAs_Pkg.RGA_Entry;
+   C : Ada_CRDT.Protected.Shared_PN_Counter (Max_Actors => 3);
 begin
-   RGAs_Pkg.RGA_Pkg.Insert (R1, 1, (1, 1), 'a');
-   RGAs_Pkg.RGA_Pkg.Insert (R2, 1, (2, 1), 'b');
-
-   RGAs_Pkg.Append (RS, R1);
-   RGAs_Pkg.Append (RS, R2);
-   RGAs_Pkg.Merge_All (RS);  -- merge all into first
+   C.Increment (5, 1);
+   C.Decrement (2, 1);
 end;
 ```
-
-## Make Targets
-
-| Command | Description |
-|---------|-------------|
-| `make` / `make help` | Show available targets |
-| `make build` | Build library and tests |
-| `make run` / `make test` | Build and run the test suite |
-| `make prove` | Run SPARK proofs (`alr gnatprove`) |
-| `make clean` | Remove build artifacts |
 
 ## SPARK Proof
 
-The core packages (`Ardt.Pn_Counters`) are fully SPARK-proven for
-run-time check elimination.  Generic packages (LWW, RGA, RGAs) are
+The core packages (`Ada_CRDT.Pn_Counters`) are fully SPARK-proven for
+run-time check elimination. Generic packages (LWW, RGA, RGAs) are
 skipped by `gnatprove` because generics are not analyzed by default
 (they depend on the actual instantiation).
-
-## LLM Usage
-
-LLMs were used to assist in the development process.
 
 ## License
 

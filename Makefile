@@ -3,7 +3,7 @@
 .DEFAULT_GOAL := help
 
 help:
-	@echo 'ardt - CRDT library for Ada/SPARK'
+	@echo 'Ada_CRDT - CRDT library for Ada/SPARK'
 	@echo ''
 	@echo 'Usage: make <target>'
 	@echo ''

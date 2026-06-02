@@ -1,11 +1,80 @@
 with Ada.Numerics.Discrete_Random;
 
-package body Ardt.Core is
+package body Ada_CRDT.Core is
 
    package Replica_Random is new Ada.Numerics.Discrete_Random (Replica_Id);
    use Replica_Random;
 
    Gen : Replica_Random.Generator;
+
+   ---------------
+   -- Lamport    --
+   ---------------
+
+   function "<" (Left, Right : Lamport_Time) return Boolean is
+   begin
+      if Left.Stamp < Right.Stamp then
+         return True;
+      elsif Left.Stamp > Right.Stamp then
+         return False;
+      else
+         return Left.Node < Right.Node;
+      end if;
+   end "<";
+
+   function "=" (Left, Right : Lamport_Time) return Boolean is
+   begin
+      return Left.Stamp = Right.Stamp and then Left.Node = Right.Node;
+   end "=";
+
+   function ">" (Left, Right : Lamport_Time) return Boolean is
+   begin
+      return not (Left < Right or else Left = Right);
+   end ">";
+
+   function Lamport_Max (Left, Right : Lamport_Time) return Lamport_Time is
+   begin
+      if Left > Right then
+         return Left;
+      end if;
+      return Right;
+   end Lamport_Max;
+
+   ---------------
+   -- HLC       --
+   ---------------
+
+   function HLC_Less (Left, Right : HLC_Time) return Boolean is
+      use Ada.Calendar;
+   begin
+      if Left.Wall < Right.Wall then
+         return True;
+      elsif Left.Wall > Right.Wall then
+         return False;
+      elsif Left.Log < Right.Log then
+         return True;
+      elsif Left.Log > Right.Log then
+         return False;
+      else
+         return Left.Node < Right.Node;
+      end if;
+   end HLC_Less;
+
+   function HLC_Eq (Left, Right : HLC_Time) return Boolean is
+      use Ada.Calendar;
+   begin
+      return Left.Wall = Right.Wall
+        and then Left.Log = Right.Log
+        and then Left.Node = Right.Node;
+   end HLC_Eq;
+
+   function HLC_Max (Left, Right : HLC_Time) return HLC_Time is
+   begin
+      if HLC_Less (Left, Right) then
+         return Right;
+      end if;
+      return Left;
+   end HLC_Max;
 
    ---------------
    -- VTime ops --
@@ -82,4 +151,4 @@ package body Ardt.Core is
       return Random (Gen);
    end New_Replica_Id;
 
-end Ardt.Core;
+end Ada_CRDT.Core;
