@@ -11,4 +11,4 @@ auto-gpr-with = false
 
 [origin]
 url = "git+https://codeberg.org/bladeacer/Ada_CRDT.git"
-commit = "cb2e54d2853986b1186535f93af7c750dd5cf509"
+commit = "128edbcf4aa61a901507b3db2e5ffcb503e99454"
