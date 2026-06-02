@@ -9,6 +9,3 @@ website = "https://codeberg.org/bladeacer/ardt"
 tags = ["crdt", "spark", "ada"]
 
 executables = ["test_crdt"]
-
-[[depends-on]]
-gnatprove = "^15.1.0"

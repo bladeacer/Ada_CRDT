@@ -9,10 +9,10 @@ project Ardt is
    package Compiler is
       for Default_Switches ("Ada") use
         ("-gnatwa",
-         "-gnatyg",
          "-gnat12",
          "-gnata",
-         "-gnatwF");
+         "-gnatwF",
+         "-gnatwsh");
    end Compiler;
 
    package Builder is
