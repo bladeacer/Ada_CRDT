@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html class=main>
+<link rel=stylesheet href=gnatdoc.css><body class=content><h1>Ada_CRDT.Protected.Shared_RGA.Shared_RGA_Obj</h1><h2>Entities</h2><h3>Subprograms</h3><ul><li><a href=#e371bdb0ba30c1a6da79d8af6b77185826fa9ce2c222742b50f2c0e9420af731>Compact</a><li><a href=#48eccfb1cb9e146d3ecf20eab242ac1c437de069fc4790ec89c8542d2160dd07>Delete</a><li><a href=#01bbbf7aab407a17b2319d0921c91e90314ec39088e81c6726368a2fa524b8c3>Get</a><li><a href=#fd3e18bc59a078522e534600e3a9c74e7f258fe5a121572021ee16a8484e6200>Insert</a><li><a href=#28b797f207dfdf181bd492dbd352670e797679438b7b8dd077872f708b979efd>Insert_Bulk</a><li><a href=#a76754ac6beec241024a4c855b54dbd3db2a37f96e3b86ef7589dca71793d0bb>Merge</a><li><a href=#2f2520b857b548a4d035d2662be42da13105fc75d9fcab3c01578d34bcad90a7>Size</a><li><a href=#3a54823a72a1150470ac20c078b5d8172831da7af6c99a04876d2852a7286ddd>Snapshot</a></ul><h2>Description</h2><h4 id=e371bdb0ba30c1a6da79d8af6b77185826fa9ce2c222742b50f2c0e9420af731>Compact</h4><pre class=ada-code-snippet><code>procedure Compact
+</code></pre><h4 id=48eccfb1cb9e146d3ecf20eab242ac1c437de069fc4790ec89c8542d2160dd07>Delete</h4><pre class=ada-code-snippet><code>procedure Delete (Pos : Positive)
+</code></pre><h5>Parameters</h5><dl><dt>Pos<dd></dl><h4 id=01bbbf7aab407a17b2319d0921c91e90314ec39088e81c6726368a2fa524b8c3>Get</h4><pre class=ada-code-snippet><code>function Get (Pos : Positive) return Element_Type
+</code></pre><h5>Parameters</h5><dl><dt>Pos<dd></dl><h5>Return Value</h5><dl><dd></dl><h4 id=fd3e18bc59a078522e534600e3a9c74e7f258fe5a121572021ee16a8484e6200>Insert</h4><pre class=ada-code-snippet><code>procedure Insert (Pos   : Positive;
+                  Id    : RGA_Pkg.Node_Id;
+                  Value : Element_Type)
+</code></pre><h5>Parameters</h5><dl><dt>Pos<dd><dt>Id<dd><dt>Value<dd></dl><h4 id=28b797f207dfdf181bd492dbd352670e797679438b7b8dd077872f708b979efd>Insert_Bulk</h4><pre class=ada-code-snippet><code>procedure Insert_Bulk (Pos    : Positive;
+                       Id     : RGA_Pkg.Node_Id;
+                       Values : RGA_Pkg.Element_Array)
+</code></pre><h5>Parameters</h5><dl><dt>Pos<dd><dt>Id<dd><dt>Values<dd></dl><h4 id=a76754ac6beec241024a4c855b54dbd3db2a37f96e3b86ef7589dca71793d0bb>Merge</h4><pre class=ada-code-snippet><code>procedure Merge (Source : RGA_Pkg.RGA)
+</code></pre><h5>Parameters</h5><dl><dt>Source<dd></dl><h4 id=2f2520b857b548a4d035d2662be42da13105fc75d9fcab3c01578d34bcad90a7>Size</h4><pre class=ada-code-snippet><code>function Size return Natural
+</code></pre><h5>Return Value</h5><dl><dd></dl><h4 id=3a54823a72a1150470ac20c078b5d8172831da7af6c99a04876d2852a7286ddd>Snapshot</h4><pre class=ada-code-snippet><code>function Snapshot return RGA_Pkg.RGA
+</code></pre><h5>Return Value</h5><dl><dd></dl>

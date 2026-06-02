@@ -11,7 +11,7 @@ help:
 	@echo '  run     Build and run tests'
 	@echo '  test    Alias for run'
 	@echo '  prove   Run SPARK proofs (alr gnatprove)'
-	@echo '  doc     Generate HTML documentation (gnatdoc)'
+	@echo '  doc     Generate HTML documentation (gnatdoc -P ada_crdt_doc.gpr)'
 	@echo '  clean   Remove build artifacts'
 	@echo '  help    Show this message'
 
@@ -27,8 +27,8 @@ prove:
 	alr gnatprove
 
 doc:
-	gnatdoc -P ada_crdt.gpr --output-dir=docs --front-end
+	alr exec -- gnatdoc -P ada_crdt.gpr --output-dir=docs
 
 clean:
 	alr clean
-	rm -rf obj/ docs/
+	rm -rf obj/ lib/ docs/

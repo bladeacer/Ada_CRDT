@@ -194,7 +194,7 @@ is
       end;
    end Insert;
 
-   procedure Insert_Bulk (R : in out RGA; Pos : Positive; Id : Node_Id; Values : array of Element_Type) is
+   procedure Insert_Bulk (R : in out RGA; Pos : Positive; Id : Node_Id; Values : Element_Array) is
    begin
       for I in Values'Range loop
          declare

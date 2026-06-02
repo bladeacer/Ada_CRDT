@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html class=main>
+<link rel=stylesheet href=gnatdoc.css><body class=content><h1>Ada_CRDT.Sequences.Yjs</h1><h2>Entities</h2><h3>Generic formal parameters</h3><ul><li><a href=#6c72ea39a3fe2089b76ac8cc2a13cc3745f48a9ad707d259d6cae61f37e95c0e>Element_Type</a><li><a href=#380a9a56527a48144d8356ae7ce61ead3c34a2744d050500c2e240dba4a310f6>Max_Items</a><li><a href=#bc68778ab95f67e55e78d9bdcf81d5d786b4497bb9e7a15a4f112e6b85843e77>Max_Replicas</a><li><a href=#e1da3d07e62f63a587a9859260673c53ff4a6fc0948a58721d742dfc892bd2ee>Max_Stride</a></ul><h3>Simple Types</h3><ul><li><a href=#a997d53e11b9b549fc188e63d3d4f4fc7a5f4da58ced55deeb7a0eb44495fd82>Cursor</a><li><a href=#0285d5aad377947a42ba74a17462b9957f4a7090db98bc402e38fbc2726d841e>RGA</a></ul><h3>Array Types</h3><ul><li><a href=#83c91d22bacd7a44a2fe1fbaee6d04f8b17c737dd648163ef973cc9d78a4b842>Element_Array</a><li><a href=#8e2217704b9c6fbf7ee79b83f34f6adc2d01f4f36df172469b32ed71ed5a700d>Replica_Max_Seq_Array</a></ul><h3>Record Types</h3><ul><li><a href=#90db46850d9ec8af3c2d464f771910f6d67f03b48f231bb13e5b70b03d1a63e0>Node_Id</a><li><a href=#18e76ee5692ca87306b3d9acdc692ca5e510073f346de8e887f24ef676414567>Replica_Max_Seq</a></ul><h3>Subprograms</h3><ul><li><a href=#73e8d3d969162e609d10591474092f929286e9e5f648bf99619c306c31e7dd75>"="</a><li><a href=#41e5f1fccd2bae7925c50b755629da322e906fe2d4ee306d550a290a51e0f6b9>Compact</a><li><a href=#514e40ae717e2098545ff2021bc70010c6b938e1e3550abacffb19d15b59871d>Compute_State_Vector</a><li><a href=#c60a1dfa067b83874fc6722eb3952bd60fa4e0f32c7b3a59792425529bf15562>Count</a><li><a href=#3874b146219fe8afb37de897d733a092f00a0fa5e6057860189dcade78e3035d>Delete</a><li><a href=#b02ae06d815f268597f863fe04a5ff7b1d9ff0b2cc53a9d770e08059636634ba>Delete_Node</a><li><a href=#9a65dce2f3779507ee8da83a4d5604084ac06ccd834178663d3d2c1b4ab39d51>Element</a><li><a href=#b9fb9843bae2c5cdf6d01a9f56754d4c4d141ceee5dbe8e96d31067de36cf843>First</a><li><a href=#11fff9b8f149c5def4489e3158be07bd9a1ca1ce85d5f02a98f4be8616d72bb2>Get</a><li><a href=#d56ae71f25ec30310ab512967d53dd20ae29815ff969c67b46599d6d86ce7b18>Has_Element</a><li><a href=#b3f1827d084c664b483d53dcdf46a3d31f14af828feaad7f49d64015d8fbc422>Has_Element</a><li><a href=#2923372118fb580fa1eed256c274c1befff5e5258179c95471786bbab365a8b6>Insert</a><li><a href=#08e26f9db6eae1fef26417582df70c43b0e6bd71fdf9d509cb17f9e57f7a0a36>Insert_Bulk</a><li><a href=#2eae9393e0489daba80eb1bab0d0965da04e0ba3e044f8d469b433469cdcdc76>Length</a><li><a href=#651c6c2ae46055f7a0174417262f50ebb0f24cb6bd57390e9bbb685e29b58e05>Merge</a><li><a href=#e5ac65232c638fb45018028b31e25551fcc501a872480d99344ff75b321a2b69>Next</a><li><a href=#fd534e8fa42f0f83fbb807ba8c0758c9542b7f44d5bb1dbfb097dc8489da4080>Read_RGA</a><li><a href=#77fad1e662734cf91b885c0c16f0c61bba9e49e43fda12dbfc3d79680b7772cd>Size</a><li><a href=#7e062dd35feb5f5b6521473b2a4f55766d9e2c82ab4cbfa19a9cb066b1ad7899>Sync_Delta</a><li><a href=#c1686959293f848cc19f2a117cb2d3c44cd2d9d2fd344046d129b5be342f9437>Write_RGA</a></ul><h2>Description</h2><h4 id=73e8d3d969162e609d10591474092f929286e9e5f648bf99619c306c31e7dd75>"="</h4><pre class=ada-code-snippet><code>function "=" (Left, Right : RGA) return Boolean
+</code></pre><h5>Parameters</h5><dl><dt>Left<dd><dt>Right<dd></dl><h5>Return Value</h5><dl><dd></dl><h4 id=41e5f1fccd2bae7925c50b755629da322e906fe2d4ee306d550a290a51e0f6b9>Compact</h4><pre class=ada-code-snippet><code>procedure Compact (R : in out RGA)
+</code></pre><h5>Parameters</h5><dl><dt>R<dd></dl><h4 id=514e40ae717e2098545ff2021bc70010c6b938e1e3550abacffb19d15b59871d>Compute_State_Vector</h4><pre class=ada-code-snippet><code>procedure Compute_State_Vector
+  (R     : RGA;
+   SV    : out Replica_Max_Seq_Array;
+   Count : out Natural)
+</code></pre><h5>Parameters</h5><dl><dt>R<dd><dt>SV<dd><dt>Count<dd></dl><h4 id=c60a1dfa067b83874fc6722eb3952bd60fa4e0f32c7b3a59792425529bf15562>Count</h4><pre class=ada-code-snippet><code>function Count (R : RGA) return Natural
+</code></pre><h5>Parameters</h5><dl><dt>R<dd></dl><h5>Return Value</h5><dl><dd></dl><h4 id=a997d53e11b9b549fc188e63d3d4f4fc7a5f4da58ced55deeb7a0eb44495fd82>Cursor</h4><pre class=ada-code-snippet><code>type Cursor is private;
+</code></pre><h4 id=3874b146219fe8afb37de897d733a092f00a0fa5e6057860189dcade78e3035d>Delete</h4><pre class=ada-code-snippet><code>procedure Delete (R   : in out RGA;
+                  Pos : Positive)
+</code></pre><h5>Parameters</h5><dl><dt>R<dd><dt>Pos<dd></dl><h4 id=b02ae06d815f268597f863fe04a5ff7b1d9ff0b2cc53a9d770e08059636634ba>Delete_Node</h4><pre class=ada-code-snippet><code>procedure Delete_Node (R : in out RGA; Id : Node_Id)
+</code></pre><h5>Parameters</h5><dl><dt>R<dd><dt>Id<dd></dl><h4 id=9a65dce2f3779507ee8da83a4d5604084ac06ccd834178663d3d2c1b4ab39d51>Element</h4><pre class=ada-code-snippet><code>function Element (Container : RGA; Position : Cursor) return Element_Type
+</code></pre><h5>Parameters</h5><dl><dt>Container<dd><dt>Position<dd></dl><h5>Return Value</h5><dl><dd></dl><h4 id=83c91d22bacd7a44a2fe1fbaee6d04f8b17c737dd648163ef973cc9d78a4b842>Element_Array</h4><pre class=ada-code-snippet><code>type Element_Array is array (Positive range &lt;>) of Element_Type;
+</code></pre><h4 id=6c72ea39a3fe2089b76ac8cc2a13cc3745f48a9ad707d259d6cae61f37e95c0e>Element_Type</h4><pre class=ada-code-snippet><code>type Element_Type is private;
+</code></pre><h4 id=b9fb9843bae2c5cdf6d01a9f56754d4c4d141ceee5dbe8e96d31067de36cf843>First</h4><pre class=ada-code-snippet><code>function First (Container : RGA) return Cursor
+</code></pre><h5>Parameters</h5><dl><dt>Container<dd></dl><h5>Return Value</h5><dl><dd></dl><h4 id=11fff9b8f149c5def4489e3158be07bd9a1ca1ce85d5f02a98f4be8616d72bb2>Get</h4><pre class=ada-code-snippet><code>function Get (R : RGA; Pos : Positive) return Element_Type
+</code></pre><h5>Parameters</h5><dl><dt>R<dd><dt>Pos<dd></dl><h5>Return Value</h5><dl><dd></dl><h4 id=d56ae71f25ec30310ab512967d53dd20ae29815ff969c67b46599d6d86ce7b18>Has_Element</h4><pre class=ada-code-snippet><code>function Has_Element (Position : Cursor) return Boolean
+</code></pre><h5>Parameters</h5><dl><dt>Position<dd></dl><h5>Return Value</h5><dl><dd></dl><h4 id=b3f1827d084c664b483d53dcdf46a3d31f14af828feaad7f49d64015d8fbc422>Has_Element</h4><pre class=ada-code-snippet><code>function Has_Element (Container : RGA; Position : Cursor) return Boolean
+</code></pre><h5>Parameters</h5><dl><dt>Container<dd><dt>Position<dd></dl><h5>Return Value</h5><dl><dd></dl><h4 id=2923372118fb580fa1eed256c274c1befff5e5258179c95471786bbab365a8b6>Insert</h4><pre class=ada-code-snippet><code>procedure Insert (R     : in out RGA;
+                  Pos   : Positive;
+                  Id    : Node_Id;
+                  Value : Element_Type)
+</code></pre><h5>Parameters</h5><dl><dt>R<dd><dt>Pos<dd><dt>Id<dd><dt>Value<dd></dl><h4 id=08e26f9db6eae1fef26417582df70c43b0e6bd71fdf9d509cb17f9e57f7a0a36>Insert_Bulk</h4><pre class=ada-code-snippet><code>procedure Insert_Bulk (R      : in out RGA;
+                       Pos    : Positive;
+                       Id     : Node_Id;
+                       Values : Element_Array)
+</code></pre><h5>Parameters</h5><dl><dt>R<dd><dt>Pos<dd><dt>Id<dd><dt>Values<dd></dl><h4 id=2eae9393e0489daba80eb1bab0d0965da04e0ba3e044f8d469b433469cdcdc76>Length</h4><pre class=ada-code-snippet><code>function Length (R : RGA) return Natural
+</code></pre><h5>Parameters</h5><dl><dt>R<dd></dl><h5>Return Value</h5><dl><dd></dl><h4 id=380a9a56527a48144d8356ae7ce61ead3c34a2744d050500c2e240dba4a310f6>Max_Items</h4><pre class=ada-code-snippet><code>Max_Items    : Positive;
+</code></pre><h4 id=bc68778ab95f67e55e78d9bdcf81d5d786b4497bb9e7a15a4f112e6b85843e77>Max_Replicas</h4><pre class=ada-code-snippet><code>Max_Replicas : Positive := 32;
+</code></pre><h4 id=e1da3d07e62f63a587a9859260673c53ff4a6fc0948a58721d742dfc892bd2ee>Max_Stride</h4><pre class=ada-code-snippet><code>Max_Stride   : Positive := 64;
+</code></pre><h4 id=651c6c2ae46055f7a0174417262f50ebb0f24cb6bd57390e9bbb685e29b58e05>Merge</h4><pre class=ada-code-snippet><code>procedure Merge (Target : in out RGA;
+                 Source : RGA)
+</code></pre><h5>Parameters</h5><dl><dt>Target<dd><dt>Source<dd></dl><h4 id=e5ac65232c638fb45018028b31e25551fcc501a872480d99344ff75b321a2b69>Next</h4><pre class=ada-code-snippet><code>procedure Next (Container : RGA; Position : in out Cursor)
+</code></pre><h5>Parameters</h5><dl><dt>Container<dd><dt>Position<dd></dl><h4 id=90db46850d9ec8af3c2d464f771910f6d67f03b48f231bb13e5b70b03d1a63e0>Node_Id</h4><pre class=ada-code-snippet><code>type Node_Id is record
+   Replica : Core.Replica_Id;
+   Seq     : Natural;
+end record;
+</code></pre><h5>Record fields</h5><dl><dt>Replica<dd><dt>Seq<dd></dl><h4 id=fd534e8fa42f0f83fbb807ba8c0758c9542b7f44d5bb1dbfb097dc8489da4080>Read_RGA</h4><pre class=ada-code-snippet><code>procedure Read_RGA
+  (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
+   Item   : out RGA)
+</code></pre><h5>Parameters</h5><dl><dt>Stream<dd><dt>Item<dd></dl><h4 id=18e76ee5692ca87306b3d9acdc692ca5e510073f346de8e887f24ef676414567>Replica_Max_Seq</h4><pre class=ada-code-snippet><code>type Replica_Max_Seq is record
+   Replica : Core.Replica_Id;
+   Max_Seq : Natural;
+end record;
+</code></pre><h5>Record fields</h5><dl><dt>Replica<dd><dt>Max_Seq<dd></dl><h4 id=8e2217704b9c6fbf7ee79b83f34f6adc2d01f4f36df172469b32ed71ed5a700d>Replica_Max_Seq_Array</h4><pre class=ada-code-snippet><code>type Replica_Max_Seq_Array is array (Positive range &lt;>) of Replica_Max_Seq;
+</code></pre><h4 id=0285d5aad377947a42ba74a17462b9957f4a7090db98bc402e38fbc2726d841e>RGA</h4><pre class=ada-code-snippet><code>type RGA (Item_Capacity : Positive) is private;
+</code></pre><h5>Record fields</h5><dl><dt>Item_Capacity<dd></dl><h4 id=77fad1e662734cf91b885c0c16f0c61bba9e49e43fda12dbfc3d79680b7772cd>Size</h4><pre class=ada-code-snippet><code>function Size (R : RGA) return Natural
+</code></pre><h5>Parameters</h5><dl><dt>R<dd></dl><h5>Return Value</h5><dl><dd></dl><h4 id=7e062dd35feb5f5b6521473b2a4f55766d9e2c82ab4cbfa19a9cb066b1ad7899>Sync_Delta</h4><pre class=ada-code-snippet><code>procedure Sync_Delta
+  (Target    : in out RGA;
+   Source    : RGA;
+   Remote_SV : Replica_Max_Seq_Array;
+   SV_Count  : Natural)
+</code></pre><h5>Parameters</h5><dl><dt>Target<dd><dt>Source<dd><dt>Remote_SV<dd><dt>SV_Count<dd></dl><h4 id=c1686959293f848cc19f2a117cb2d3c44cd2d9d2fd344046d129b5be342f9437>Write_RGA</h4><pre class=ada-code-snippet><code>procedure Write_RGA
+  (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
+   Item   : RGA)
+</code></pre><h5>Parameters</h5><dl><dt>Stream<dd><dt>Item<dd></dl>

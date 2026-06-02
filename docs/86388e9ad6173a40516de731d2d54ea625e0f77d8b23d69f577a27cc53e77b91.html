@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html class=main>
+<link rel=stylesheet href=gnatdoc.css><body class=content><h1>Ada_CRDT.Bounded.Bounded_RGA</h1><h2>Entities</h2><h3>Generic formal parameters</h3><ul><li><a href=#04b9e6faa8254d209482bc8939b7d130634cd62b90f6790834998de5841d243d>Element_Type</a><li><a href=#c749f65350d0ecda5cd21062c424e6033cf3b173dcd717621a77cff2a3c0280d>Max_Items</a><li><a href=#a68387e18a54ebf5372c5f53c2e00e2de67cf87941aa69b5ea1a6fc1a38d336b>Max_Replicas</a><li><a href=#6fabf027106686752a68bd291bd49766f0b66a074dd76ecbee3d4778476318d7>Max_Stride</a></ul><h3>Subtypes</h3><ul><li><a href=#d68543037e01c9bf9a63a9fb887bde218847655503ce84fd4961bbb89e73e959>Sequence</a></ul><h3>Generic Instantiations</h3><ul><li><a href=#34b351164abc7e1506522f63446dd46feb445573e660ca52db53939fa153035d>RGA_Pkg</a></ul><h2>Description</h2><p>Bounded RGA with fixed item capacity and stride.<h4 id=04b9e6faa8254d209482bc8939b7d130634cd62b90f6790834998de5841d243d>Element_Type</h4><pre class=ada-code-snippet><code>type Element_Type is private;
+</code></pre><h4 id=c749f65350d0ecda5cd21062c424e6033cf3b173dcd717621a77cff2a3c0280d>Max_Items</h4><pre class=ada-code-snippet><code>Max_Items    : Positive;
+</code></pre><h4 id=a68387e18a54ebf5372c5f53c2e00e2de67cf87941aa69b5ea1a6fc1a38d336b>Max_Replicas</h4><pre class=ada-code-snippet><code>Max_Replicas : Positive := 32;
+</code></pre><h4 id=6fabf027106686752a68bd291bd49766f0b66a074dd76ecbee3d4778476318d7>Max_Stride</h4><pre class=ada-code-snippet><code>Max_Stride   : Positive := 64;
+</code></pre><h4 id=34b351164abc7e1506522f63446dd46feb445573e660ca52db53939fa153035d>RGA_Pkg</h4><pre class=ada-code-snippet><code>package RGA_Pkg is new Ada_CRDT.Rga
+  (Element_Type, Max_Items, Max_Stride, Max_Replicas);
+</code></pre><h4 id=d68543037e01c9bf9a63a9fb887bde218847655503ce84fd4961bbb89e73e959>Sequence</h4><pre class=ada-code-snippet><code>subtype Sequence is RGA_Pkg.RGA (Max_Items);
+</code></pre>

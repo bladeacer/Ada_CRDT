@@ -1,0 +1,8 @@
+<!DOCTYPE html>
+<html class=main>
+<link rel=stylesheet href=gnatdoc.css><body class=content><h1>Ada_CRDT.Protected.Shared_RGA</h1><h2>Entities</h2><h3>Generic formal parameters</h3><ul><li><a href=#2113cb4f888b20528d9fa67435f39b86a22b5266ab7cab2921000368cede68ed>Element_Type</a><li><a href=#9dd19ae8598535363b03250420e82598b11c04930471f1ced14844ffae03309d>Max_Size</a><li><a href=#da7d2ae9fb63c76b3cae15e7ae8f61d9915c209217e44adbd7bbac77b8f7da0a>Max_Stride</a></ul><h3>Protected Types and Protected Objects</h3><ul><li><a href=b237f8b60e5149803a1351dad01ac8860a55f2910ac24d3824bcc843107b9950.html>Shared_RGA_Obj</a></ul><h3>Generic Instantiations</h3><ul><li><a href=#2c7022a52d79c1008ba03a2cf5eb28f633ef81054dbcfa057d0287acbc762414>RGA_Pkg</a></ul><h2>Description</h2><p>Thread-safe RGA (chunk-based Yjs engine).<h4 id=2113cb4f888b20528d9fa67435f39b86a22b5266ab7cab2921000368cede68ed>Element_Type</h4><pre class=ada-code-snippet><code>type Element_Type is private;
+</code></pre><h4 id=9dd19ae8598535363b03250420e82598b11c04930471f1ced14844ffae03309d>Max_Size</h4><pre class=ada-code-snippet><code>Max_Size   : Positive;
+</code></pre><h4 id=da7d2ae9fb63c76b3cae15e7ae8f61d9915c209217e44adbd7bbac77b8f7da0a>Max_Stride</h4><pre class=ada-code-snippet><code>Max_Stride : Positive := 64;
+</code></pre><h4 id=2c7022a52d79c1008ba03a2cf5eb28f633ef81054dbcfa057d0287acbc762414>RGA_Pkg</h4><pre class=ada-code-snippet><code>package RGA_Pkg is new Ada_CRDT.Rga
+  (Element_Type, Max_Size, Max_Stride);
+</code></pre>
