@@ -2,13 +2,19 @@ with Ardt.Rga;
 
 generic
    type Element_Type is private;
-   Max_RGA_Size  : Positive;
-   Max_RGA_Count : Positive;
+   Max_RGA_Size   : Positive;
+   Max_RGA_Count  : Positive;
+   Max_Stride     : Positive := 64;
+   Max_Replicas   : Positive := 32;
 package Ardt.Rgas with
   SPARK_Mode
 is
 
-   package RGA_Pkg is new Ardt.Rga (Element_Type, Max_RGA_Size);
+   package RGA_Pkg is new Ardt.Rga
+     (Element_Type,
+      Max_Items     => Max_RGA_Size,
+      Max_Stride    => Max_Stride,
+      Max_Replicas  => Max_Replicas);
 
    subtype RGA_Entry is RGA_Pkg.RGA (Max_RGA_Size);
 

@@ -1,6 +1,8 @@
 with Ada.Text_IO;
 with Ada.Numerics.Discrete_Random;
 with Ada.Numerics.Float_Random;
+with Ada.Streams;
+with Ada.Streams.Stream_IO;
 with Ardt.Core;
 with Ardt.Pn_Counters;
 with Ardt.Lww_Element_Sets;
@@ -603,6 +605,163 @@ procedure Test_Crdt is
       Put_Line ("[Tombstone Edge Cases] done.");
    end Test_Tombstone_Edge_Cases;
 
+   -----------------------------------------------
+   --  Structural Splitting (Yjs-style)         --
+   -----------------------------------------------
+   procedure Test_Structural_Splitting is
+      Max_RGA : constant Positive := 20;
+      package RGA_Str is new Ardt.Rga (Character, Max_RGA, Max_Stride => 10);
+      R : RGA_Str.RGA (Max_RGA);
+      Seq : Natural := 0;
+   begin
+      New_Line;
+      Put_Line ("[Structural Splitting]");
+
+      -- Insert a bulk of 5 characters
+      RGA_Str.Insert_Bulk (R, 1, (1, 1), "Hello");
+      Check (RGA_Str.Size (R) = 5, "After Insert_Bulk ""Hello"" at 1: size = 5");
+      Check (RGA_Str.Get (R, 1) = 'H', "Get (1) = 'H'");
+      Check (RGA_Str.Get (R, 3) = 'l', "Get (3) = 'l'");
+      Check (RGA_Str.Get (R, 5) = 'o', "Get (5) = 'o'");
+      Check (RGA_Str.Count (R) = 1, "1 item after bulk insert");
+
+      -- Insert a character in the middle of the bulk (between 'l' and 'l' at pos 3)
+      -- This should split the item at offset 3: left="He", right="llo", new="X"
+      RGA_Str.Insert (R, 3, (1, 2), 'X');
+      Check (RGA_Str.Size (R) = 6, "After split insert: size = 6");
+      Check (RGA_Str.Get (R, 1) = 'H', "Split: Get (1) = 'H'");
+      Check (RGA_Str.Get (R, 2) = 'e', "Split: Get (2) = 'e'");
+      Check (RGA_Str.Get (R, 3) = 'X', "Split: Get (3) = 'X'");
+      Check (RGA_Str.Get (R, 4) = 'l', "Split: Get (4) = 'l'");
+      Check (RGA_Str.Get (R, 5) = 'l', "Split: Get (5) = 'l'");
+      Check (RGA_Str.Get (R, 6) = 'o', "Split: Get (6) = 'o'");
+
+      -- The original item was split into 3: left 2 chars + new 1 char + right 3 chars
+      Check (RGA_Str.Count (R) >= 3, "At least 3 items after split");
+
+      Put_Line ("[Structural Splitting] done.");
+   end Test_Structural_Splitting;
+
+   -----------------------------------------------
+   --  State Vector / Delta Sync                --
+   -----------------------------------------------
+   procedure Test_Delta_Sync is
+      Max_RGA : constant Positive := 20;
+      package RGA_Str is new Ardt.Rga (Character, Max_RGA);
+      A : RGA_Str.RGA (Max_RGA);
+      B : RGA_Str.RGA (Max_RGA);
+      SV : RGA_Str.Replica_Max_Seq_Array (1 .. 10);
+      SV_Cnt : Natural;
+   begin
+      New_Line;
+      Put_Line ("[Delta Sync]");
+
+      -- A has chars written by replica 1
+      RGA_Str.Insert (A, 1, (1, 1), 'A');
+      RGA_Str.Insert (A, 2, (1, 2), 'B');
+      RGA_Str.Insert (A, 3, (1, 3), 'C');
+
+      -- B has a char written by replica 2
+      RGA_Str.Insert (B, 1, (2, 1), 'X');
+
+      -- Compute state vector for B
+      RGA_Str.Compute_State_Vector (B, SV, SV_Cnt);
+      Check (SV_Cnt >= 1, "State vector has at least 1 entry");
+      Check (SV_Cnt <= 10, "State vector within bounds");
+
+      -- Sync B's state vector to A: A sends only items newer than B's vector.
+      -- B has (2,1) at Seq=1, so A's items (1,1) through (1,3) are all new to B.
+      -- Use A as source, B as target
+      RGA_Str.Sync_Delta (B, A, SV, SV_Cnt);
+      Check (RGA_Str.Size (B) >= 4,
+             "After delta sync B size >= 4 (got" &
+             Natural'Image (RGA_Str.Size (B)) & ")");
+      -- Items ordered by (Seq, Replica): (1,1) < (2,1) < (1,2) < (1,3)
+      -- So final order: A, X, B, C
+      Check (RGA_Str.Get (B, 1) = 'A', "Delta: Get (1) = 'A'");
+      Check (RGA_Str.Get (B, 2) = 'X', "Delta: Get (2) = 'X'");
+      Check (RGA_Str.Get (B, 3) = 'B', "Delta: Get (3) = 'B'");
+      Check (RGA_Str.Get (B, 4) = 'C', "Delta: Get (4) = 'C'");
+
+      Put_Line ("[Delta Sync] done.");
+   end Test_Delta_Sync;
+
+   -----------------------------------------------
+   --  Tombstone Garbage Collection             --
+   -----------------------------------------------
+   procedure Test_Tombstone_GC is
+      Max_RGA : constant Positive := 20;
+      package RGA_Str is new Ardt.Rga (Character, Max_RGA);
+      R : RGA_Str.RGA (Max_RGA);
+   begin
+      New_Line;
+      Put_Line ("[Tombstone GC]");
+
+      RGA_Str.Insert (R, 1, (1, 1), 'A');
+      RGA_Str.Insert (R, 2, (1, 2), 'B');
+      RGA_Str.Insert (R, 3, (1, 3), 'C');
+
+      Check (RGA_Str.Size (R) = 3, "Before delete: size = 3");
+      Check (RGA_Str.Count (R) = 3, "Before delete: item count = 3");
+
+      -- Delete B
+      RGA_Str.Delete (R, 2);
+      Check (RGA_Str.Size (R) = 3, "After delete: size = 3 (tombstone still counts)");
+
+      -- Compact should remove tombstoned item
+      RGA_Str.Compact (R);
+      Check (RGA_Str.Size (R) = 2, "After compact: size = 2");
+      Check (RGA_Str.Get (R, 1) = 'A', "Compact: Get (1) = 'A'");
+      Check (RGA_Str.Get (R, 2) = 'C', "Compact: Get (2) = 'C'");
+
+      Put_Line ("[Tombstone GC] done.");
+   end Test_Tombstone_GC;
+
+   -----------------------------------------------
+   --  Stream Serialization                     --
+   -----------------------------------------------
+   procedure Test_Serialization is
+      Max_RGA : constant Positive := 20;
+      package RGA_Str is new Ardt.Rga (Character, Max_RGA);
+      Src : RGA_Str.RGA (Max_RGA);
+      Dst : RGA_Str.RGA (Max_RGA);
+      use Ada.Streams.Stream_IO;
+      F : Ada.Streams.Stream_IO.File_Type;
+   begin
+      New_Line;
+      Put_Line ("[Serialization]");
+
+      RGA_Str.Insert (Src, 1, (1, 1), 'H');
+      RGA_Str.Insert (Src, 2, (1, 2), 'i');
+      RGA_Str.Insert_Bulk (Src, 3, (2, 1), " Ada");
+
+      -- Write to temp file
+      Create (F, Out_File, "/tmp/ardt_serialize_test.bin");
+      RGA_Str.RGA'Write (Stream (F), Src);
+      Close (F);
+
+      -- Read back
+      Open (F, In_File, "/tmp/ardt_serialize_test.bin");
+      RGA_Str.RGA'Read (Stream (F), Dst);
+      Close (F);
+
+      Check (RGA_Str.Size (Dst) = 6,
+             "Deserialized size = 6 (got" &
+             Natural'Image (RGA_Str.Size (Dst)) & ")");
+      Check (RGA_Str.Get (Dst, 1) = 'H', "Deserialized Get (1) = 'H'");
+      Check (RGA_Str.Get (Dst, 4) = 'A', "Deserialized Get (4) = 'A'");
+      Check (RGA_Str.Get (Dst, 6) = 'a', "Deserialized Get (6) = 'a'");
+
+      -- Verify equality of round-trip
+      declare
+         use type RGA_Str.RGA;
+      begin
+         Check (Src = Dst, "Round-trip serialization: Src = Dst");
+      end;
+
+      Put_Line ("[Serialization] done.");
+   end Test_Serialization;
+
 begin
    Put_Line ("=== ARDT CRDT Test Suite ===");
    Put_Line ("Running unit tests, property-based fuzzing, and chaos simulations...");
@@ -614,6 +773,10 @@ begin
    Test_Lattice_Properties;
    Test_Chaotic_Interleaving;
    Test_Tombstone_Edge_Cases;
+   Test_Structural_Splitting;
+   Test_Delta_Sync;
+   Test_Tombstone_GC;
+   Test_Serialization;
 
    New_Line;
    Put_Line ("=== Results ===");

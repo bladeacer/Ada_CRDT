@@ -1,8 +1,11 @@
+with Ada.Streams;
 with Ardt.Core;
 
 generic
    type Element_Type is private;
-   Max_RGA_Size : Positive;
+   Max_Items   : Positive;
+   Max_Stride  : Positive := 64;
+   Max_Replicas : Positive := 32;
 package Ardt.Rga with
   SPARK_Mode
 is
@@ -12,42 +15,107 @@ is
       Seq     : Natural;
    end record;
 
-   type RGA_Node is record
-      Id      : Node_Id;
-      Value   : Element_Type;
-      Deleted : Boolean := False;
-   end record;
+   type Element_Array is array (Positive range <>) of Element_Type;
 
-   type Node_Array is array (Positive range <>) of RGA_Node;
+   type RGA (Item_Capacity : Positive) is private;
 
-   type RGA (Capacity : Positive) is private;
+   -- Count of items in the linked list
+   function Count (R : RGA) return Natural;
 
+   -- Total elements across all items (including tombstones)
    function Size (R : RGA) return Natural;
 
    function Length (R : RGA) return Natural is (Size (R));
 
+   -- Get element at physical position (1-indexed item element position)
    function Get (R : RGA; Pos : Positive) return Element_Type;
 
+   -- Insert single element at physical position
    procedure Insert (R     : in out RGA;
                      Pos   : Positive;
                      Id    : Node_Id;
                      Value : Element_Type);
 
+   -- Insert multiple contiguous elements as a single Item block
+   procedure Insert_Bulk (R      : in out RGA;
+                          Pos    : Positive;
+                          Id     : Node_Id;
+                          Values : Element_Array);
+
+   -- Delete element at physical position (tombstone)
    procedure Delete (R   : in out RGA;
                      Pos : Positive);
 
+   -- Delete item starting with the given Node_Id
    procedure Delete_Node (R : in out RGA; Id : Node_Id);
 
+   -- Merge all source items into target
    procedure Merge (Target : in out RGA;
                     Source : RGA);
 
    function "=" (Left, Right : RGA) return Boolean;
 
+   -- === State Vector / Delta Sync ===
+
+   type Replica_Max_Seq is record
+      Replica : Core.Replica_Id;
+      Max_Seq : Natural;
+   end record;
+
+   type Replica_Max_Seq_Array is array (Positive range <>) of Replica_Max_Seq;
+
+   -- Compute state vector: max seq per replica
+   procedure Compute_State_Vector
+     (R     : RGA;
+      SV    : out Replica_Max_Seq_Array;
+      Count : out Natural);
+
+   -- Delta-sync: merge only items from Source that are newer than
+   -- what the remote side's state vector reports
+   procedure Sync_Delta
+     (Target    : in out RGA;
+      Source    : RGA;
+      Remote_SV : Replica_Max_Seq_Array;
+      SV_Count  : Natural);
+
+   -- === Tombstone Garbage Collection ===
+
+   -- Compact: physically remove all tombstoned items, reclaiming slots
+   procedure Compact (R : in out RGA);
+
+   -- === Stream Serialization ===
+
+   -- Write all items in RGA order into a stream
+   procedure Write_RGA (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
+                        Item   : RGA);
+
+   -- Read items from a stream and populate RGA
+   procedure Read_RGA  (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
+                        Item   : out RGA);
+
 private
 
-   type RGA (Capacity : Positive) is record
-      Nodes : Node_Array (1 .. Capacity);
-      Sz    : Natural := 0;
+   type Element_Store is array (1 .. Max_Stride) of Element_Type;
+
+   type RGA_Item is record
+      Id      : Node_Id;
+      Content : Element_Store;
+      Len     : Natural := 0;
+      Deleted : Boolean := False;
+      Next    : Natural := 0;
    end record;
+
+   type Item_Array is array (Positive range <>) of RGA_Item;
+
+   type RGA (Item_Capacity : Positive) is record
+      Items   : Item_Array (1 .. Item_Capacity);
+      Head    : Natural := 0;
+      Count   : Natural := 0;
+      Free    : Natural := 0;
+      Total   : Natural := 0;  -- sum of Len across all items (incl tombstones)
+   end record;
+
+   for RGA'Write use Write_RGA;
+   for RGA'Read  use Read_RGA;
 
 end Ardt.Rga;
