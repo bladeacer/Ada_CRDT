@@ -1,4 +1,4 @@
-.PHONY: help all build run test prove doc api-docs clean release demo
+.PHONY: help all build run test prove doc api-docs clean release publish demo
 
 .DEFAULT_GOAL := help
 
@@ -12,7 +12,8 @@ help:
 	@echo '  test     Alias for run'
 	@echo '  prove    Run SPARK proofs (alr gnatprove)'
 	@echo '  doc      Generate Markdown API docs (docs/api-docs/)'
-	@echo '  release  Tag, update index+releases (Codeberg URL), push. Use VERSION=x.y.z'
+	@echo '  release  Tag, update index+releases, push. Use VERSION=x.y.z'
+	@echo '  publish  Publish to Alire community index (run after make release)'
 	@echo '  demo     Build and run the Game of Life demo'
 	@echo '  clean    Remove build artifacts'
 	@echo '  help     Show this message'
@@ -64,6 +65,46 @@ release:
 	echo "Tagged v$$version at $$commit"; \
 	git push origin HEAD && git push origin "v$$version"; \
 	echo "Pushed commit and tag v$$version"
+
+publish:
+	@if [ -n "$$(git status --porcelain)" ]; then \
+		echo "Error: working tree is not clean. Commit or stash changes first."; \
+		exit 1; \
+	fi; \
+	version=$$(sed -n 's/^version = "\(.*\)"/\1/p' alire/releases/crdt-latest.toml); \
+	if [ -z "$$version" ]; then \
+		echo "Error: could not detect version from alire/releases/crdt-latest.toml"; \
+		exit 1; \
+	fi; \
+	echo "Publishing crdt $$version to Alire community index..."; \
+	publish_dir="$$HOME/.local/share/alire/publish/community"; \
+	orig_dir=$$(pwd); \
+	if [ ! -d "$$publish_dir" ]; then \
+		echo "Error: $$publish_dir not found"; \
+		exit 1; \
+	fi; \
+	cd "$$publish_dir" && git pull && cd "$$orig_dir"; \
+	alr publish "https://codeberg.org/bladeacer/Ada_CRDT/archive/v$$version.tar.gz" || true; \
+	cd "$$publish_dir" && \
+	git reset --soft HEAD~1 && \
+	index_file="index/cr/crdt/crdt-$$version.toml"; \
+	if [ -f "$$index_file" ]; then \
+		sed -i \
+			-e '/^executables = /d' \
+			-e '/^\[\[depends-on\]\]/d' \
+			-e '/^gnatprove = /d' \
+			-e '/^gnatdoc_bin = /d' \
+			"$$index_file"; \
+		git add -A && \
+		git commit -m "crdt $$version (via alr publish)" && \
+		git push origin && \
+		cd "$$orig_dir"; \
+		echo "Published crdt $$version to community index."; \
+	else \
+		echo "Error: $$index_file not found in $$publish_dir"; \
+		cd "$$orig_dir"; \
+		exit 1; \
+	fi
 
 demo:
 	alr exec -- gprbuild -Pdemo/demo.gpr

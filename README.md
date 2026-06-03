@@ -234,7 +234,7 @@ rolling upgrades.
 | `make run` / `make test` | Run test suite (see [test results](test_result.md)) |
 | `make prove` | SPARK proofs via `alr gnatprove` |
 | `make demo` | Run Conway Game of Life Demo |
-| `make doc` | Generate Markdown API docs (see `docs/api-docs/`) |
+| `make doc` | Generate Markdown API docs (See [API docs](docs/api-docs/index.md) |
 | `make clean` | Remove build artifacts |
 
 Prerequisites: [Alire](https://alire.ada.dev) (manages GNAT automatically),
