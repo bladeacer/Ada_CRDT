@@ -1,4 +1,4 @@
---  Replicated Growable Array (RGA) — default Yjs-style chunk-based engine.
+--  Replicated Growable Array (RGA) - default Yjs-style chunk-based engine.
 --  Contiguous elements written by the same replica are stored in sized
 --  blocks (Max_Stride), dramatically reducing allocation overhead
 --  vs. per-character nodes. Default sequence engine for CRDT.

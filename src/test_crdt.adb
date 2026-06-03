@@ -1012,7 +1012,7 @@ procedure Test_Crdt is
          RGA_Str.Merge (M, R2);
          RGA_Str.Merge (M, R3);
          Check (RGA_Str.Size (M) >= 5, "Unified state size >= 5 (got" &
-                Natural'Image (RGA_Str.Size (M)) & ") — " & To_String (M));
+                Natural'Image (RGA_Str.Size (M)) & ") -- " & To_String (M));
       end;
 
       -- Build final merged states in different orders, verify convergence
@@ -1241,7 +1241,7 @@ procedure Test_Crdt is
 
       Nat_Random.Reset (Gen, 42);
 
-      --  Phase 1: partition — S3 is cut off for 50 ops
+      --  Phase 1: partition -- S3 is cut off for 50 ops
       for I in 1 .. 50 loop
          Do_Op (S1, Stamp_1, 1, I);
          Do_Op (S2, Stamp_2, 2, I);
@@ -1494,7 +1494,7 @@ procedure Test_Crdt is
             RGA_Str.Insert (B, 8, (3, 2), 'B');
             RGA_Str.Insert (B, 9, (3, 3), 'C');
 
-            --  Merge both ways — check semantic properties
+            --  Merge both ways -- check semantic properties
             declare
                M1 : RGA_Str.RGA (Max_RGA) := A;
                M2 : RGA_Str.RGA (Max_RGA) := B;
@@ -1837,7 +1837,7 @@ procedure Test_Crdt is
          Check (not Is_Alive (Cells, 5, 5) and Is_Alive (Cells, 4, 6) and Is_Alive (Cells, 5, 6) and Is_Alive (Cells, 6, 6),
                 "Blinker gen 1: vertical alive");
 
-         --  Evolve to generation 2 (horizontal again — oscillator period 2)
+         --  Evolve to generation 2 (horizontal again -- oscillator period 2)
          Evolve;
          Check (Is_Alive (Cells, 5, 5) and Is_Alive (Cells, 5, 6) and Is_Alive (Cells, 5, 7),
                 "Blinker gen 2: back to horizontal");
@@ -1847,7 +1847,7 @@ procedure Test_Crdt is
    end Test_GoL_Blinker;
 
    -----------------------------------------------
-   --  Game of Life: Matrix↔Yjs Sync             --
+   --  Game of Life: Matrix<->Yjs Sync             --
    -----------------------------------------------
    --  @summary Matrix-to-Yjs sync: LWW set cells round-trip through RGA rows without data loss
    procedure Test_GoL_Matrix_Yjs_Sync is
@@ -1864,7 +1864,7 @@ procedure Test_Crdt is
       Stamp : Natural := 0;
    begin
       New_Line;
-      Put_Line ("[Game of Life: Matrix↔Yjs Sync]");
+      Put_Line ("[Game of Life: Matrix<->Yjs Sync]");
 
       --  Fill a few cells in the matrix
       for R in 1 .. Grid_Size loop
@@ -1876,7 +1876,7 @@ procedure Test_Crdt is
          end loop;
       end loop;
 
-      --  Sync Matrix → Yjs (like Sync_Yjs_From_Matrix)
+      --  Sync Matrix -> Yjs (like Sync_Yjs_From_Matrix)
       for R in 1 .. Grid_Size loop
          Rows.Compact (Grid (R));
          declare
@@ -1911,10 +1911,10 @@ procedure Test_Crdt is
                end;
             end loop;
          end loop;
-         Check (All_Correct, "Matrix→Yjs: all cells match after sync");
+         Check (All_Correct, "Matrix->Yjs: all cells match after sync");
       end;
 
-      --  Sync back: Yjs → Matrix (like Sync_Matrix_From_Yjs)
+      --  Sync back: Yjs -> Matrix (like Sync_Matrix_From_Yjs)
       Matrix.Clear (Cells);
       for R in 1 .. Grid_Size loop
          for C in 1 .. Grid_Size loop
@@ -1942,16 +1942,16 @@ procedure Test_Crdt is
                end if;
             end loop;
          end loop;
-         Check (All_Present, "Yjs→Matrix: round-trip preserves all cells");
+         Check (All_Present, "Yjs->Matrix: round-trip preserves all cells");
       end;
 
-      Put_Line ("[Game of Life: Matrix↔Yjs Sync] done.");
+      Put_Line ("[Game of Life: Matrix<->Yjs Sync] done.");
    end Test_GoL_Matrix_Yjs_Sync;
 
    -----------------------------------------------
    --  Game of Life: Convergence After Fork      --
    -----------------------------------------------
-   --  @summary Game of Life convergence: 3 nodes fork from same initial state, evolve independently, then merge — all converge to same final state
+   --  @summary Game of Life convergence: 3 nodes fork from same initial state, evolve independently, then merge -- all converge to same final state
    procedure Test_GoL_Convergence is
       Grid_Size : constant := 5;
       Max_Set   : constant := 100;
@@ -2190,7 +2190,7 @@ begin
          Row ("Fuzzing Network Partitions", 8);
          Row ("Game of Life", 4, "Neighbors");
          Row ("Game of Life", 3, "Blinker");
-         Row ("Game of Life", 2, "Matrix↔Yjs Sync");
+         Row ("Game of Life", 2, "Matrix<->Yjs Sync");
          Row ("Game of Life", 3, "Convergence");
          Put_Line (To, "  |" & (1 .. Cat_W => '-') & "|" & (1 .. Tests_W => '-') & "|" & (1 .. Status_W => '-') & "|");
       end Write_Summary_Table;

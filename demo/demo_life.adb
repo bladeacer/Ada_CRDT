@@ -292,7 +292,7 @@ procedure Demo_Life is
       Init_Glider (S.N2, 2, 2);
       Init_Glider (S.N3, 2, 2);
       Nat_Random.Reset (Gen, 42);
-      for I in 1 .. Grid_Size * 2 loop
+      for I in 1 .. Grid_Size * Grid_Size * 3 / 10 - 5 loop
          declare
             RR : constant Integer := (Nat_Random.Random (Gen) mod Grid_Size) + 1;
             CC : constant Integer := (Nat_Random.Random (Gen) mod Grid_Size) + 1;
