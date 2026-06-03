@@ -2,6 +2,8 @@
 
 Container for managing multiple RGA instances. Provides Append to collect replicas and Merge_All to converge all into the first entry.
 
+> **Note:** This package declares items in a `private` section (not shown in full below).
+
 ## Types
 
 ### type RGA_Array

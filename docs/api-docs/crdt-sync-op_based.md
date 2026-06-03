@@ -2,6 +2,8 @@
 
 Operation-Based (CmRDT) sync engine. Replicas broadcast granular, immutable mutation events. Downstream operations must be applied exactly once. Network trait: Hyper-low bandwidth consumption, ideal for ordered delivery channels (WebSockets, TCP/TLS streams).
 
+> **Note:** This package declares items in a `private` section (not shown in full below).
+
 ## Types
 
 ### type Op_Kind
@@ -20,17 +22,20 @@ type Op_Log (Capacity : Positive) is private;
 
 ```ada
 type Operation (Kind : Op_Kind := Op_Insert) is record
-Seq     : Natural;
-Node    : Core.Replica_Id;
-case Kind is
-when Op_Insert =>
-Position : Positive;
-when Op_Delete =>
-Del_Position : Positive;
-when Op_Increment | Op_Decrement =>
-Amount    : Natural;
-Actor     : Core.Replica_Id;
-end case;
+```
+
+| Field | Type |
+|-------|------|
+| `Seq` | `Natural` |
+| `Node` | `Core.Replica_Id` |
+
+**Variants:**
+
+- `when Op_Insert =>` `Position` : `Positive`
+- `when Op_Delete =>` `Del_Position` : `Positive`
+- `when Op_Increment | Op_Decrement =>` `Amount` : `Natural`, `Actor` : `Core.Replica_Id`
+
+```ada
 end record;
 ```
 

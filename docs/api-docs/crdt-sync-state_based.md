@@ -2,6 +2,8 @@
 
 State-Based (CvRDT) sync engine. Replicas exchange full or delta-compressed state using Hybrid Logical Clock (HLC) timestamps for causal ordering. Network trait: Highly resilient to lossy/unstable topologies (UDP, peer-to-peer mesh, radio datalinks) because state merges are fully idempotent.
 
+> **Note:** This package declares items in a `private` section (not shown in full below).
+
 ## Types
 
 ### type Replica_State

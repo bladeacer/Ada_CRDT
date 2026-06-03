@@ -49,6 +49,7 @@ package CRDT.Protected is
       package LWW_Pkg is new CRDT.Lww_Element_Sets
         (Element_Type, Max_Set_Size);
 
+      --  Thread-safe LWW-element set.
       protected type Shared_Set (Capacity : Positive) is
 
          --  Add an element with the given timestamp.
@@ -91,6 +92,7 @@ package CRDT.Protected is
       package RGA_Pkg is new CRDT.Rga
         (Element_Type, Max_Size, Max_Stride);
 
+      --  Thread-safe mutable RGA sequence.
       protected type Shared_RGA_Obj (Capacity : Positive) is
 
          --  Insert element at position.

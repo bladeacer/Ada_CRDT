@@ -2,6 +2,8 @@
 
 Core types and utilities used across all CRDT packages. Provides replica identification, Lamport/HLC timestamps, vector clocks, and the wire protocol version constant.
 
+> **Note:** This package declares items in a `private` section (not shown in full below).
+
 ## Types
 
 ### type HLC_Time

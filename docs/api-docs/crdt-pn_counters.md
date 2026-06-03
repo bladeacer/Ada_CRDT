@@ -2,6 +2,8 @@
 
 PN-Counter with per-replica actor map. Tracks increments (P) and decrements (N) for each replica independently. Fixed memory: 3 replicas = 3 slots regardless of millions of ops. Value = sum(P) - sum(N).
 
+> **Note:** This package declares items in a `private` section (not shown in full below).
+
 ## Types
 
 ### type Counter_Range

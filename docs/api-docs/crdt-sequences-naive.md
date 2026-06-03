@@ -2,6 +2,8 @@
 
 Naive per-element RGA engine. Every single element is its own individually allocated node. Useful for: educational baselines, chaotic editing environments, or small sequences where per-element overhead is acceptable.
 
+> **Note:** This package declares items in a `private` section (not shown in full below).
+
 ## Types
 
 ### type Cursor
