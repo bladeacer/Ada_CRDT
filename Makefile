@@ -99,11 +99,11 @@ publish:
 		git add -A && \
 		git commit -m "crdt $$version (via alr publish)" && \
 		git push origin && \
-		cd "$$orig_dir"; \
+		cd "$$orig_dir" && git restore .; \
 		echo "Published crdt $$version to community index."; \
 	else \
 		echo "Error: $$index_file not found in $$publish_dir"; \
-		cd "$$orig_dir"; \
+		cd "$$orig_dir" && git restore .; \
 		exit 1; \
 	fi
 
@@ -121,6 +121,7 @@ test-publish:
 	echo "Publish:  alr publish <archive>"; \
 	echo "Cleanup:  sed on index file (executables, depends-on, gnatprove, gnatdoc_bin)"; \
 	echo "Push:     git add + commit + push to community index"; \
+	echo "Cleanup:   cd back to project root and run git restore ."; \
 	echo "=== end dry-run ==="
 
 demo:
