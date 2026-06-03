@@ -49,7 +49,7 @@ Default_Initial_Condition;
 
 ## Procedures
 
-### procedure Decrement (C : CRDT.Pn_Counters.PN_Counter; By : CRDT.Pn_Counters.Counter_Range; Actor : CRDT.Core.Replica_Id)
+### procedure Decrement (C : CRDT.Pn_Counters.PN_Counter; By : CRDT.Pn_Counters.Counter_Range; Actor : CRDT.Core.Replica_Id) `[Pre]`
 
 | Parameter | Description |
 |-----------|-------------|
@@ -57,7 +57,7 @@ Default_Initial_Condition;
 | `By` | Amount to decrement (default 1). |
 | `C` | The counter to modify. |
 
-### procedure Increment (C : CRDT.Pn_Counters.PN_Counter; By : CRDT.Pn_Counters.Counter_Range; Actor : CRDT.Core.Replica_Id)
+### procedure Increment (C : CRDT.Pn_Counters.PN_Counter; By : CRDT.Pn_Counters.Counter_Range; Actor : CRDT.Core.Replica_Id) `[Pre]`
 
 | Parameter | Description |
 |-----------|-------------|

@@ -14,6 +14,7 @@ help:
 	@echo '  doc      Generate Markdown API docs (docs/api-docs/)'
 	@echo '  release  Tag, update index+releases, push. Use VERSION=x.y.z'
 	@echo '  publish  Publish to Alire community index (run after make release)'
+	@echo '  test-publish  Dry-run showing what make publish would do'
 	@echo '  demo     Build and run the Game of Life demo'
 	@echo '  clean    Remove build artifacts'
 	@echo '  help     Show this message'
@@ -105,6 +106,22 @@ publish:
 		cd "$$orig_dir"; \
 		exit 1; \
 	fi
+
+test-publish:
+	@version=$$(ls alire/releases/crdt-*.toml 2>/dev/null | sort -V | tail -1 | sed 's/.*crdt-\(.*\)\.toml/\1/'); \
+	if [ -z "$$version" ]; then \
+		echo "Error: could not detect version from alire/releases/"; \
+		exit 1; \
+	fi; \
+	echo "=== test-publish dry-run ==="; \
+	echo "Version:  $$version"; \
+	echo "Config:   alire/releases/crdt-$$version.toml"; \
+	echo "Archive:  https://codeberg.org/bladeacer/Ada_CRDT/archive/v$$version.tar.gz"; \
+	echo "Index:    index/cr/crdt/crdt-$$version.toml"; \
+	echo "Publish:  alr publish <archive>"; \
+	echo "Cleanup:  sed on index file (executables, depends-on, gnatprove, gnatdoc_bin)"; \
+	echo "Push:     git add + commit + push to community index"; \
+	echo "=== end dry-run ==="
 
 demo:
 	alr exec -- gprbuild -Pdemo/demo.gpr

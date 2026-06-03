@@ -26,14 +26,33 @@ type Operation (Kind : Op_Kind := Op_Insert) is record
 
 | Field | Type |
 |-------|------|
-| `Seq` | `Natural` |
-| `Node` | `Core.Replica_Id` |
+| `Seq` | Natural |
+| `Node` | [`Core.Replica_Id`](crdt-core.md#type-replica_id) |
 
 **Variants:**
 
-- `when Op_Insert =>` `Position` : `Positive`
-- `when Op_Delete =>` `Del_Position` : `Positive`
-- `when Op_Increment | Op_Decrement =>` `Amount` : `Natural`, `Actor` : `Core.Replica_Id`
+- `when Op_Insert =>`
+
+  ```ada
+  Position : Positive
+  ```
+
+- `when Op_Delete =>`
+
+  ```ada
+  Del_Position : Positive
+  ```
+
+- `when Op_Increment | Op_Decrement =>`
+
+  ```ada
+  Amount : Natural
+  ```
+
+  ```ada
+  Actor : [`Core.Replica_Id`](crdt-core.md#type-replica_id)
+  ```
+
 
 ```ada
 end record;

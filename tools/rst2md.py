@@ -218,6 +218,45 @@ def parse_ada_annotations(ads_path):
     return pkg_desc, annotations, in_private, private_items
 
 
+def extract_aspects_from_ads(ads_path):
+    """Second pass over .ads to find with-clauses for all subprograms.
+    Returns dict of short_name -> aspect_text."""
+    aspects = {}
+    if not os.path.isfile(ads_path):
+        return aspects
+    with open(ads_path) as f:
+        lines = f.readlines()
+    i = 0
+    while i < len(lines):
+        s = lines[i].strip()
+        sm = re.match(
+            r'\s*(?:overriding\s+)?(?:procedure\b|function\b)\s+'
+            r'("(?:[^"]|"")+"|\w+)',
+            s
+        )
+        if sm:
+            name = sm.group(1)
+            parts = [s]
+            depth = s.count("(") - s.count(")")
+            i += 1
+            while i < len(lines):
+                ns = lines[i].strip()
+                if ns.startswith("--") or not ns:
+                    break
+                parts.append(ns)
+                depth += ns.count("(") - ns.count(")")
+                if depth <= 0 and ns.rstrip().endswith(";"):
+                    break
+                i += 1
+            full_decl = " ".join(parts)
+            wm = re.search(r'\bwith\b\s*(.+?)\s*;', full_decl)
+            if wm:
+                aspects[name] = "with " + wm.group(1).strip()
+        else:
+            i += 1
+    return aspects
+
+
 def subprog_short_name(block_name):
     m = re.match(r'(?:procedure|function)\s+("(?:[^"]|"")+"|\w+)', block_name)
     return m.group(1) if m else block_name
@@ -410,7 +449,7 @@ def parse_record_subitems(decl, type_name):
     return header, common, variants, "end record;"
 
 
-def render_record_type(name, header, common, variants, footer, desc):
+def render_record_type(name, header, common, variants, footer, desc, type_map=None):
     lines = []
     lines.append(f"```ada\n{header}\n```\n")
     if desc:
@@ -419,13 +458,16 @@ def render_record_type(name, header, common, variants, footer, desc):
         lines.append("| Field | Type |")
         lines.append("|-------|------|")
         for fn, ft, _ in common:
-            lines.append(f"| `{fn}` | `{ft}` |")
+            ft_disp = link_type_refs(ft, type_map) if type_map else f"`{ft}`"
+            lines.append(f"| `{fn}` | {ft_disp} |")
         lines.append("")
     if variants:
         lines.append("**Variants:**\n")
         for when_expr, fields in variants:
-            field_str = ", ".join(f"`{fn}` : `{ft}`" for fn, ft in fields)
-            lines.append(f"- `when {when_expr} =>` {field_str}")
+            lines.append(f"- `when {when_expr} =>`\n")
+            for fn, ft in fields:
+                ft_disp = link_type_refs(ft, type_map) if type_map else ft
+                lines.append(f"  ```ada\n  {fn} : {ft_disp}\n  ```\n")
         lines.append("")
     lines.append(f"```ada\n{footer}\n```\n")
     return lines
@@ -439,7 +481,61 @@ def render_index(packages):
     return "\n".join(lines)
 
 
-def render_structured_type(name, header, subitems, footer, desc):
+def build_type_map(rst_dir):
+    """Scan RST files and build type_name -> (doc_file, anchor) mapping."""
+    tmap = {}
+    for fn in os.listdir(rst_dir):
+        if not fn.endswith(".rst"):
+            continue
+        with open(join(rst_dir, fn)) as f:
+            text = fix_text(f.read())
+        title = parse_title(text)
+        if not title:
+            continue
+        doc_fn = slug(title)
+        blocks = parse_blocks(text)
+        for kind, name, _, _, _, _ in blocks:
+            if kind == "type":
+                tn = re.sub(r'^type\s+', '', name).strip()
+                anc = "#type-" + tn.lower()
+                tmap[tn] = (doc_fn, anc)
+    return tmap
+
+
+def link_type_refs(text, type_map):
+    """Replace known Ada type references in text with markdown links."""
+    def replace_match(m):
+        full = m.group(0)
+        if full in type_map:
+            fn, anc = type_map[full]
+            return f"[`{full}`]({fn}{anc})"
+        short = full.split(".")[-1]
+        if short in type_map:
+            fn, anc = type_map[short]
+            return f"[`{full}`]({fn}{anc})"
+        return full
+    return re.sub(r'\b(?:CRDT\.)?[A-Z]\w*(?:\.[A-Z]\w*)+\b', replace_match, text)
+
+
+def extract_aspect_badges(sig):
+    """Check Ada signature for SPARK aspects and return badge strings."""
+    badges = []
+    if re.search(r'\bwith\s+Inline\b', sig, re.IGNORECASE):
+        badges.append("[Inline]")
+    if re.search(r'\bPre\s*[=][>]', sig):
+        badges.append("[Pre]")
+    if re.search(r'\bPost\s*[=][>]', sig):
+        badges.append("[Post]")
+    if re.search(r'\bGlobal\s*[=][>]', sig):
+        badges.append("[Global]")
+    if re.search(r'\bDepends\s*[=][>]', sig):
+        badges.append("[Depends]")
+    if re.search(r'\bwith\s+SPARK_Mode\b', sig, re.IGNORECASE):
+        badges.append("[SPARK]")
+    return badges
+
+
+def render_structured_type(name, header, subitems, footer, desc, type_map=None):
     """Render a type with sub-items (e.g. protected type with operations/state)."""
     lines = []
     lines.append(f"```ada\n{header}\n```\n")
@@ -453,7 +549,9 @@ def render_structured_type(name, header, subitems, footer, desc):
         lines.append("**Public Operations:**\n")
         for kind, iname, sig, idesc, params, returns, _ in public_items:
             iname_clean = iname.replace('"', '')
-            lines.append(f"#### {kind} {iname_clean}\n")
+            badges = extract_aspect_badges(sig)
+            badge_str = " " + " ".join(f"`{b}`" for b in badges) if badges else ""
+            lines.append(f"#### {kind} {iname_clean}{badge_str}\n")
             if sig:
                 lines.append(f"```ada\n{sig}\n```\n")
             if idesc:
@@ -462,10 +560,12 @@ def render_structured_type(name, header, subitems, footer, desc):
                 lines.append("| Parameter | Description |")
                 lines.append("|-----------|-------------|")
                 for pn, pd in sorted(params.items()):
-                    lines.append(f"| `{pn}` | {pd} |")
+                    pd_linked = link_type_refs(pd, type_map) if type_map else pd
+                    lines.append(f"| `{pn}` | {pd_linked} |")
                 lines.append("")
             if returns:
-                lines.append(f"**Returns:** {returns}\n")
+                r_linked = link_type_refs(returns, type_map) if type_map else returns
+                lines.append(f"**Returns:** {r_linked}\n")
 
     if private_items:
         lines.append("**Private State:**\n")
@@ -478,7 +578,7 @@ def render_structured_type(name, header, subitems, footer, desc):
     return lines
 
 
-def render_package(title, desc, blocks, annotations, has_private, private_items, ads_path):
+def render_package(title, desc, blocks, annotations, has_private, private_items, ads_path, type_map=None, subprog_aspects=None):
     lines = [f"# {title}", ""]
     if desc:
         lines.append(desc)
@@ -510,7 +610,10 @@ def render_package(title, desc, blocks, annotations, has_private, private_items,
             params, returns = params_returns
             sname = subprog_short_name(name)
             anno = annotations.get(sname, {})
-            lines.append(f"### {name}\n")
+            aspect_text = (subprog_aspects or {}).get(sname, "")
+            badges = extract_aspect_badges(name + " " + aspect_text)
+            badge_str = " " + " ".join(f"`{b}`" for b in badges) if badges else ""
+            lines.append(f"### {name}{badge_str}\n")
             type_name = re.sub(r'^type\s+', '', name).strip()
             if not decl:
                 ads_decl = extract_protected_type_decl(ads_path, type_name)
@@ -518,10 +621,10 @@ def render_package(title, desc, blocks, annotations, has_private, private_items,
                     decl = ads_decl
             if decl and re.match(r'\s*protected\s+type\b', decl):
                 hdr, subitems, ftr = parse_protected_subitems(decl, type_name)
-                lines.extend(render_structured_type(name, hdr, subitems, ftr, desc))
+                lines.extend(render_structured_type(name, hdr, subitems, ftr, desc, type_map))
             elif decl and 'case' in decl and 'record' in decl:
                 hdr, common, variants, ftr = parse_record_subitems(decl, type_name)
-                lines.extend(render_record_type(name, hdr, common, variants, ftr, desc))
+                lines.extend(render_record_type(name, hdr, common, variants, ftr, desc, type_map))
             else:
                 if decl:
                     lines.append(f"```ada\n{decl}\n```\n")
@@ -534,11 +637,13 @@ def render_package(title, desc, blocks, annotations, has_private, private_items,
                     lines.append("| Parameter | Description |")
                     lines.append("|-----------|-------------|")
                     for pname, pdesc in sorted(merged.items()):
-                        lines.append(f"| `{pname}` | {pdesc} |")
+                        pd_linked = link_type_refs(pdesc, type_map) if type_map else pdesc
+                        lines.append(f"| `{pname}` | {pd_linked} |")
                     lines.append("")
                 rdesc = returns or anno.get("returns", "")
                 if rdesc:
-                    lines.append(f"**Returns:** {rdesc}\n")
+                    r_linked = link_type_refs(rdesc, type_map) if type_map else rdesc
+                    lines.append(f"**Returns:** {r_linked}\n")
 
     if private_items:
         lines.append("---\n")
@@ -556,6 +661,8 @@ def main():
     files = sorted(f for f in os.listdir(RST_DIR) if f.endswith(".rst"))
     packages = {}
 
+    type_map = build_type_map(RST_DIR)
+
     for fname in files:
         with open(join(RST_DIR, fname)) as f:
             text = fix_text(f.read())
@@ -568,11 +675,12 @@ def main():
         blocks = parse_blocks(text)
         ads_path = package_to_ads_path(title)
         pkg_desc, annotations, has_private, private_items = parse_ada_annotations(ads_path)
+        subprog_aspects = extract_aspects_from_ads(ads_path)
         if not desc:
             desc = pkg_desc
         fn = slug(title)
         with open(join(OUT_DIR, fn), "w") as f:
-            f.write(render_package(title, desc, blocks, annotations, has_private, private_items, ads_path))
+            f.write(render_package(title, desc, blocks, annotations, has_private, private_items, ads_path, type_map, subprog_aspects))
         packages[title] = fn
 
     with open(join(OUT_DIR, "index.md"), "w") as f:
