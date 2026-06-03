@@ -2,7 +2,7 @@
 
 Hybrid Logical Clock (HLC) implementation. Combines physical wall-clock time with a logical counter to ensure causality is preserved even when physical clocks drift. Usage: Clock : HLC.Instance := HLC.Create (Node => 1); HLC.Tick (Clock); -- before sending HLC.Recv (Clock, Remote); -- on receiving remote timestamp TS : constant HLC_Time := HLC.Now (Clock);
 
-> **Note:** This package declares items in a `private` section (not shown in full below).
+> **Note:** 9 public item(s) shown below; 2 private internal item(s) are in the `private` section.
 
 ## Types
 
@@ -77,3 +77,10 @@ type Instance is private;
 | Parameter | Description |
 |-----------|-------------|
 | `Clock` | HLC instance to tick. |
+
+---
+
+## Private Section
+
+- **type** `Instance`
+- **function** `Now`

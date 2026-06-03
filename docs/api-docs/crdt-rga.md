@@ -2,7 +2,7 @@
 
 Replicated Growable Array (RGA) - default Yjs-style chunk-based engine. Contiguous elements written by the same replica are stored in sized blocks (Max_Stride), dramatically reducing allocation overhead vs. per-character nodes. Default sequence engine for CRDT. Industry equivalence: Yjs/YATA algorithm. Supports structural splitting, state vector delta sync, tombstone garbage collection, and protocol-versioned serialization.
 
-> **Note:** This package declares items in a `private` section (not shown in full below).
+> **Note:** 20 public item(s) shown below; 4 private internal item(s) are in the `private` section.
 
 ## Types
 
@@ -163,3 +163,12 @@ type RGA (Item_Capacity : Positive) is private;
 |-----------|-------------|
 | `Item` | RGA to serialize. |
 | `Stream` | Output stream. |
+
+---
+
+## Private Section
+
+- **type** `Element_Store`
+- **type** `RGA_Item`
+- **type** `Item_Array`
+- **type** `RGA`

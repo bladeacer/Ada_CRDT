@@ -147,9 +147,11 @@ def parse_ada_pkg_desc(lines):
 
 def parse_ada_annotations(ads_path):
     """Parse .ads file for package description and per-subprogram annotations.
-    Returns (pkg_desc, annotations, has_private_section)."""
+    Returns (pkg_desc, annotations, has_private, private_items).
+    private_items is a list of (kind, name) tuples for items declared
+    in the package's private section."""
     if not os.path.isfile(ads_path):
-        return "", {}, False
+        return "", {}, False, []
     with open(ads_path) as f:
         lines = f.readlines()
     pkg_desc = parse_ada_pkg_desc(lines)
@@ -157,6 +159,8 @@ def parse_ada_annotations(ads_path):
     cur = {"params": {}, "returns": ""}
     in_private = False
     protected_depth = 0
+    record_depth = 0
+    private_items = []
     for line in lines:
         s = line.strip()
         if re.match(r'\s*protected\s+type\b', s):
@@ -167,10 +171,24 @@ def parse_ada_annotations(ads_path):
             continue
         if protected_depth > 0:
             continue
+
+        is_rec_start = re.match(r'^\s*type\s+\w+.*\bis\s+record\b', s)
+        is_type_is = re.match(r'^\s*type\s+\w+.*\bis\s*$', s) and 'record' not in s
+        if is_rec_start:
+            record_depth += 1
+        elif is_type_is:
+            record_depth += 1
+            continue
+        elif re.match(r'^\s*record\s*$', s) and record_depth > 0:
+            continue
+        elif re.match(r'^\s*end\s+record\s*;', s) and record_depth > 0:
+            record_depth -= 1
+            continue
+        if record_depth > 0 and not is_rec_start:
+            continue
+
         if re.match(r'^private$', s):
             in_private = True
-            continue
-        if in_private:
             continue
         pm = re.match(r'--\s*@param\s+(\S+)\s*(.*)', s)
         if pm:
@@ -181,15 +199,23 @@ def parse_ada_annotations(ads_path):
             cur["returns"] = rm.group(1).strip()
             continue
         sm = re.match(
-            r'\s*(?:overriding\s+)?(?:procedure\b|function\b)\s+'
+            r'\s*(?:overriding\s+)?(?:procedure\b|function\b|type\b|subtype\b)\s+'
             r'("(?:[^"]|"")+"|\w+)',
             s
         )
         if sm:
             name = sm.group(1)
-            annotations[name] = cur
-            cur = {"params": {}, "returns": ""}
-    return pkg_desc, annotations, in_private
+            kind = sm.group(0).strip().split()[0]
+            if in_private:
+                private_items.append((kind, name))
+            else:
+                annotations[name] = cur
+                cur = {"params": {}, "returns": ""}
+        elif in_private and re.match(r'\w+\s*:', s):
+            var_name = s.split(":")[0].strip()
+            if not re.match(r'(end|case|when|others|range|type|subtype)\b', var_name):
+                private_items.append(("variable", var_name))
+    return pkg_desc, annotations, in_private, private_items
 
 
 def subprog_short_name(block_name):
@@ -452,13 +478,22 @@ def render_structured_type(name, header, subitems, footer, desc):
     return lines
 
 
-def render_package(title, desc, blocks, annotations, has_private, ads_path):
+def render_package(title, desc, blocks, annotations, has_private, private_items, ads_path):
     lines = [f"# {title}", ""]
     if desc:
         lines.append(desc)
         lines.append("")
     if has_private:
-        lines.append("> **Note:** This package declares items in a `private` section (not shown in full below).")
+        public_count = len(blocks)
+        private_count = len(private_items)
+        if public_count == 0:
+            lines.append("> **Note:** This package has no public items — all items are in the `private` section.")
+            lines.append("")
+        else:
+            lines.append(f"> **Note:** {public_count} public item(s) shown below; {private_count} private internal item(s) are in the `private` section.")
+            lines.append("")
+    else:
+        lines.append("> **Note:** All items in this package are public.")
         lines.append("")
 
     sections = {}
@@ -505,6 +540,13 @@ def render_package(title, desc, blocks, annotations, has_private, ads_path):
                 if rdesc:
                     lines.append(f"**Returns:** {rdesc}\n")
 
+    if private_items:
+        lines.append("---\n")
+        lines.append("## Private Section\n")
+        for kind, name in private_items:
+            lines.append(f"- **{kind}** `{name}`")
+        lines.append("")
+
     return "\n".join(lines)
 
 
@@ -525,12 +567,12 @@ def main():
         desc = parse_description(text)
         blocks = parse_blocks(text)
         ads_path = package_to_ads_path(title)
-        pkg_desc, annotations, has_private = parse_ada_annotations(ads_path)
+        pkg_desc, annotations, has_private, private_items = parse_ada_annotations(ads_path)
         if not desc:
             desc = pkg_desc
         fn = slug(title)
         with open(join(OUT_DIR, fn), "w") as f:
-            f.write(render_package(title, desc, blocks, annotations, has_private, ads_path))
+            f.write(render_package(title, desc, blocks, annotations, has_private, private_items, ads_path))
         packages[title] = fn
 
     with open(join(OUT_DIR, "index.md"), "w") as f:

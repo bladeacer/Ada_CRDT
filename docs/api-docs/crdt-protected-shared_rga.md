@@ -2,6 +2,8 @@
 
 Thread-safe RGA (chunk-based Yjs engine).
 
+> **Note:** All items in this package are public.
+
 ## Types
 
 ### type Shared_RGA_Obj

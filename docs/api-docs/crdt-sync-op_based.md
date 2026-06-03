@@ -2,7 +2,7 @@
 
 Operation-Based (CmRDT) sync engine. Replicas broadcast granular, immutable mutation events. Downstream operations must be applied exactly once. Network trait: Hyper-low bandwidth consumption, ideal for ordered delivery channels (WebSockets, TCP/TLS streams).
 
-> **Note:** This package declares items in a `private` section (not shown in full below).
+> **Note:** 8 public item(s) shown below; 2 private internal item(s) are in the `private` section.
 
 ## Types
 
@@ -79,3 +79,10 @@ end record;
 | Parameter | Description |
 |-----------|-------------|
 | `Log` | Operation log to compact. |
+
+---
+
+## Private Section
+
+- **type** `Op_Array`
+- **type** `Op_Log`

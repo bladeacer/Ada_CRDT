@@ -2,7 +2,7 @@
 
 Yjs-style splitting block RGA engine. Groups contiguous characters written by the same client into memory blocks (size Max_Stride). Structural splitting splits a block when an insert targets its middle, then stitches the new block in between. Uses a pre-allocated contiguous array of blocks (memory arena) to avoid heap fragmentation. Industry equivalence: Yjs YATA algorithm.
 
-> **Note:** This package declares items in a `private` section (not shown in full below).
+> **Note:** 26 public item(s) shown below; 5 private internal item(s) are in the `private` section.
 
 ## Types
 
@@ -210,3 +210,13 @@ type RGA (Item_Capacity : Positive) is private;
 |-----------|-------------|
 | `Item` | RGA to serialize. |
 | `Stream` | Output stream. |
+
+---
+
+## Private Section
+
+- **type** `Element_Store`
+- **type** `RGA_Item`
+- **type** `Item_Array`
+- **type** `Cursor`
+- **type** `RGA`

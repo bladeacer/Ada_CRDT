@@ -2,6 +2,8 @@
 
 Thread-safe LWW-Element-Set.
 
+> **Note:** All items in this package are public.
+
 ## Types
 
 ### type Shared_Set

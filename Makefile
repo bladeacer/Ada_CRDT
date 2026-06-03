@@ -71,12 +71,12 @@ publish:
 		echo "Error: working tree is not clean. Commit or stash changes first."; \
 		exit 1; \
 	fi; \
-	version=$$(sed -n 's/^version = "\(.*\)"/\1/p' alire/releases/crdt-latest.toml); \
+	version=$$(ls alire/releases/crdt-*.toml 2>/dev/null | sort -V | tail -1 | sed 's/.*crdt-\(.*\)\.toml/\1/'); \
 	if [ -z "$$version" ]; then \
-		echo "Error: could not detect version from alire/releases/crdt-latest.toml"; \
+		echo "Error: could not detect version from alire/releases/"; \
 		exit 1; \
 	fi; \
-	echo "Publishing crdt $$version to Alire community index..."; \
+	echo "Publishing crdt $$version (from alire/releases/crdt-$$version.toml) to Alire community index..."; \
 	publish_dir="$$HOME/.local/share/alire/publish/community"; \
 	orig_dir=$$(pwd); \
 	if [ ! -d "$$publish_dir" ]; then \

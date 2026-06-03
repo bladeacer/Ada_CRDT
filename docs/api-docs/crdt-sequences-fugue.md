@@ -2,7 +2,7 @@
 
 Fugue-style tree-based RGA engine. Replaces flat linked lists with a binary search tree hierarchy designed to eliminate string interleaving (the "zipper" bug when users type concurrently at the same position). Node_Id includes a Depth component for tree positioning. In-order traversal produces the document sequence.
 
-> **Note:** This package declares items in a `private` section (not shown in full below).
+> **Note:** 22 public item(s) shown below; 4 private internal item(s) are in the `private` section.
 
 ## Types
 
@@ -179,3 +179,12 @@ type RGA (Capacity : Positive) is private;
 |-----------|-------------|
 | `Item` | RGA to serialize. |
 | `Stream` | Output stream. |
+
+---
+
+## Private Section
+
+- **type** `RGA_Item`
+- **type** `Item_Array`
+- **type** `Cursor`
+- **type** `RGA`

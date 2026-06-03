@@ -2,6 +2,8 @@
 
 Bounded LWW-Element-Set with a fixed capacity.
 
+> **Note:** All items in this package are public.
+
 ## Types
 
 ### type Set

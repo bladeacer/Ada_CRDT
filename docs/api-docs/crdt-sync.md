@@ -2,6 +2,8 @@
 
 Sync layer interface for CRDT. Provides two transport strategies: * State_Based (CvRDT): full state merge with delta compression * Op_Based (CmRDT) : granular operation broadcast with ack/GC By separating the storage engine (Sequences.*) from the sync layer, Ada's generic instantiation ensures unused code paths are optimized away, maximizing performance and gnatprove compatibility.
 
+> **Note:** All items in this package are public.
+
 ## Types
 
 ### type State_Vector

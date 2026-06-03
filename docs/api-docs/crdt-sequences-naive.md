@@ -2,7 +2,7 @@
 
 Naive per-element RGA engine. Every single element is its own individually allocated node. Useful for: educational baselines, chaotic editing environments, or small sequences where per-element overhead is acceptable.
 
-> **Note:** This package declares items in a `private` section (not shown in full below).
+> **Note:** 22 public item(s) shown below; 4 private internal item(s) are in the `private` section.
 
 ## Types
 
@@ -178,3 +178,12 @@ type RGA (Capacity : Positive) is private;
 |-----------|-------------|
 | `Item` | RGA to serialize. |
 | `Stream` | Output stream. |
+
+---
+
+## Private Section
+
+- **type** `RGA_Item`
+- **type** `Item_Array`
+- **type** `Cursor`
+- **type** `RGA`

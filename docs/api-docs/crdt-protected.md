@@ -2,6 +2,8 @@
 
 Thread-safe protected-object wrappers for CRDT types. Multiple tasks can concurrently mutate and query CRDT structures without external locking. Built on Ada's native protected objects.
 
+> **Note:** All items in this package are public.
+
 ## Types
 
 ### type Shared_PN_Counter

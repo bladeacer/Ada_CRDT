@@ -2,7 +2,7 @@
 
 Last-Writer-Wins Element Set using Lamport timestamps. Stores (element, Lamport_Time) pairs for add and remove sets. An element is present iff its add-timestamp exceeds its remove-timestamp. Uses logical Lamport timestamps instead of wall clocks, avoiding clock skew issues in distributed deployments.
 
-> **Note:** This package declares items in a `private` section (not shown in full below).
+> **Note:** 8 public item(s) shown below; 1 private internal item(s) are in the `private` section.
 
 ## Types
 
@@ -68,3 +68,9 @@ end record;
 | `E` | Element to remove. |
 | `S` | The set to modify. |
 | `TS` | Lamport timestamp for this remove operation. |
+
+---
+
+## Private Section
+
+- **type** `LWW_Element_Set`

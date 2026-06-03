@@ -12,3 +12,5 @@ Get, Size, Count, Compact
 Cursor-based and for-of iteration
 Protocol-versioned serialization
 State vector delta sync
+
+> **Note:** All items in this package are public.

@@ -2,7 +2,7 @@
 
 Core types and utilities used across all CRDT packages. Provides replica identification, Lamport/HLC timestamps, vector clocks, and the wire protocol version constant.
 
-> **Note:** This package declares items in a `private` section (not shown in full below).
+> **Note:** 17 public item(s) shown below; 1 private internal item(s) are in the `private` section.
 
 ## Types
 
@@ -149,3 +149,9 @@ Default_Component_Value => 0;
 |-----------|-------------|
 | `Source` | Vector clock to merge from. |
 | `Target` | Vector clock to update. |
+
+---
+
+## Private Section
+
+- **variable** `Generator_Init`

@@ -2,7 +2,7 @@
 
 Container for managing multiple RGA instances. Provides Append to collect replicas and Merge_All to converge all into the first entry.
 
-> **Note:** This package declares items in a `private` section (not shown in full below).
+> **Note:** 7 public item(s) shown below; 1 private internal item(s) are in the `private` section.
 
 ## Types
 
@@ -57,3 +57,9 @@ type RGAs (Count : Positive) is private;
 | Parameter | Description |
 |-----------|-------------|
 | `RS` | The collection whose entries are merged. |
+
+---
+
+## Private Section
+
+- **type** `RGAs`
