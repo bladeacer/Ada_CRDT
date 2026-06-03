@@ -2,6 +2,10 @@
 
 CRDT (Conflict-Free Replicated Data Types) library for Ada/SPARK.
 
+Note: This is a push mirror, the canonical is
+[on Codeberg](https://codeberg.org/bladeacer/ada_crdt). No issues or pull
+requests will be accepted here. Submit proposed changes there instead.
+
 ## Install
 
 ### Alire Community Index
