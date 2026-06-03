@@ -32,7 +32,7 @@ def parse_title(text):
 def parse_description(text):
     """Extract text between the set_package code block and first section heading."""
     m = re.search(
-        r'code-block:: ada\s*\n\s+package\s+\S+\s*$'
+        r'code-block:: ada.*?^\s+package\s+\S+\s*$'
         r'(.*?)'
         r'(?:^-----.+$|\Z)',
         text,
@@ -121,13 +121,35 @@ def parse_blocks(text):
     return blocks
 
 
+def parse_ada_pkg_desc(lines):
+    """Extract package description from Ada spec file header comments."""
+    desc_parts = []
+    for line in lines:
+        s = line.strip()
+        if re.match(r'--\s*@', s):
+            continue
+        if s.startswith('--'):
+            text = re.sub(r'^--\s*', '', s)
+            if text:
+                desc_parts.append(text)
+        elif not s:
+            continue
+        else:
+            break
+    if not desc_parts:
+        return ""
+    desc = " ".join(desc_parts)
+    return re.sub(r'\s+', ' ', desc).strip()
+
+
 def parse_ada_annotations(ads_path):
-    """Parse .ads file for @param and @return annotations per subprogram."""
+    """Parse .ads file for package description and per-subprogram annotations."""
     if not os.path.isfile(ads_path):
-        return {}
+        return "", {}
     with open(ads_path) as f:
         lines = f.readlines()
-    result = {}
+    pkg_desc = parse_ada_pkg_desc(lines)
+    annotations = {}
     cur = {"params": {}, "returns": ""}
     in_private = False
     for line in lines:
@@ -154,20 +176,26 @@ def parse_ada_annotations(ads_path):
         )
         if sm:
             name = sm.group(1)
-            result[name] = cur
+            annotations[name] = cur
             cur = {"params": {}, "returns": ""}
-    return result
+    return pkg_desc, annotations
 
 
 def subprog_short_name(block_name):
-    """Extract short name from RST block name e.g. 'function Contains (...)' -> 'Contains'."""
     m = re.match(r'(?:procedure|function)\s+("(?:[^"]|"")+"|\w+)', block_name)
     return m.group(1) if m else block_name
 
 
 def package_to_ads_path(pkg_name):
-    """Convert CRDT.Lww_Element_Sets -> src/crdt-lww_element_sets.ads."""
-    return "src/" + "-".join(pkg_name.lower().split(".")) + ".ads"
+    """Convert CRDT.Lww_Element_Sets -> src/crdt-lww_element_sets.ads.
+    For nested packages (e.g. CRDT.Protected.Shared_RGA) walks up the
+    hierarchy until it finds an existing file."""
+    parts = pkg_name.lower().split(".")
+    for i in range(len(parts), 0, -1):
+        candidate = "src/" + "-".join(parts[:i]) + ".ads"
+        if os.path.isfile(candidate):
+            return candidate
+    return "src/" + "-".join(parts) + ".ads"
 
 
 def render_index(packages):
@@ -234,7 +262,9 @@ def main():
         desc = parse_description(text)
         blocks = parse_blocks(text)
         ads_path = package_to_ads_path(title)
-        annotations = parse_ada_annotations(ads_path)
+        pkg_desc, annotations = parse_ada_annotations(ads_path)
+        if not desc:
+            desc = pkg_desc
         fn = slug(title)
         with open(join(OUT_DIR, fn), "w") as f:
             f.write(render_package(title, desc, blocks, annotations))

@@ -1,5 +1,7 @@
 # CRDT.Sequences.Naive
 
+Naive per-element RGA engine. Every single element is its own individually allocated node. Useful for: educational baselines, chaotic editing environments, or small sequences where per-element overhead is acceptable.
+
 ## Types
 
 ### type Cursor

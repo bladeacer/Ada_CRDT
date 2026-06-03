@@ -1,5 +1,7 @@
 # CRDT.Sync.Op_Based
 
+Operation-Based (CmRDT) sync engine. Replicas broadcast granular, immutable mutation events. Downstream operations must be applied exactly once. Network trait: Hyper-low bandwidth consumption, ideal for ordered delivery channels (WebSockets, TCP/TLS streams).
+
 ## Types
 
 ### type Op_Kind

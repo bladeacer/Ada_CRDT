@@ -1,5 +1,7 @@
 # CRDT.Lww_Element_Sets
 
+Last-Writer-Wins Element Set using Lamport timestamps. Stores (element, Lamport_Time) pairs for add and remove sets. An element is present iff its add-timestamp exceeds its remove-timestamp. Uses logical Lamport timestamps instead of wall clocks, avoiding clock skew issues in distributed deployments.
+
 ## Types
 
 ### type LWW_Element_Set

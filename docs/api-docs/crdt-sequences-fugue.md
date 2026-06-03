@@ -1,5 +1,7 @@
 # CRDT.Sequences.Fugue
 
+Fugue-style tree-based RGA engine. Replaces flat linked lists with a binary search tree hierarchy designed to eliminate string interleaving (the "zipper" bug when users type concurrently at the same position). Node_Id includes a Depth component for tree positioning. In-order traversal produces the document sequence.
+
 ## Types
 
 ### type Cursor

@@ -1,5 +1,7 @@
 # CRDT.HLC
 
+Hybrid Logical Clock (HLC) implementation. Combines physical wall-clock time with a logical counter to ensure causality is preserved even when physical clocks drift. Usage: Clock : HLC.Instance := HLC.Create (Node => 1); HLC.Tick (Clock); -- before sending HLC.Recv (Clock, Remote); -- on receiving remote timestamp TS : constant HLC_Time := HLC.Now (Clock);
+
 ## Types
 
 ### type HLC_Time

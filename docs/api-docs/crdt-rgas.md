@@ -1,5 +1,7 @@
 # CRDT.Rgas
 
+Container for managing multiple RGA instances. Provides Append to collect replicas and Merge_All to converge all into the first entry.
+
 ## Types
 
 ### type RGA_Array

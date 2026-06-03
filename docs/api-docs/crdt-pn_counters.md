@@ -1,5 +1,7 @@
 # CRDT.Pn_Counters
 
+PN-Counter with per-replica actor map. Tracks increments (P) and decrements (N) for each replica independently. Fixed memory: 3 replicas = 3 slots regardless of millions of ops. Value = sum(P) - sum(N).
+
 ## Types
 
 ### type Counter_Range
