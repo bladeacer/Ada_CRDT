@@ -209,15 +209,11 @@ procedure Demo_Life is
    begin
       for R in 1 .. Grid_Size loop
          Char_RGA.Compact (N.Yjs_Cells (R));
-         declare
-            Sz : constant Natural := Char_RGA.Size (N.Yjs_Cells (R));
-         begin
-            for I in 1 .. Sz loop
-               Char_RGA.Delete (N.Yjs_Cells (R), 1);
-            end loop;
-         end;
-         Char_RGA.Compact (N.Yjs_Cells (R));
-         N.Seq := 0;
+         loop
+            exit when Char_RGA.Size (N.Yjs_Cells (R)) = 0;
+            Char_RGA.Delete (N.Yjs_Cells (R), 1);
+            Char_RGA.Compact (N.Yjs_Cells (R));
+         end loop;
          for C in 1 .. Grid_Size loop
             N.Seq := N.Seq + 1;
             Char_RGA.Insert (N.Yjs_Cells (R), C, (N.Id, N.Seq),

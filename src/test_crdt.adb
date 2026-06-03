@@ -1879,15 +1879,11 @@ procedure Test_Crdt is
       --  Sync Matrix -> Yjs (like Sync_Yjs_From_Matrix)
       for R in 1 .. Grid_Size loop
          Rows.Compact (Grid (R));
-         declare
-            Sz : constant Natural := Rows.Size (Grid (R));
-         begin
-            for I in 1 .. Sz loop
-               Rows.Delete (Grid (R), 1);
-            end loop;
-         end;
-         Rows.Compact (Grid (R));
-         Seq := 0;
+         loop
+            exit when Rows.Size (Grid (R)) = 0;
+            Rows.Delete (Grid (R), 1);
+            Rows.Compact (Grid (R));
+         end loop;
          for C in 1 .. Grid_Size loop
             Seq := Seq + 1;
             Rows.Insert (Grid (R), C, (Id, Seq),
@@ -1914,6 +1910,51 @@ procedure Test_Crdt is
          Check (All_Correct, "Matrix->Yjs: all cells match after sync");
       end;
 
+      --  Simulate a second sync (rows now have data): evolve matrix, re-sync
+      declare
+         Old_Seq : constant Natural := Seq;
+      begin
+         for R in 1 .. Grid_Size loop
+            for C in 1 .. Grid_Size loop
+               Stamp := Stamp + 1;
+               if (R + C) mod 2 = 0 then
+                  Matrix.Remove (Cells, R * 100 + C, (Stamp, Id));
+               else
+                  Matrix.Add (Cells, R * 100 + C, (Stamp, Id));
+               end if;
+            end loop;
+         end loop;
+         for R in 1 .. Grid_Size loop
+            Rows.Compact (Grid (R));
+            loop
+               exit when Rows.Size (Grid (R)) = 0;
+               Rows.Delete (Grid (R), 1);
+               Rows.Compact (Grid (R));
+            end loop;
+            for C in 1 .. Grid_Size loop
+               Seq := Seq + 1;
+               Rows.Insert (Grid (R), C, (Id, Seq),
+                 (if Matrix.Contains (Cells, R * 100 + C) then '#' else '.'));
+            end loop;
+         end loop;
+         declare
+            Match : Boolean := True;
+         begin
+            for R in 1 .. Grid_Size loop
+               for C in 1 .. Grid_Size loop
+                  if Matrix.Contains (Cells, R * 100 + C)
+                    /= (Rows.Get (Grid (R), C) = '#')
+                  then
+                     Match := False;
+                  end if;
+               end loop;
+            end loop;
+            Check (Match, "Matrix->Yjs: second sync on non-empty rows preserves all cells");
+         end;
+         Check (Seq > Old_Seq, "Matrix->Yjs: seq counter monotonically increases (" &
+                Natural'Image (Seq) & " >" & Natural'Image (Old_Seq) & ")");
+      end;
+
       --  Sync back: Yjs -> Matrix (like Sync_Matrix_From_Yjs)
       Matrix.Clear (Cells);
       for R in 1 .. Grid_Size loop
@@ -1925,24 +1966,20 @@ procedure Test_Crdt is
          end loop;
       end loop;
 
-      --  Verify round-trip
+      --  Verify round-trip: sync back and compare Matrix vs Yjs
       declare
-         All_Present : Boolean := True;
+         All_Agree : Boolean := True;
       begin
          for R in 1 .. Grid_Size loop
             for C in 1 .. Grid_Size loop
-               if (R + C) mod 2 = 0 then
-                  if not Matrix.Contains (Cells, R * 100 + C) then
-                     All_Present := False;
-                  end if;
-               else
-                  if Matrix.Contains (Cells, R * 100 + C) then
-                     All_Present := False;
-                  end if;
+               if Matrix.Contains (Cells, R * 100 + C)
+                 /= (Rows.Get (Grid (R), C) = '#')
+               then
+                  All_Agree := False;
                end if;
             end loop;
          end loop;
-         Check (All_Present, "Yjs->Matrix: round-trip preserves all cells");
+         Check (All_Agree, "Yjs->Matrix: round-trip preserves all cells");
       end;
 
       Put_Line ("[Game of Life: Matrix<->Yjs Sync] done.");
@@ -2096,6 +2133,134 @@ procedure Test_Crdt is
       Put_Line ("[Game of Life: Convergence] done.");
    end Test_GoL_Convergence;
 
+   -----------------------------------------------
+   --  Game of Life: Mode Switch Lifecycle       --
+   -----------------------------------------------
+   --  @summary Game of Life mode switch: multiple Matrix<->Yjs round-trips preserve cell state
+   --  (regression: the old delete-loop only removed 1 item before compact, leaving stale items
+   --   that accumulated across switches, eventually corrupting merge behavior)
+   procedure Test_GoL_Mode_Switch is
+      Grid_Size : constant := 5;
+      Max_Items : constant := 30;
+
+      package Matrix is new CRDT.Lww_Element_Sets (Integer, Max_Items * 2);
+      package Rows is new CRDT.Rga (Character, Max_Items, Max_Stride => 10);
+
+      Cells : Matrix.LWW_Element_Set (Matrix.Max_Capacity);
+      Grid  : array (1 .. Grid_Size) of Rows.RGA (Max_Items);
+      Seq   : Natural := 0;
+      Id    : constant CRDT.Core.Replica_Id := 1;
+      Stamp : Natural := 0;
+
+      procedure Sync_To_Yjs is
+      begin
+         for R in 1 .. Grid_Size loop
+            Rows.Compact (Grid (R));
+            loop
+               exit when Rows.Size (Grid (R)) = 0;
+               Rows.Delete (Grid (R), 1);
+               Rows.Compact (Grid (R));
+            end loop;
+            for C in 1 .. Grid_Size loop
+               Seq := Seq + 1;
+               Rows.Insert (Grid (R), C, (Id, Seq),
+                 (if Matrix.Contains (Cells, R * 100 + C) then '#' else '.'));
+            end loop;
+         end loop;
+      end Sync_To_Yjs;
+
+      procedure Sync_To_Matrix is
+      begin
+         Matrix.Clear (Cells);
+         for R in 1 .. Grid_Size loop
+            for C in 1 .. Grid_Size loop
+               if Rows.Get (Grid (R), C) = '#' then
+                  Stamp := Stamp + 1;
+                  Matrix.Add (Cells, R * 100 + C, (Stamp, Id));
+               end if;
+            end loop;
+         end loop;
+      end Sync_To_Matrix;
+
+      function Cells_Match return Boolean is
+      begin
+         for R in 1 .. Grid_Size loop
+            for C in 1 .. Grid_Size loop
+               if Matrix.Contains (Cells, R * 100 + C)
+                 /= (Rows.Get (Grid (R), C) = '#')
+               then
+                  return False;
+               end if;
+            end loop;
+         end loop;
+         return True;
+      end Cells_Match;
+
+      procedure Toggle_Pattern is
+      begin
+         for R in 1 .. Grid_Size loop
+            for C in 1 .. Grid_Size loop
+               Stamp := Stamp + 1;
+               if (R + C) mod 2 = 0 then
+                  Matrix.Remove (Cells, R * 100 + C, (Stamp, Id));
+               else
+                  Matrix.Add (Cells, R * 100 + C, (Stamp, Id));
+               end if;
+            end loop;
+         end loop;
+      end Toggle_Pattern;
+   begin
+      New_Line;
+      Put_Line ("[Game of Life: Mode Switch]");
+
+      --  Gen 0: initial checkerboard in Matrix
+      for R in 1 .. Grid_Size loop
+         for C in 1 .. Grid_Size loop
+            Stamp := Stamp + 1;
+            if (R + C) mod 2 = 0 then
+               Matrix.Add (Cells, R * 100 + C, (Stamp, Id));
+            end if;
+         end loop;
+      end loop;
+
+      --  First sync: Matrix -> Yjs (empty rows)
+      Sync_To_Yjs;
+      Check (Cells_Match, "Mode switch gen 0: first Matrix->Yjs sync (empty rows)");
+      declare
+         Seq_After_First : constant Natural := Seq;
+      begin
+         Check (Seq_After_First = Grid_Size * Grid_Size, "Mode switch gen 0: seq = Grid_Size^2 (" &
+                Natural'Image (Seq_After_First) & " = " & Natural'Image (Grid_Size * Grid_Size) & ")");
+      end;
+
+      --  Gen 1: toggle pattern in Matrix (simulate evolution), re-sync
+      Toggle_Pattern;
+      Sync_To_Yjs;
+      Check (Cells_Match, "Mode switch gen 1: second Matrix->Yjs sync (non-empty rows)");
+      Check (Seq = Grid_Size * Grid_Size * 2, "Mode switch gen 1: seq monotonically increased (" &
+             Natural'Image (Seq) & ")");
+
+      --  Gen 2: toggle again (simulate evolution), re-sync
+      Toggle_Pattern;
+      Sync_To_Yjs;
+      Check (Cells_Match, "Mode switch gen 2: third Matrix->Yjs sync (another toggle)");
+
+      --  Gen 3: round-trip Yjs -> Matrix
+      Sync_To_Matrix;
+      Check (Cells_Match, "Mode switch gen 3: Yjs->Matrix round-trip preserves pattern");
+
+      --  Gen 4: back to Yjs again (full cycle: M -> Y -> M -> Y)
+      Sync_To_Yjs;
+      Check (Cells_Match, "Mode switch gen 4: second Yjs->Matrix sync (full cycle complete)");
+
+      --  Gen 5: toggle and sync one more time to ensure no stale-item accumulation
+      Toggle_Pattern;
+      Sync_To_Yjs;
+      Check (Cells_Match, "Mode switch gen 5: toggle + re-sync after full cycle (no stale items)");
+
+      Put_Line ("[Game of Life: Mode Switch] done.");
+   end Test_GoL_Mode_Switch;
+
 begin
    Put_Line ("=== CRDT Test Suite ===");
    Put_Line ("Running unit tests, property-based fuzzing, and chaos simulations...");
@@ -2126,6 +2291,7 @@ begin
    Test_GoL_Blinker;
    Test_GoL_Matrix_Yjs_Sync;
    Test_GoL_Convergence;
+   Test_GoL_Mode_Switch;
 
    declare
       Cat_W  : constant := 33;
@@ -2188,10 +2354,11 @@ begin
          Row ("HLC Clock Skew", 4);
          Row ("Tombstone Saturation", 7);
          Row ("Fuzzing Network Partitions", 8);
-         Row ("Game of Life", 4, "Neighbors");
-         Row ("Game of Life", 3, "Blinker");
-         Row ("Game of Life", 2, "Matrix<->Yjs Sync");
-         Row ("Game of Life", 3, "Convergence");
+          Row ("Game of Life", 4, "Neighbors");
+          Row ("Game of Life", 3, "Blinker");
+          Row ("Game of Life", 4, "Matrix<->Yjs Sync");
+          Row ("Game of Life", 3, "Convergence");
+          Row ("Game of Life", 8, "Mode Switch");
          Put_Line (To, "  |" & (1 .. Cat_W => '-') & "|" & (1 .. Tests_W => '-') & "|" & (1 .. Status_W => '-') & "|");
       end Write_Summary_Table;
 

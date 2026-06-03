@@ -25,6 +25,7 @@
   | Fuzzing Network Partitions      |     8 | PASS   |
   | Game of Life: Neighbors         |     4 | PASS   |
   | Game of Life: Blinker           |     3 | PASS   |
-  | Game of Life: Matrix<->Yjs Sync |     2 | PASS   |
+  | Game of Life: Matrix<->Yjs Sync |     4 | PASS   |
   | Game of Life: Convergence       |     3 | PASS   |
+  | Game of Life: Mode Switch       |     8 | PASS   |
   |---------------------------------|-------|--------|
