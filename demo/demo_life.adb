@@ -360,12 +360,18 @@ procedure Demo_Life is
    end Image_Trim;
 
    function Pad (S : String; W : Natural) return String is
-      P : String (1 .. W) := (others => ' ');
    begin
-      if S'Length <= W then
-         P (1 .. S'Length) := S;
+      if W = 0 then
+         return "";
       end if;
-      return P;
+      declare
+         P : String (1 .. W) := (others => ' ');
+      begin
+         if S'Length <= W then
+            P (1 .. S'Length) := S;
+         end if;
+         return P;
+      end;
    end Pad;
 
    procedure Draw (S : App_State) is
@@ -411,21 +417,18 @@ procedure Demo_Life is
       begin
          Put (V);
          Put (Status);
-         Put_Line (Pad ("", Line_W - 2 - Status'Length) & V);
+          Put_Line (Pad ("", Natural'Max (0, Line_W - 2 - Status'Length)) & V);
       end;
       declare
-         Cur_S : constant String := (if S.Focus = 1
-           then " [" & Image_Trim (S.Cur_R) & "," & Image_Trim (S.Cur_C) & "]"
-           else "");
          P1_Label : constant String := (if S.N1.Paused then " PAUSED" else "");
          P2_Label : constant String := (if S.N2.Paused then " PAUSED" else "");
          P3_Label : constant String := (if S.N3.Paused then " PAUSED" else "");
-         Label_A : constant String := " +-- Node A" & P1_Label & Cur_S
-           & Pad ("", Box_W - 12 - P1_Label'Length - Cur_S'Length) & "+";
+         Label_A : constant String := " +-- Node A" & P1_Label
+           & Pad ("", Natural'Max (0, Box_W - 12 - P1_Label'Length)) & "+";
          Label_B : constant String := " +-- Node B" & P2_Label
-           & Pad ("", Box_W - 12 - P2_Label'Length) & "+";
+           & Pad ("", Natural'Max (0, Box_W - 12 - P2_Label'Length)) & "+";
          Label_C : constant String := " +-- Node C" & P3_Label
-           & Pad ("", Box_W - 12 - P3_Label'Length) & "+";
+           & Pad ("", Natural'Max (0, Box_W - 12 - P3_Label'Length)) & "+";
       begin
          Put (V);
          Put (' ');
@@ -457,9 +460,9 @@ procedure Demo_Life is
          A_Alive : constant String := " Alive:" & Image_Trim (Alive_Count (S.N1, S.Mode));
          B_Alive : constant String := " Alive:" & Image_Trim (Alive_Count (S.N2, S.Mode));
          C_Alive : constant String := " Alive:" & Image_Trim (Alive_Count (S.N3, S.Mode));
-         A_Full  : constant String := V & A_Alive & Pad ("", Box_W - 2 - A_Alive'Length) & V;
-         B_Full  : constant String := V & B_Alive & Pad ("", Box_W - 2 - B_Alive'Length) & V;
-         C_Full  : constant String := V & C_Alive & Pad ("", Box_W - 2 - C_Alive'Length) & V;
+         A_Full  : constant String := V & A_Alive & Pad ("", Natural'Max (0, Box_W - 2 - A_Alive'Length)) & V;
+         B_Full  : constant String := V & B_Alive & Pad ("", Natural'Max (0, Box_W - 2 - B_Alive'Length)) & V;
+         C_Full  : constant String := V & C_Alive & Pad ("", Natural'Max (0, Box_W - 2 - C_Alive'Length)) & V;
       begin
          Put (V);
          Put (' ');
@@ -495,7 +498,7 @@ procedure Demo_Life is
       Put ("]erge  [");
       VT100.Set_Attribute (VT100.Revers); Put ("C"); VT100.Set_Attribute (VT100.Reset);
       Put ("]heck");
-      Put_Line (Pad ("", Line_W - 2 - 61) & V);
+      Put_Line (Pad ("", Natural'Max (0, Line_W - 2 - 61)) & V);
 
       Put (V);
       Put ("["); VT100.Set_Attribute (VT100.Revers); Put ("Q"); VT100.Set_Attribute (VT100.Reset);
@@ -510,7 +513,7 @@ procedure Demo_Life is
       Put ("]Move  [");
       VT100.Set_Attribute (VT100.Revers); Put ("Y"); VT100.Set_Attribute (VT100.Reset);
       Put ("]js");
-      Put_Line (Pad ("", Line_W - 2 - 59) & V);
+      Put_Line (Pad ("", Natural'Max (0, Line_W - 2 - 59)) & V);
 
       Put_Line (BL & (1 .. Line_W - 2 => '=') & BR);
       if S.Auto then
