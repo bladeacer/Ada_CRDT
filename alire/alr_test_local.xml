@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites>
+   <testsuite name="/home/data/Desktop/projects/Ada_CRDT/alire/alr_test_local" id="0" tests="1" errors="0" failures="0" skipped="0">
+      <testcase name="crdt=1.2.0" status="PASS">
+      
+      </testcase>
+   </testsuite>
+</testsuites>

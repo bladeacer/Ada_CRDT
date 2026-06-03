@@ -8,7 +8,3 @@ maintainers-logins = ["bladeacer"]
 website = "https://github.com/bladeacer/ada_crdt"
 tags = ["crdt", "spark", "ada", "library"]
 auto-gpr-with = false
-
-[origin]
-url = "git+https://github.com/bladeacer/ada_crdt.git"
-commit = "156ea3e04738c91a664af88db48dad4b5fcb7553"

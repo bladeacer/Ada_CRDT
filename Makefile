@@ -53,9 +53,6 @@ release:
 		sed 's/^version = ".*"/version = "'$$version'"/' alire/releases/crdt-0.0.0.toml > "$$release_file"; \
 	fi; \
 	sed -i 's/^version = ".*"/version = "'$$version'"/' "$$release_file"; \
-	sed -i '/^\[origin\]/,$$d' "$$release_file" 2>/dev/null || true; \
-	sed -i '$${/^$$/d}' "$$release_file" 2>/dev/null || true; \
-	printf '[origin]\nurl = "https://codeberg.org/bladeacer/Ada_CRDT/archive/v%s.tar.gz"\n' "$$version" >> "$$release_file"; \
 	if git rev-parse "v$$version" >/dev/null 2>&1; then \
 		git tag -d "v$$version" >/dev/null 2>&1 || true; \
 		git push origin :refs/tags/"v$$version" >/dev/null 2>&1 || true; \
@@ -70,7 +67,7 @@ release:
 
 demo:
 	alr exec -- gprbuild -Pdemo/demo.gpr
-	./demo/demo_life
+	stty -isig; ./demo/demo_life; stty isig
 
 clean:
 	alr clean

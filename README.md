@@ -227,6 +227,16 @@ Prerequisites: [Alire](https://alire.ada.dev) (manages GNAT automatically),
 
 ---
 
+## Demo
+
+![Conway's Game of Life Demo](./demo.webp)
+
+There is a Conway Game of Life demonstration made using this library.
+
+One can run with `make demo` after cloning the repository.
+
+---
+
 ## SPARK Proof
 
 Core packages (`CRDT.Pn_Counters`) SPARK-proven for run-time check elimination.

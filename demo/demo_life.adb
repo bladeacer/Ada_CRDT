@@ -51,7 +51,6 @@ procedure Demo_Life is
       N1, N2, N3   : Node;
       Gen          : Natural := 0;
       Paused       : Boolean := False;
-      Running      : Boolean := True;
       Mode         : Grid_Mode := Matrix;
    end record;
 
@@ -69,6 +68,8 @@ procedure Demo_Life is
    package Nat_Random is new Ada.Numerics.Discrete_Random (Rand_Range);
    Nat_Gen : Nat_Random.Generator;
    Float_Gen : Ada.Numerics.Float_Random.Generator;
+
+   Quit : Boolean := False;
 
    function Is_Alive (N : Node; Row, Col : Integer) return Boolean is
      (Cell_Sets.Contains (N.Cells, (Row, Col)));
@@ -340,6 +341,12 @@ procedure Demo_Life is
 
       Grid_Border : constant String (1 .. Grid_Size) := (others => '-');
 
+      procedure Put_Cell (N : Node; R, C : Integer) is
+      begin
+         Put ((if (if S.Mode = Matrix then Is_Alive (N, R, C)
+                   else Yjs_Is_Alive (N, R, C)) then '*' else '.'));
+      end Put_Cell;
+
       function Node_Label (N : Node; Tag : Character) return String is
          Tag_Str : constant String (1 .. 2) := " " & Tag;
          P_Str   : constant String := (if N.Paused then " PAUSED" else "");
@@ -365,30 +372,26 @@ procedure Demo_Life is
       for R in 1 .. Grid_Size loop
          Put (V);
          Put (' ');
-         for C in 1 .. Grid_Size loop
-            Put ((if (if S.Mode = Matrix then Is_Alive (S.N1, R, C)
-                      else Yjs_Is_Alive (S.N1, R, C)) then '*' else '.'));
-         end loop;
+         Put (V);
+         for C in 1 .. Grid_Size loop Put_Cell (S.N1, R, C); end loop;
          Put (V);
          Put (Pad ("", Sep));
-         for C in 1 .. Grid_Size loop
-            Put ((if (if S.Mode = Matrix then Is_Alive (S.N2, R, C)
-                      else Yjs_Is_Alive (S.N2, R, C)) then '*' else '.'));
-         end loop;
+         Put (V);
+         for C in 1 .. Grid_Size loop Put_Cell (S.N2, R, C); end loop;
          Put (V);
          Put (Pad ("", Sep));
-         for C in 1 .. Grid_Size loop
-            Put ((if (if S.Mode = Matrix then Is_Alive (S.N3, R, C)
-                      else Yjs_Is_Alive (S.N3, R, C)) then '*' else '.'));
-         end loop;
+         Put (V);
+         for C in 1 .. Grid_Size loop Put_Cell (S.N3, R, C); end loop;
+         Put (V);
          Put_Line (" " & V);
       end loop;
       Put (V);
-      Put (" " & Node_Label (S.N1, 'A'));
+      Put (' ');
+      Put (Node_Label (S.N1, 'A'));
       Put (Pad ("", Sep));
       Put (Node_Label (S.N2, 'B'));
       Put (Pad ("", Sep));
-      Put_Line (Node_Label (S.N3, 'C') & "  " & V);
+      Put_Line (Node_Label (S.N3, 'C') & " " & V);
       declare
          A_Alive : constant String := " Alive:" & Image_Trim (Alive_Count (S.N1, S.Mode));
          B_Alive : constant String := " Alive:" & Image_Trim (Alive_Count (S.N2, S.Mode));
@@ -425,7 +428,9 @@ procedure Demo_Life is
    begin
       case Ch is
          when 'q' | 'Q' =>
-            S.Running := False;
+            Quit := True;
+         when ASCII.ETX =>
+            Quit := True;
          when 'p' | 'P' =>
             S.Paused := not S.Paused;
          when 'r' | 'R' =>
@@ -465,6 +470,8 @@ procedure Demo_Life is
    Step_Dt : constant Duration := 0.15;
 
    S : App_State;
+   Ch : Character;
+   Avail : Boolean;
 
 begin
    Reset_State (S);
@@ -487,18 +494,24 @@ begin
          if not S.N3.Paused then
             Next_Generation (S.N3, S.Mode);
          end if;
-         S.Gen := S.Gen + 1;
+         if not S.N1.Paused or not S.N2.Paused or not S.N3.Paused then
+            S.Gen := S.Gen + 1;
+         end if;
 
-         Merge_Nodes (S.N1, S.N2, S.Mode);
-         Merge_Nodes (S.N1, S.N3, S.Mode);
+         if not S.N1.Paused and not S.N2.Paused then
+            Merge_Nodes (S.N1, S.N2, S.Mode);
+         end if;
+         if not S.N1.Paused and not S.N3.Paused then
+            Merge_Nodes (S.N1, S.N3, S.Mode);
+         end if;
+         if not S.N2.Paused and not S.N3.Paused then
+            Merge_Nodes (S.N2, S.N3, S.Mode);
+         end if;
 
          delay Step_Dt;
       end if;
 
       for Attempt in 1 .. 10 loop
-         declare
-            Ch : Character;
-            Avail : Boolean;
          begin
             Get_Immediate (Ch, Avail);
             if Avail then
@@ -513,7 +526,7 @@ begin
          end if;
       end loop;
 
-      exit when not S.Running;
+      exit when Quit;
    end loop;
 
    Put (Show);

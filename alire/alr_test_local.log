@@ -1,0 +1,7 @@
+[alr test] Testing crdt=1.2.0
+[alr test] Spawning default local test: alr -d -n build --release
+Note: Building crdt=1.2.0/crdt.gpr...
+gprbuild: "test_crdt" up to date
+Success: Build finished successfully in 0.29 seconds.
+Found declared GPR file: crdt.gpr
+[alr test] Test completed SUCCESSFULLY
