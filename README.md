@@ -246,11 +246,8 @@ Prerequisites: [Alire](https://alire.ada.dev) (manages GNAT automatically),
 
 ![Conway's Game of Life Demo](./demo.webp)
 
-A Conway's Game of Life TUI demo demonstrating CRDT convergence with three
-independent nodes. Each node evolves its own 20x20 grid using Game of Life
-rules, then pairwise merges with peers — nodes converge to identical state
-within 1-2 generations, even when random per-grid pauses temporarily freeze
-individual nodes.
+A real-time TUI simulation of Conway's Game of Life to stress-test and visually
+prove the library's eventual consistency engine across three independent nodes.
 
 ### Running
 
@@ -260,24 +257,34 @@ make demo
 
 ### Features
 
-- **Two CRDT backends** toggled at runtime with `M`:
-  - **Matrix mode**: Each cell is a `(Row, Col)` element in a shared
-    `LWW_Element_Set`. Alive = present with highest-timestamp add; Dead =
-    removed (or never added).
-  - **Yjs_RGA mode**: Each grid row is an RGA `Character` sequence (`.` =
-    dead, `#` = alive). Uses chunk-splitting (Yjs engine) for efficiency.
-    Toggling modes syncs data between representations for each node.
-- **Three nodes (A, B, C)**, each with unique replica ID and Lamport clock.
-  Labels show per-node pause status.
-- **Round-robin merge** every tick between all non-paused node pairs.
-- **Per-grid random pauses** (0-5s) — paused nodes do not evolve or accept
-  merges. When they unpause they evolve one step then merge on the next tick,
-  instantly converging with peers.
-- **Global pause/resume** (`P`) freezes all grids; generation counter only
-  advances when at least one node evolves.
-- **Random seed 42** ensures reproducible gliders + ~30% random cell density.
-- **Ctrl+C** captured gracefully (cursor restore, "Goodbye!" message).
-- **Keybinds**: `Q` quit, `R` reset, `P` pause, `M` mode switch.
+Dual Backends (Toggle with M)
+- Matrix Mode: Tracks live cells as discrete (Row, Col) elements in an
+`LWW_Element_Set`. Uses Lamport timestamps to resolve split-brain conflicts with
+absolute set consistency.
+- `Yjs_RGA` Mode: Tracks grid rows as RGA Character sequences with chunk-splitting.
+Serves as a sequence stress test by continuously sweeping, deleting, and
+rebuilding text rows.
+
+Simulation Boundaries & Performance
+- Eventual Convergence: Replicas achieve strong eventual consistency eventually,
+mimicking real-world gossip protocol behaviours.
+
+- Complexity Evaluation: Tests the RGA merger's $O(n \cdot m)$ sequence loop,
+utilizing linear array pointer scans and an internal O(n²) bubble-sort under
+high-frequency load.
+
+> tldr; RGA is not a great CRDT type for Conway's Game of Life unlike `LWW_Element_Set`.
+
+- Zero-Heap Footprint: Relies on `CRDT.Bounded` types to completely eliminate
+runtime allocation leaks during explosive cell birth/death cycles.
+
+- Split-Brain Testing: Simulates random 0-5s per-node network freezes.
+Disconnected nodes queue updates locally and auto-reconcile seamlessly upon healing.
+
+Controls
+- Terminal Safety: Built on native vt100 escape bindings with robust SIGINT
+handling to guarantee full cursor and attribute restoration on exit.
+- Keybinds: Q Quit, R Reset, P Global Pause, M Toggle Engine Type.
 
 ---
 

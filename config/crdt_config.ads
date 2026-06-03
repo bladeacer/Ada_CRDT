@@ -5,7 +5,7 @@ pragma Style_Checks (Off);
 package Crdt_Config is
    pragma Pure;
 
-   Crate_Version : constant String := "1.2.0";
+   Crate_Version : constant String := "1.3.0";
    Crate_Name : constant String := "crdt";
 
    Alire_Host_OS : constant String := "linux";

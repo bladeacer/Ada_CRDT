@@ -2,7 +2,7 @@
 #ifndef CRDT_CONFIG_H
 #define CRDT_CONFIG_H
 
-#define CRATE_VERSION "1.2.0"
+#define CRATE_VERSION "1.3.0"
 #define CRATE_NAME "crdt"
 
 #define ALIRE_HOST_OS "linux"
