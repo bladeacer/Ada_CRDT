@@ -146,48 +146,49 @@ procedure Demo_Life is
                   end loop;
                end loop;
             end;
-         when Yjs_RGA =>
-            declare
-               function Count_Neighbors is new Gen_Count_Neighbors (Cell_Alive => Yjs_Is_Alive);
-               Grid : array (1 .. Grid_Size, 1 .. Grid_Size) of Boolean;
-            begin
-               for R in 1 .. Grid_Size loop
-                  for C in 1 .. Grid_Size loop
-                     Grid (R, C) := Yjs_Is_Alive (N, R, C);
-                  end loop;
-               end loop;
+          when Yjs_RGA =>
+             declare
+                function Count_Neighbors is new Gen_Count_Neighbors (Cell_Alive => Yjs_Is_Alive);
+                Grid : array (1 .. Grid_Size, 1 .. Grid_Size) of Boolean;
+             begin
+                for R in 1 .. Grid_Size loop
+                   for C in 1 .. Grid_Size loop
+                      Grid (R, C) := Yjs_Is_Alive (N, R, C);
+                   end loop;
+                end loop;
 
-               for R in 1 .. Grid_Size loop
-                  for C in 1 .. Grid_Size loop
-                     declare
-                        Alive     : constant Boolean := Grid (R, C);
-                        Neighbors : constant Integer := Count_Neighbors (N, R, C);
-                     begin
-                        if Alive and (Neighbors < 2 or Neighbors > 3) then
-                           Actions (R, C) := Make_Dead;
-                        elsif not Alive and Neighbors = 3 then
-                           Actions (R, C) := Make_Alive;
-                        end if;
-                     end;
-                  end loop;
-               end loop;
+                for R in 1 .. Grid_Size loop
+                   for C in 1 .. Grid_Size loop
+                      declare
+                         Alive     : constant Boolean := Grid (R, C);
+                         Neighbors : constant Integer := Count_Neighbors (N, R, C);
+                      begin
+                         if Alive and (Neighbors < 2 or Neighbors > 3) then
+                            Actions (R, C) := Make_Dead;
+                         elsif not Alive and Neighbors = 3 then
+                            Actions (R, C) := Make_Alive;
+                         end if;
+                      end;
+                   end loop;
+                end loop;
 
-               for R in 1 .. Grid_Size loop
-                  for C in 1 .. Grid_Size loop
-                     case Actions (R, C) is
-                        when Make_Alive =>
-                           Char_RGA.Delete (N.Yjs_Cells (R), C);
-                           N.Seq := N.Seq + 1;
-                           Char_RGA.Insert (N.Yjs_Cells (R), C, (N.Id, N.Seq), '#');
-                        when Make_Dead =>
-                           Char_RGA.Delete (N.Yjs_Cells (R), C);
-                           N.Seq := N.Seq + 1;
-                           Char_RGA.Insert (N.Yjs_Cells (R), C, (N.Id, N.Seq), '.');
-                        when None => null;
-                     end case;
-                  end loop;
-               end loop;
-            end;
+                for R in 1 .. Grid_Size loop
+                   Char_RGA.Compact (N.Yjs_Cells (R));
+                   loop
+                      exit when Char_RGA.Size (N.Yjs_Cells (R)) = 0;
+                      Char_RGA.Delete (N.Yjs_Cells (R), 1);
+                      Char_RGA.Compact (N.Yjs_Cells (R));
+                   end loop;
+                   for C in 1 .. Grid_Size loop
+                      N.Seq := N.Seq + 1;
+                      Char_RGA.Insert (N.Yjs_Cells (R), C, (N.Id, N.Seq),
+                        (case Actions (R, C) is
+                           when Make_Alive => '#',
+                           when Make_Dead => '.',
+                           when None => (if Grid (R, C) then '#' else '.')));
+                   end loop;
+                end loop;
+             end;
       end case;
    end Next_Generation;
 
