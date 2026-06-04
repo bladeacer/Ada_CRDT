@@ -1,5 +1,6 @@
 with Ada.Streams;
 with CRDT.Core.LEB128;
+with CRDT.Serialization;
 
 package body CRDT.Sequences.Naive with
   SPARK_Mode => Off
@@ -352,32 +353,35 @@ is
    procedure Read_RGA
      (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
       Item   : out RGA)
-   is
-      use Ada.Streams;
-      Ver       : Natural;
-      Total     : Natural;
-      Num_Items : Natural;
-      Id        : Node_Id;
-      Deleted   : Boolean;
-      Val       : Element_Type;
-      Prev_Idx  : Natural := 0;
-      New_Idx   : Natural;
-   begin
-      Core.LEB128.Decode (Stream, Ver);
-      if Ver /= Core.Protocol_Version then
-         raise Constraint_Error with "unsupported protocol version";
-      end if;
-      Core.LEB128.Decode (Stream, Total);
-      Core.LEB128.Decode (Stream, Num_Items);
-      Item.Total := Total;
-      Item.Head := 0;
-      Item.Count := 0;
-      Item.Free := 0;
+    is
+       use Ada.Streams;
+       use CRDT.Serialization;
+       Kind      : Protocol_Kind;
+       Total     : Natural;
+       Num_Items : Natural;
+       Id        : Node_Id;
+       Deleted   : Boolean;
+       Val       : Element_Type;
+       Prev_Idx  : Natural := 0;
+       New_Idx   : Natural;
+    begin
+       Read_Header (Stream, Kind, Total, Num_Items);
 
-      for J in 1 .. Num_Items loop
-         Node_Id'Read (Stream, Id);
-         Boolean'Read (Stream, Deleted);
-         Element_Type'Read (Stream, Val);
+       if Num_Items > Item.Capacity then
+          raise Constraint_Error with
+            "Naive Read_RGA: item count" & Natural'Image (Num_Items) &
+            " exceeds capacity" & Natural'Image (Item.Capacity);
+       end if;
+
+       Item.Total := Total;
+       Item.Head := 0;
+       Item.Count := 0;
+       Item.Free := 0;
+
+       for J in 1 .. Num_Items loop
+          Node_Id'Read (Stream, Id);
+          Boolean'Read (Stream, Deleted);
+          Element_Type'Read (Stream, Val);
          New_Idx := Alloc_Item (Item);
          if New_Idx > 0 then
             Item.Count := J;

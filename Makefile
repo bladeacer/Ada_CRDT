@@ -1,4 +1,4 @@
-.PHONY: help all build run test prove doc api-docs clean release publish demo
+.PHONY: help all build run test test-fuzz prove doc api-docs clean release publish demo
 
 .DEFAULT_GOAL := help
 
@@ -10,6 +10,7 @@ help:
 	@echo '  build    Build the project and tests (alr build)'
 	@echo '  run      Build and run tests'
 	@echo '  test     Alias for run'
+	@echo '  test-fuzz  Run chaos fuzzing (bit-flip + clock skew + OOO delta)'
 	@echo '  prove    Run SPARK proofs (alr gnatprove)'
 	@echo '  doc      Generate Markdown API docs (docs/api-docs/)'
 	@echo '  release  Tag, update index+releases, push. Use VERSION=x.y.z'
@@ -26,6 +27,8 @@ run: build
 	alr run
 
 test: run
+
+test-fuzz: run
 
 prove:
 	alr gnatprove

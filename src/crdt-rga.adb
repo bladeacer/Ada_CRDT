@@ -1,4 +1,5 @@
 with CRDT.Core.LEB128;
+with CRDT.Serialization;
 
 package body CRDT.Rga with
   SPARK_Mode => Off
@@ -533,50 +534,58 @@ is
       end;
    end Write_RGA;
 
-   procedure Read_RGA
-     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
-      Item   : out RGA)
-   is
-      use Ada.Streams;
-      Ver       : Natural;
-      Total     : Natural;
-      Num_Items : Natural;
-      Id        : Node_Id;
-      Len       : Natural;
-      Deleted   : Boolean;
-      Prev_Idx  : Natural := 0;
-      New_Idx   : Natural;
-   begin
-      Core.LEB128.Decode (Stream, Ver);
-      if Ver /= Core.Protocol_Version then
-         raise Constraint_Error with
-           "RGA Read_RGA: unsupported protocol version";
-      end if;
+    procedure Read_RGA
+      (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
+       Item   : out RGA)
+    is
+       use Ada.Streams;
+       use CRDT.Serialization;
+       Kind      : Protocol_Kind;
+       Total     : Natural;
+       Num_Items : Natural;
+       Id        : Node_Id;
+       Len       : Natural;
+       Deleted   : Boolean;
+       Prev_Idx  : Natural := 0;
+       New_Idx   : Natural;
+    begin
+       Read_Header (Stream, Kind, Total, Num_Items);
 
-      Core.LEB128.Decode (Stream, Total);
-      Core.LEB128.Decode (Stream, Num_Items);
-      Item.Total := Total;
-      Item.Head := 0;
-      Item.Count := 0;
-      Item.Free := 0;
+        if Num_Items > Item.Item_Capacity then
+           raise Constraint_Error with
+             "RGA Read_RGA: item count" & Natural'Image (Num_Items) &
+             " exceeds capacity" & Natural'Image (Item.Item_Capacity);
+        end if;
 
-      for J in 1 .. Num_Items loop
-         Node_Id'Read (Stream, Id);
-         Core.LEB128.Decode (Stream, Len);
-         Boolean'Read (Stream, Deleted);
+        Item.Total := Total;
+        Item.Head := 0;
+        Item.Count := 0;
+        Item.Free := 0;
 
-         New_Idx := Alloc_Item (Item);
-         if New_Idx > 0 then
-            Item.Count := J;
-         end if;
+        for J in 1 .. Num_Items loop
+           Node_Id'Read (Stream, Id);
+           Read_Natural (Kind, Stream, Len);
 
-         if New_Idx > 0 then
-            Item.Items (New_Idx).Id := Id;
-            Item.Items (New_Idx).Len := Len;
-            Item.Items (New_Idx).Deleted := Deleted;
-            for I in 1 .. Len loop
-               Element_Type'Read (Stream, Item.Items (New_Idx).Content (I));
-            end loop;
+          if Len > Max_Stride then
+             raise Constraint_Error with
+               "RGA Read_RGA: item len" & Natural'Image (Len) &
+               " exceeds Max_Stride" & Natural'Image (Max_Stride);
+          end if;
+
+          Boolean'Read (Stream, Deleted);
+
+          New_Idx := Alloc_Item (Item);
+          if New_Idx > 0 then
+             Item.Count := J;
+          end if;
+
+          if New_Idx > 0 then
+             Item.Items (New_Idx).Id := Id;
+             Item.Items (New_Idx).Len := Len;
+             Item.Items (New_Idx).Deleted := Deleted;
+             for I in 1 .. Len loop
+                Element_Type'Read (Stream, Item.Items (New_Idx).Content (I));
+             end loop;
             if Prev_Idx = 0 then
                Item.Head := New_Idx;
             else
