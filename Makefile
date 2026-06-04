@@ -40,8 +40,9 @@ doc: api-docs
 
 api-docs:
 	mkdir -p obj
-	alr exec -- gnatdoc -P crdt.gpr --backend=rst --output-dir=obj/gnatdoc-rst --exclude-dir="tests"
+	alr exec -- gnatdoc -P crdt.gpr --backend=rst --output-dir=obj/gnatdoc-rst
 	python3 tools/rst2md.py obj/gnatdoc-rst docs/api-docs
+	rm -f docs/api-docs/test_*.md docs/api-docs/crdt-test_support.md
 
 release:
 	@if [ -n "$(VERSION)" ]; then \
