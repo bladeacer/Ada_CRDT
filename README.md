@@ -1,3 +1,5 @@
+[![crdt Alire crate badge](https://img.shields.io/endpoint?url=https://alire.ada.dev/badges/crdt.json)](https://alire.ada.dev/crates/crdt)
+
 # CRDT
 
 CRDT (Conflict-Free Replicated Data Types) library for Ada/SPARK.
@@ -14,7 +16,7 @@ requests will be accepted here. Submit proposed changes there instead.
 alr with crdt
 ```
 
-Will work once added to the community index.
+[View on Alire Community Index](https://alire.ada.dev/crates/crdt).
 
 ### Local Index
 
