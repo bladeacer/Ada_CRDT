@@ -23,6 +23,7 @@
   | HLC Clock Skew                           |     4 | PASS   |
   | Tombstone Saturation                     |     7 | PASS   |
   | Fuzzing Network Partitions               |     8 | PASS   |
+  | V1 Migration: backward compat            |     5 | PASS   |
   | Fuzzing Chaos: bit-flip + skew + ooo     |    16 | PASS   |
   | Game of Life: Neighbors                  |     4 | PASS   |
   | Game of Life: Blinker                    |     3 | PASS   |

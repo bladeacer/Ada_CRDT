@@ -8,38 +8,46 @@ package body CRDT.Serialization is
 
    use Ada.Streams;
 
-   --  Read a single stream element from the underlying stream.
-   procedure Read_B (Stream : not null access Root_Stream_Type'Class;
-                     B      : out Stream_Element) is
-   begin
-      Stream_Element'Read (Stream, B);
-   end Read_B;
-
-   --  Decode one LEB128 Natural from a buffer of already-read bytes
-   --  followed by stream reads.  Advances Idx past consumed bytes.
-   procedure Decode_LEB128
-     (Buf      : Stream_Element_Array;
-      Idx      : in out Natural;
-      Stream   : not null access Root_Stream_Type'Class;
-      Value    : out Natural)
+   --  Decode a LEB128 Natural given a starter byte, reading
+   --  continuation bytes from the stream as needed.
+   procedure Decode_LEB128_From
+     (Stream : not null access Root_Stream_Type'Class;
+      B0     : Stream_Element;
+      Value  : out Natural)
    is
-      V        : Natural := 0;
-      Shift    : Natural := 0;
-      Byte_Val : Stream_Element;
+      V     : Natural := 0;
+      Shift : Natural := 0;
+      B     : Stream_Element := B0;
    begin
       loop
-         if Idx <= Buf'Last then
-            Byte_Val := Buf (Idx);
-            Idx := Idx + 1;
-         else
-            Stream_Element'Read (Stream, Byte_Val);
-         end if;
-         V := V + Natural (Byte_Val and 127) * (2 ** Shift);
+         V := V + Natural (B and 127) * (2 ** Shift);
          Shift := Shift + 7;
-         exit when (Byte_Val and 128) = 0;
+         exit when (B and 128) = 0;
+         Stream_Element'Read (Stream, B);
       end loop;
       Value := V;
-   end Decode_LEB128;
+   end Decode_LEB128_From;
+
+   --  Decode a LEB128 Natural from the stream (no starter byte).
+   procedure Decode_LEB128_Stream
+     (Stream : not null access Root_Stream_Type'Class;
+      Value  : out Natural) is
+      B : Stream_Element;
+   begin
+      Stream_Element'Read (Stream, B);
+      Decode_LEB128_From (Stream, B, Value);
+   end Decode_LEB128_Stream;
+
+   --  Try to read one byte; return False on End_Error.
+   function Try_Read (Stream : not null access Root_Stream_Type'Class;
+                      B      : out Stream_Element) return Boolean is
+   begin
+      Stream_Element'Read (Stream, B);
+      return True;
+   exception
+      when Ada.IO_Exceptions.End_Error =>
+         return False;
+   end Try_Read;
 
    -----------------
    --  Read_Header --
@@ -52,57 +60,59 @@ package body CRDT.Serialization is
       Count    : out Natural)
    is
       B1, B2, B3, B4 : Stream_Element;
-      Buf  : Stream_Element_Array (1 .. 3);
-      Idx  : Natural;
    begin
       --  First byte: protocol version.
-      --  Both V1 (Natural'Write of 2) and V2 (LEB128 of 2) begin with byte 2.
-      Read_B (Stream, B1);
+      if not Try_Read (Stream, B1) then
+         raise Ada.IO_Exceptions.End_Error;
+      end if;
       if B1 /= 2 then
          raise Constraint_Error with
            "Serialization.Read_Header: unsupported protocol version";
       end if;
 
-      Read_B (Stream, B2);
-
-      --  V2 Total can never be zero in V1's Natural'Write padding.
-      --  If B2 /= 0 it is definitely V2.
-      if B2 /= 0 then
-         Kind := Proto_V2;
-         Buf (1) := B2;
-         Idx := 1;
-         Decode_LEB128 (Buf, Idx, Stream, Total);
-         Decode_LEB128 (Buf, Idx, Stream, Count);
-         return;
-      end if;
-
-      --  B2 = 0: could be V1 padding or V2 with Total = 0.
-      Read_B (Stream, B3);
-
-      if B3 /= 0 then
-         --  V2: Total = 0 (from B2), Count starts at B3
+      if not Try_Read (Stream, B2) then
+         --  V2 with version-only payload
          Kind := Proto_V2;
          Total := 0;
-         Buf (1) := B3;
-         Idx := 1;
-         Decode_LEB128 (Buf, Idx, Stream, Count);
+         Count := 0;
          return;
       end if;
 
-      --  B2 = 0, B3 = 0: V1 version padding or V2 with Total = 0, Count = 0.
-      Read_B (Stream, B4);
+      if B2 /= 0 then
+         Kind := Proto_V2;
+         Decode_LEB128_From (Stream, B2, Total);
+         Decode_LEB128_Stream (Stream, Count);
+         return;
+      end if;
+
+      if not Try_Read (Stream, B3) then
+         --  V2: Total = 0, truncated after B2
+         Kind := Proto_V2;
+         Total := 0;
+         Count := 0;
+         return;
+      end if;
+
+      if B3 /= 0 then
+         Kind := Proto_V2;
+         Total := 0;
+         Decode_LEB128_From (Stream, B3, Count);
+         return;
+      end if;
+
+      if not Try_Read (Stream, B4) then
+         --  V2: Total = 0, Count = 0, stream ends at B3
+         Kind := Proto_V2;
+         Total := 0;
+         Count := 0;
+         return;
+      end if;
 
       if B4 = 0 then
-         --  V1: version is 4-byte Natural'Write [02, 00, 00, 00].
-         --  Total and Count follow as fixed 4-byte fields.
          Kind := Proto_V1;
          Natural'Read (Stream, Total);
          Natural'Read (Stream, Count);
       else
-         --  V2: Total = 0, Count = 0.
-         --  B4 is the first byte of the first item, consumed from the stream.
-         --  For an empty RGA (Total=0, Count=0) there are no items, so B4
-         --  should not exist in a well-formed payload.  Discard it.
          Kind := Proto_V2;
          Total := 0;
          Count := 0;

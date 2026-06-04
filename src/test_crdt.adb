@@ -8,6 +8,7 @@ with Ada.Streams.Stream_IO;
 with CRDT.Core;
 with CRDT.HLC;
 with CRDT.Pn_Counters;
+with CRDT.Serialization.Legacy;
 with CRDT.Lww_Element_Sets;
 with CRDT.Rga;
 with CRDT.Rgas;
@@ -1350,6 +1351,107 @@ procedure Test_Crdt is
    end Test_Fuzzing_Network_Partitions;
 
    -----------------------------------------------
+   --  V1 Migration (Backward Compatibility)     --
+   -----------------------------------------------
+   --  @summary V1 legacy format auto-migration: construct a raw V1 payload
+   --  byte-by-byte (fixed 4-byte Natural'Write), then read it back via the
+   --  version router and verify all data survives intact.
+   procedure Test_V1_Migration is
+      Max_RGA : constant Positive := 30;
+      package RGA_Str is new CRDT.Rga (Character, Max_RGA);
+      Src     : RGA_Str.RGA (Max_RGA);
+      Dst     : RGA_Str.RGA (Max_RGA);
+      use Ada.Streams;
+      use Ada.Streams.Stream_IO;
+      F : Ada.Streams.Stream_IO.File_Type;
+   begin
+      New_Line;
+      Put_Line ("[V1 Migration]");
+
+      --  Build a representative RGA using a single Insert_Bulk (1 item)
+      RGA_Str.Insert_Bulk (Src, 1, (1, 1), "ABCDE");
+
+      --  Construct V1 wire format byte-by-byte.
+      --  V1 layout: [Version:4][Total:4][Count:4]
+      --             then per-item [Node_Id:8][Len:4][Deleted:1][Content:Len×1]
+      declare
+         subtype SEO is Stream_Element_Offset;
+         Buf  : Stream_Element_Array (SEO'(1) .. 30);
+         Idx  : SEO := SEO'(1);
+         procedure WB (B : Stream_Element) is
+         begin Buf (Idx) := B; Idx := Idx + 1; end WB;
+         procedure WN (V : Natural) is
+         begin
+            --  Natural'Write on little-endian: LSB first
+            WB (Stream_Element (V mod 256));
+            WB (Stream_Element ((V / 256) mod 256));
+            WB (Stream_Element ((V / 65536) mod 256));
+            WB (Stream_Element ((V / 16777216) mod 256));
+         end WN;
+      begin
+         --  Header
+         WN (2);                     -- Protocol_Version = 2
+         WN (5);                     -- Total = 5
+         WN (1);                     -- Count = 1
+
+         --  Single item: Node_Id (Replica => 1, Seq => 1)
+         WN (1);  -- Replica
+         WN (1);  -- Seq
+         WN (5);  -- Len = 5
+         WB (0);  -- Deleted = False
+
+         --  Content: "ABCDE"
+         WB (65); WB (66); WB (67); WB (68); WB (69);
+
+         --  Write the V1 payload to file
+         Create (F, Out_File, "/tmp/crdt_v1_migration.bin");
+         Ada.Streams.Stream_IO.Write (F, Buf (1 .. Idx - 1));
+         Close (F);
+      end;
+
+      --  Read back through auto-detecting version router
+      Open (F, In_File, "/tmp/crdt_v1_migration.bin");
+      RGA_Str.RGA'Read (Stream (F), Dst);
+      Close (F);
+
+      Check (RGA_Str.Size (Dst) = 5,
+        "V1 migration: deserialized size = 5 (got" &
+        Natural'Image (RGA_Str.Size (Dst)) & ")");
+      Check (RGA_Str.Get (Dst, 1) = 'A', "V1 migration: Get(1) = 'A'");
+      Check (RGA_Str.Get (Dst, 3) = 'C', "V1 migration: Get(3) = 'C'");
+      Check (RGA_Str.Get (Dst, 5) = 'E', "V1 migration: Get(5) = 'E'");
+
+      --  Also test empty V1 payload (Total=0, Count=0)
+      declare
+         subtype SEO is Stream_Element_Offset;
+         Emp  : Stream_Element_Array (SEO'(1) .. 12);
+         EmpI : SEO := SEO'(1);
+         procedure WBE (B : Stream_Element) is
+         begin Emp (EmpI) := B; EmpI := EmpI + 1; end WBE;
+         procedure WNE (V : Natural) is
+         begin
+            WBE (Stream_Element (V mod 256));
+            WBE (Stream_Element ((V / 256) mod 256));
+            WBE (Stream_Element ((V / 65536) mod 256));
+            WBE (Stream_Element ((V / 16777216) mod 256));
+         end WNE;
+         Empty_Dst : RGA_Str.RGA (Max_RGA);
+      begin
+         WNE (2); WNE (0); WNE (0);  -- Version=2, Total=0, Count=0
+         Create (F, Out_File, "/tmp/crdt_v1_empty.bin");
+         Ada.Streams.Stream_IO.Write (F, Emp (1 .. EmpI - 1));
+         Close (F);
+         Open (F, In_File, "/tmp/crdt_v1_empty.bin");
+         RGA_Str.RGA'Read (Stream (F), Empty_Dst);
+         Close (F);
+         Check (RGA_Str.Size (Empty_Dst) = 0,
+           "V1 migration: empty RGA deserialized size = 0");
+      end;
+
+      Put_Line ("[V1 Migration] done.");
+   end Test_V1_Migration;
+
+   -----------------------------------------------
    --  Fuzzing Chaos (Defensive Serialization)   --
    -----------------------------------------------
    --  @summary Defensive serialization + chaos fuzzing:
@@ -2517,6 +2619,7 @@ begin
     Test_HLC_Clock_Skew;
     Test_Tombstone_Saturation;
     Test_Fuzzing_Network_Partitions;
+    Test_V1_Migration;
    Test_GoL_Neighbors;
    Test_GoL_Blinker;
    Test_GoL_Matrix_Yjs_Sync;
@@ -2584,6 +2687,7 @@ begin
          Row ("HLC Clock Skew", 4);
          Row ("Tombstone Saturation", 7);
           Row ("Fuzzing Network Partitions", 8);
+          Row ("V1 Migration", 5, "backward compat");
           Row ("Fuzzing Chaos", 16, "bit-flip + skew + ooo");
            Row ("Game of Life", 4, "Neighbors");
           Row ("Game of Life", 3, "Blinker");
