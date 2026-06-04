@@ -9,7 +9,9 @@ with Ada.Calendar;
 with CRDT.Core;
 with CRDT.HLC;
 
-package CRDT.Sync.State_Based is
+package CRDT.Sync.State_Based with
+  SPARK_Mode
+is
 
    --  Configuration for a state-based sync session.
    --  @field Max_Replicas  Upper bound on distinct replicas.

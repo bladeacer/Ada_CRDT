@@ -5,9 +5,11 @@
 --
 --  All types in CRDT natively use bounded storage; this package
 --  provides convenient renamings and documentation.
-with CRDT.Core;
-with CRDT.Pn_Counters;
-with CRDT.Lww_Element_Sets;
+   with CRDT.Core;
+   with CRDT.Pn_Counters;
+   with CRDT.Lww_Element_Sets;
+
+   pragma SPARK_Mode;
 with CRDT.Rga;
 
 package CRDT.Bounded is

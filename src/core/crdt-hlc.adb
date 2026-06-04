@@ -1,6 +1,8 @@
 with Ada.Calendar;
 
-package body CRDT.HLC is
+package body CRDT.HLC with
+  SPARK_Mode => On
+is
 
    use Ada.Calendar;
    use type Core.Replica_Id;
@@ -26,9 +28,9 @@ package body CRDT.HLC is
 
    function "=" (Left, Right : HLC_Time) return Boolean is
    begin
-      return Left.Wall = Right.Wall
-        and then Left.Log = Right.Log
-        and then Left.Node = Right.Node;
+       return Left.Wall = Right.Wall
+         and then Left.Log = Right.Log
+         and then Left.Node = Right.Node;
    end "=";
 
    function ">" (Left, Right : HLC_Time) return Boolean is
@@ -40,7 +42,9 @@ package body CRDT.HLC is
    --  Create   --
    ---------------
 
-   function Create (Node : Core.Replica_Id) return Instance is
+   function Create (Node : Core.Replica_Id) return Instance with
+     SPARK_Mode => Off
+   is
    begin
       return Instance'(Wall => Clock,
                        Node => Node,
@@ -51,7 +55,9 @@ package body CRDT.HLC is
    --  Tick     --
    ---------------
 
-   procedure Tick (Clock : in out Instance) is
+   procedure Tick (Clock : in out Instance) with
+     SPARK_Mode => Off
+   is
       Now_Time : constant Ada.Calendar.Time := Ada.Calendar.Clock;
    begin
       if Now_Time > Clock.Wall then
@@ -66,7 +72,9 @@ package body CRDT.HLC is
    --  Recv     --
    ---------------
 
-   procedure Recv (Clock : in out Instance; Remote : HLC_Time) is
+   procedure Recv (Clock : in out Instance; Remote : HLC_Time) with
+     SPARK_Mode => Off
+   is
       Now_Time : constant Ada.Calendar.Time := Ada.Calendar.Clock;
    begin
       if Now_Time > Clock.Wall and then Now_Time > Remote.Wall then
@@ -78,7 +86,7 @@ package body CRDT.HLC is
          Clock.Wall := Remote.Wall;
          Clock.Log := Remote.Log + 1;
       else
-         -- Equal wall times
+         --Equal wall times
          Clock.Log := Natural'Max (Clock.Log, Remote.Log) + 1;
       end if;
    end Recv;

@@ -6,7 +6,9 @@
 --  ordered delivery channels (WebSockets, TCP/TLS streams).
 with CRDT.Core;
 
-package CRDT.Sync.Op_Based is
+package CRDT.Sync.Op_Based with
+  SPARK_Mode
+is
 
    --  Kind of operation for discriminated record.
    type Op_Kind is (Op_Insert, Op_Delete, Op_Increment, Op_Decrement);
@@ -69,6 +71,7 @@ private
       Ops   : Op_Array (1 .. Capacity);
       Count : Natural := 0;
       GC    : Natural := 0;
-   end record;
+   end record with
+     Type_Invariant => GC <= Count and then Count <= Capacity;
 
 end CRDT.Sync.Op_Based;

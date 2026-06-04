@@ -10,7 +10,9 @@
 with Ada.Calendar;
 with CRDT.Core;
 
-package CRDT.HLC is
+package CRDT.HLC with
+  SPARK_Mode
+is
 
    --  HLC timestamp wrapping Core's HLC_Time.
    type HLC_Time is new Core.HLC_Time;

@@ -3,7 +3,9 @@
 --  vector clocks, and the wire protocol version constant.
 with Ada.Calendar;
 
-package CRDT.Core is
+package CRDT.Core with
+  SPARK_Mode
+is
 
    --  Unique identifier for a replica in the distributed system.
    type Replica_Id is new Positive;
@@ -82,41 +84,43 @@ package CRDT.Core is
    --  @param Left   Left vector clock.
    --  @param Right  Right vector clock.
    --  @return True if Left is strictly behind Right.
-   function VTime_Less (Left, Right : VTime) return Boolean;
+   function VTime_Less (Left, Right : VTime) return Boolean with
+     Pre => Left'Length = Right'Length and then Left'First = Right'First;
 
    --  Non-strict vector-clock less-or-equal: all entries <=.
    --  @param Left   Left vector clock.
    --  @param Right  Right vector clock.
    --  @return True if Left is at or behind Right.
-   function VTime_Leq  (Left, Right : VTime) return Boolean;
+   function VTime_Leq  (Left, Right : VTime) return Boolean with
+     Pre => Left'Length = Right'Length and then Left'First = Right'First;
 
    --  Vector-clock equality: all entries match.
    --  @param Left   Left vector clock.
    --  @param Right  Right vector clock.
    --  @return True if Left and Right are identical.
-   function VTime_Eq   (Left, Right : VTime) return Boolean;
+   function VTime_Eq   (Left, Right : VTime) return Boolean with
+     Pre => Left'Length = Right'Length and then Left'First = Right'First;
 
    --  Element-wise max merge of Source into Target.
    --  @param Target  Vector clock to update.
    --  @param Source  Vector clock to merge from.
-   procedure VTime_Merge (Target : in out VTime; Source : VTime);
+   procedure VTime_Merge (Target : in out VTime; Source : VTime) with
+     Pre => Target'Length = Source'Length and then Target'First = Source'First;
 
    --  Increment entry Idx by one.
    --  @param VT   Vector clock to modify.
    --  @param Idx  Index of the entry to increment.
-   procedure VTime_Increment (VT : in out VTime; Idx : Positive);
+   procedure VTime_Increment (VT : in out VTime; Idx : Positive) with
+     Pre => Idx in VT'Range and then VT (Idx) < Natural'Last;
 
    --  Generate a new globally unique replica identifier.
    --  Uses a cryptographically seeded random generator.
    --  @return A fresh Replica_Id not previously returned.
-   function New_Replica_Id return Replica_Id;
+   function New_Replica_Id return Replica_Id with
+     SPARK_Mode => Off;
 
    --  Wire protocol version for all serialized CRDT state.
    --  Increment when making breaking changes to the binary format.
    Protocol_Version : constant Natural := 2;
-
-private
-
-   Generator_Init : Boolean := False;
 
 end CRDT.Core;

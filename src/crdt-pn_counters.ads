@@ -84,12 +84,15 @@ private
    type PN_Counter (Max_Actors : Positive) is record
       Entries : Actor_Array (1 .. Max_Actors);
       Count   : Natural := 0;
-   end record;
+   end record with
+     Type_Invariant => Count <= Max_Actors;
 
    function Can_Increment (C : PN_Counter; By : Counter_Range := 1)
-                              return Boolean is (True);
+                               return Boolean is
+     (C.Count < C.Max_Actors);
 
    function Can_Decrement (C : PN_Counter; By : Counter_Range := 1)
-                              return Boolean is (True);
+                               return Boolean is
+     (C.Count < C.Max_Actors);
 
 end CRDT.Pn_Counters;
