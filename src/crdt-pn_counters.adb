@@ -1,3 +1,7 @@
+with Ada.Streams;
+with CRDT.Serialization;
+with CRDT.Core.LEB128;
+
 package body CRDT.Pn_Counters with
   SPARK_Mode => On
 is
@@ -105,5 +109,54 @@ is
           end if;
       end loop;
    end Merge;
+
+   ---------------
+   --  Write/Read --
+   ---------------
+
+   procedure Write_PN_Counter
+     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
+      Item   : PN_Counter) with SPARK_Mode => Off
+   is
+   begin
+      CRDT.Core.LEB128.Encode (Stream, CRDT.Core.Protocol_Version);
+      CRDT.Core.LEB128.Encode (Stream, 0);  -- Total = 0 (unused)
+      CRDT.Core.LEB128.Encode (Stream, Item.Count);
+      for I in 1 .. Item.Count loop
+         CRDT.Core.LEB128.Encode (Stream, Natural (Item.Entries (I).Actor));
+         CRDT.Core.LEB128.Encode (Stream, Item.Entries (I).P);
+         CRDT.Core.LEB128.Encode (Stream, Item.Entries (I).N);
+      end loop;
+   end Write_PN_Counter;
+
+   procedure Read_PN_Counter
+     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
+      Item   : out PN_Counter) with SPARK_Mode => Off
+   is
+      Kind  : CRDT.Serialization.Protocol_Kind;
+      Total : Natural;
+      Count : Natural;
+   begin
+      CRDT.Serialization.Read_Header (Stream, Kind, Total, Count);
+      if Count > Item.Max_Actors then
+         raise Constraint_Error with
+           "PN_Counter stream has more entries than Max_Actors";
+      end if;
+      Item.Count := Count;
+      for I in 1 .. Count loop
+         declare
+            Raw_A : Natural;
+            Raw_P : Natural;
+            Raw_N : Natural;
+         begin
+            CRDT.Serialization.Read_Natural (Kind, Stream, Raw_A);
+            CRDT.Serialization.Read_Natural (Kind, Stream, Raw_P);
+            CRDT.Serialization.Read_Natural (Kind, Stream, Raw_N);
+            Item.Entries (I) := (Actor => Core.Replica_Id (Raw_A),
+                                 P     => Counter_Range (Raw_P),
+                                 N     => Counter_Range (Raw_N));
+         end;
+      end loop;
+   end Read_PN_Counter;
 
 end CRDT.Pn_Counters;

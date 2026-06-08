@@ -1,3 +1,7 @@
+with Ada.Streams;
+with CRDT.Core.LEB128;
+with CRDT.Serialization;
+
 package body CRDT.Lww_Element_Sets with
   SPARK_Mode
 is
@@ -96,5 +100,68 @@ is
                  Source.Remove_Array (I).Time);
       end loop;
    end Merge;
+
+   ---------------
+   --  Write/Read --
+   ---------------
+
+   procedure Write_LWW_Element_Set
+     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
+      Item   : LWW_Element_Set) with SPARK_Mode => Off
+   is
+   begin
+      CRDT.Core.LEB128.Encode (Stream, CRDT.Core.Protocol_Version);
+      CRDT.Core.LEB128.Encode (Stream, Item.Add_Size);
+      CRDT.Core.LEB128.Encode (Stream, Item.Remove_Size);
+      for I in 1 .. Item.Add_Size loop
+         Element_Type'Write (Stream, Item.Add_Array (I).Element);
+         CRDT.Core.LEB128.Encode (Stream, Item.Add_Array (I).Time.Stamp);
+         CRDT.Core.LEB128.Encode (Stream, Natural (Item.Add_Array (I).Time.Node));
+      end loop;
+      for I in 1 .. Item.Remove_Size loop
+         Element_Type'Write (Stream, Item.Remove_Array (I).Element);
+         CRDT.Core.LEB128.Encode (Stream, Item.Remove_Array (I).Time.Stamp);
+         CRDT.Core.LEB128.Encode (Stream, Natural (Item.Remove_Array (I).Time.Node));
+      end loop;
+   end Write_LWW_Element_Set;
+
+   procedure Read_LWW_Element_Set
+     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
+      Item   : out LWW_Element_Set) with SPARK_Mode => Off
+   is
+      Kind        : CRDT.Serialization.Protocol_Kind;
+      Add_Size    : Natural;
+      Remove_Size : Natural;
+   begin
+      CRDT.Serialization.Read_Header (Stream, Kind, Add_Size, Remove_Size);
+      if Add_Size > Item.Capacity or else Remove_Size > Item.Capacity then
+         raise Constraint_Error with
+           "LWW_Element_Set stream has more entries than Capacity";
+      end if;
+      Item.Add_Size := Add_Size;
+      Item.Remove_Size := Remove_Size;
+      for I in 1 .. Add_Size loop
+         declare
+            Stamp : Natural;
+            Node  : Natural;
+         begin
+            Element_Type'Read (Stream, Item.Add_Array (I).Element);
+            CRDT.Serialization.Read_Natural (Kind, Stream, Stamp);
+            CRDT.Serialization.Read_Natural (Kind, Stream, Node);
+            Item.Add_Array (I).Time := (Stamp, CRDT.Core.Replica_Id (Node));
+         end;
+      end loop;
+      for I in 1 .. Remove_Size loop
+         declare
+            Stamp : Natural;
+            Node  : Natural;
+         begin
+            Element_Type'Read (Stream, Item.Remove_Array (I).Element);
+            CRDT.Serialization.Read_Natural (Kind, Stream, Stamp);
+            CRDT.Serialization.Read_Natural (Kind, Stream, Node);
+            Item.Remove_Array (I).Time := (Stamp, CRDT.Core.Replica_Id (Node));
+         end;
+      end loop;
+   end Read_LWW_Element_Set;
 
 end CRDT.Lww_Element_Sets;

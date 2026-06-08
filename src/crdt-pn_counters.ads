@@ -2,6 +2,7 @@
 --  Tracks increments (P) and decrements (N) for each replica independently.
 --  Fixed memory: 3 replicas = 3 slots regardless of millions of ops.
 --  Value = sum(P) - sum(N).
+with Ada.Streams;
 with CRDT.Core;
 
 package CRDT.Pn_Counters with
@@ -65,6 +66,19 @@ is
    --  @param Source  Counter to merge from.
    procedure Merge (Target : in out PN_Counter;
                      Source : PN_Counter);
+
+   --  Serialize counter to stream (V2: LEB128-encoded).
+   procedure Write_PN_Counter
+     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
+      Item   : PN_Counter);
+
+   --  Deserialize counter from stream (auto-detects V1 vs V2).
+   procedure Read_PN_Counter
+     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
+      Item   : out PN_Counter);
+
+   for PN_Counter'Write use Write_PN_Counter;
+   for PN_Counter'Read  use Read_PN_Counter;
 
 private
 

@@ -1,5 +1,8 @@
 with CRDT.Test_Support; use CRDT.Test_Support;
+with CRDT.Pn_Counters;
+with CRDT.Lww_Element_Sets;
 with CRDT.Rga;
+with CRDT.Core;
 with Ada.Streams;
 with Ada.Streams.Stream_IO;
 with Ada.Text_IO; use Ada.Text_IO;
@@ -208,9 +211,200 @@ package body Test_Serialization is
       Put_Line ("[V1 Migration] done.");
    end Test_V1_Migration;
 
+   procedure Test_Migration_PN_Counter is
+      use Ada.Streams;
+      use Ada.Streams.Stream_IO;
+      F : Ada.Streams.Stream_IO.File_Type;
+      subtype SEO is Stream_Element_Offset;
+      Buf  : Stream_Element_Array (SEO'(1) .. 40);
+      Idx  : SEO := SEO'(1);
+      procedure WB (B : Stream_Element) is
+      begin Buf (Idx) := B; Idx := Idx + 1; end WB;
+      procedure WN (V : Natural) is
+      begin
+         WB (Stream_Element (V mod 256));
+         WB (Stream_Element ((V / 256) mod 256));
+         WB (Stream_Element ((V / 65536) mod 256));
+         WB (Stream_Element ((V / 16777216) mod 256));
+      end WN;
+   begin
+      New_Line;
+      Put_Line ("[Migration: PN_Counter V1->V2]");
+
+      --  V1 header: [Version:4bytes][Total:4bytes][Count:4bytes]
+      WN (2);  -- Version (B1..B4 = 02 00 00 00)
+      WN (0);  -- Total = 0 (unused for PN_Counter)
+      WN (2);  -- Count = 2
+      --  Per-item: [Actor:4][P:4][N:4]
+      WN (1);  WN (5);  WN (2);   -- Actor=1, P=5, N=2
+      WN (2);  WN (3);  WN (0);   -- Actor=2, P=3, N=0
+
+      Create (F, Out_File, "/tmp/crdt_migrate_pn_v1.bin");
+      Ada.Streams.Stream_IO.Write (F, Buf (1 .. Idx - 1));
+      Close (F);
+
+      --  Read V1 data into counter
+      declare
+         C : CRDT.Pn_Counters.PN_Counter (Max_Actors => 5);
+         D : CRDT.Pn_Counters.PN_Counter (Max_Actors => 5);
+      begin
+         Open (F, In_File, "/tmp/crdt_migrate_pn_v1.bin");
+         CRDT.Pn_Counters.PN_Counter'Read (Stream (F), C);
+         Close (F);
+
+         RunR.Check (CRDT.Pn_Counters.Value (C) = 6,
+           "PN V1 migration: value = 5+3-2 = 6 (got" &
+           Integer'Image (CRDT.Pn_Counters.Value (C)) & ")");
+
+         --  Write back as V2
+         Create (F, Out_File, "/tmp/crdt_migrate_pn_v2.bin");
+         CRDT.Pn_Counters.PN_Counter'Write (Stream (F), C);
+         Close (F);
+
+         --  Read V2 output back
+         Open (F, In_File, "/tmp/crdt_migrate_pn_v2.bin");
+         CRDT.Pn_Counters.PN_Counter'Read (Stream (F), D);
+         Close (F);
+
+         RunR.Check (CRDT.Pn_Counters.Value (C) = CRDT.Pn_Counters.Value (D),
+           "PN V1->V2 round-trip: values match");
+      end;
+
+      --  Also test empty counter (Count=0)
+      declare
+         E : Stream_Element_Array (SEO'(1) .. 12);
+         P : SEO := SEO'(1);
+         procedure WBE (B : Stream_Element) is
+         begin E (P) := B; P := P + 1; end WBE;
+         procedure WNE (V : Natural) is
+         begin
+            WBE (Stream_Element (V mod 256));
+            WBE (Stream_Element ((V / 256) mod 256));
+            WBE (Stream_Element ((V / 65536) mod 256));
+            WBE (Stream_Element ((V / 16777216) mod 256));
+         end WNE;
+         C : CRDT.Pn_Counters.PN_Counter (Max_Actors => 5);
+         D : CRDT.Pn_Counters.PN_Counter (Max_Actors => 5);
+      begin
+         WNE (2); WNE (0); WNE (0);  -- Version=2, Total=0, Count=0
+         Create (F, Out_File, "/tmp/crdt_migrate_pn_v1_empty.bin");
+         Ada.Streams.Stream_IO.Write (F, E (1 .. P - 1));
+         Close (F);
+
+         Open (F, In_File, "/tmp/crdt_migrate_pn_v1_empty.bin");
+         CRDT.Pn_Counters.PN_Counter'Read (Stream (F), C);
+         Close (F);
+         RunR.Check (CRDT.Pn_Counters.Value (C) = 0,
+           "PN V1 migration: empty counter value = 0");
+         RunR.Check (CRDT.Pn_Counters.Value (C) = CRDT.Pn_Counters.Value (D),
+           "PN V1 migration: empty counter matches fresh");
+      end;
+
+      Put_Line ("[Migration: PN_Counter V1->V2] done.");
+   end Test_Migration_PN_Counter;
+
+    procedure Test_Migration_LWW_Roundtrip is
+       Max_LWW : constant Positive := 10;
+       package LWW is new CRDT.Lww_Element_Sets (Integer, Max_LWW);
+       use Ada.Streams;
+       use Ada.Streams.Stream_IO;
+       F : Ada.Streams.Stream_IO.File_Type;
+       Src : LWW.LWW_Element_Set (Max_LWW);
+       Dst : LWW.LWW_Element_Set (Max_LWW);
+       use type CRDT.Core.Lamport_Time;
+       TS1 : constant CRDT.Core.Lamport_Time := (100, 1);
+       TS2 : constant CRDT.Core.Lamport_Time := (200, 1);
+    begin
+       New_Line;
+       Put_Line ("[Migration: LWW V1->V2]");
+
+       --  V1 wire: [Ver:4][Add_Sz:4][Rem_Sz:4]
+       --           per-entry: [Elem'Write][Stamp:4][Node:4]
+       declare
+          subtype SEO is Stream_Element_Offset;
+          Buf  : Stream_Element_Array (SEO'(1) .. 40);
+          Idx  : SEO := SEO'(1);
+          procedure WB (B : Stream_Element) is
+          begin Buf (Idx) := B; Idx := Idx + 1; end WB;
+          procedure WN (V : Natural) is
+          begin
+             WB (Stream_Element (V mod 256));
+             WB (Stream_Element ((V / 256) mod 256));
+             WB (Stream_Element ((V / 65536) mod 256));
+             WB (Stream_Element ((V / 16777216) mod 256));
+          end WN;
+       begin
+          WN (2);    -- Version = 2 (in V1 4-byte encoding)
+          WN (2);    -- Add_Size = 2
+          WN (0);    -- Remove_Size = 0
+
+          --  Entry 1: Element=42, Stamp=100, Node=1
+          WN (42);
+          WN (100);
+          WN (1);
+
+          --  Entry 2: Element=99, Stamp=200, Node=1
+          WN (99);
+          WN (200);
+          WN (1);
+
+          Create (F, Out_File, "/tmp/crdt_lww_v1.bin");
+          Ada.Streams.Stream_IO.Write (F, Buf (1 .. Idx - 1));
+          Close (F);
+       end;
+
+       --  Read V1 data
+       declare
+          C : LWW.LWW_Element_Set (Max_LWW);
+          D : LWW.LWW_Element_Set (Max_LWW);
+       begin
+          Open (F, In_File, "/tmp/crdt_lww_v1.bin");
+          LWW.LWW_Element_Set'Read (Stream (F), C);
+          Close (F);
+
+          RunR.Check (LWW.Contains (C, 42), "LWW V1 migration: contains 42");
+          RunR.Check (LWW.Contains (C, 99), "LWW V1 migration: contains 99");
+          RunR.Check (not LWW.Contains (C, 0), "LWW V1 migration: not contains 0");
+
+          --  Write back as V2
+          Create (F, Out_File, "/tmp/crdt_lww_v2.bin");
+          LWW.LWW_Element_Set'Write (Stream (F), C);
+          Close (F);
+
+          --  Read V2 output back
+          Open (F, In_File, "/tmp/crdt_lww_v2.bin");
+          LWW.LWW_Element_Set'Read (Stream (F), D);
+          Close (F);
+
+          RunR.Check (LWW.Contains (D, 42), "LWW V1->V2 round-trip: contains 42");
+          RunR.Check (LWW.Contains (D, 99), "LWW V1->V2 round-trip: contains 99");
+          RunR.Check (not LWW.Contains (D, 0), "LWW V1->V2 round-trip: not contains 0");
+       end;
+
+       --  V2 round-trip
+       LWW.Add (Src, 42, TS1);
+       LWW.Add (Src, 99, TS2);
+
+       Create (F, Out_File, "/tmp/crdt_lww_v2_rt.bin");
+       LWW.LWW_Element_Set'Write (Stream (F), Src);
+       Close (F);
+
+       Open (F, In_File, "/tmp/crdt_lww_v2_rt.bin");
+       LWW.LWW_Element_Set'Read (Stream (F), Dst);
+       Close (F);
+
+       RunR.Check (LWW.Contains (Dst, 42), "LWW V2 round-trip: contains 42");
+       RunR.Check (LWW.Contains (Dst, 99), "LWW V2 round-trip: contains 99");
+       RunR.Check (not LWW.Contains (Dst, 0), "LWW V2 round-trip: not contains 0");
+
+       Put_Line ("[Migration: LWW V1->V2] done.");
+    end Test_Migration_LWW_Roundtrip;
+
 begin
    Test_Stream_Serialization;
    Test_Byte_Boundary;
    Test_V1_Migration;
+   Test_Migration_PN_Counter;
+   Test_Migration_LWW_Roundtrip;
 end Run;
 end Test_Serialization;

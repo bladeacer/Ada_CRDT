@@ -2,7 +2,7 @@
 
 PN-Counter with per-replica actor map. Tracks increments (P) and decrements (N) for each replica independently. Fixed memory: 3 replicas = 3 slots regardless of millions of ops. Value = sum(P) - sum(N).
 
-> **Note:** 8 public item(s) shown below; 3 private internal item(s) are in the `private` section.
+> **Note:** 10 public item(s) shown below; 3 private internal item(s) are in the `private` section.
 
 ## Types
 
@@ -71,6 +71,20 @@ Default_Initial_Condition;
 |-----------|-------------|
 | `Source` | Counter to merge from. |
 | `Target` | Counter to merge into. |
+
+### procedure Read_PN_Counter (Stream : Ada.Streams.Root_Stream_Type; Item : CRDT.Pn_Counters.PN_Counter)
+
+| Parameter | Description |
+|-----------|-------------|
+| `Item` |  |
+| `Stream` |  |
+
+### procedure Write_PN_Counter (Stream : Ada.Streams.Root_Stream_Type; Item : CRDT.Pn_Counters.PN_Counter)
+
+| Parameter | Description |
+|-----------|-------------|
+| `Item` |  |
+| `Stream` |  |
 
 ---
 

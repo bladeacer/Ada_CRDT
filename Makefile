@@ -45,6 +45,35 @@ api-docs:
 	rm -f docs/api-docs/test_*.md docs/api-docs/crdt-test_support.md
 	sed -i '/](test_[^)]*\.md)/d' docs/api-docs/index.md
 	sed -i '/](crdt-test_support\.md)/d' docs/api-docs/index.md
+	@echo "Regenerating docs/changelogs/index.md..."
+	@list=""; \
+	for f in docs/changelogs/crdt-*.md; do \
+	  v=$$(basename "$$f" .md | sed 's/crdt-//'); \
+	  case "$$v" in *-migration|index) continue;; esac; \
+	  list="$$list$$v "; \
+	done; \
+	links=""; \
+	for v in $$(echo $$list | tr ' ' '\n' | sort -t. -k1,1rn -k2,2rn -k3,3rn); do \
+	  links="$$links- [$$v](crdt-$$v.md)\n"; \
+	done; \
+	awk -v links="$$links" \
+	  '/<!-- CHANGELOG_LIST -->/{print; printf "%s", links; inside=1; next} \
+	   inside && /<!-- CHANGELOG_LIST_END -->/{inside=0; next} \
+	   inside{next} \
+	   1' docs/changelogs/index.md > /tmp/changelog-index.md && \
+	mv /tmp/changelog-index.md docs/changelogs/index.md
+	@echo "Validating changelog links..."
+	@for f in docs/changelogs/*.md; do \
+	  base=$$(dirname "$$f"); \
+	  for link in $$(sed -n 's/.*\[.*\](\([^)]*\.md\)).*/\1/p' "$$f"); do \
+	    resolved="$$base/$$link"; \
+	    if [ ! -f "$$resolved" ] && [ ! -f "docs/changelogs/$$link" ]; then \
+	      echo "ERROR: broken link '$$link' in $$f"; \
+	      exit 1; \
+	    fi; \
+	  done; \
+	done; \
+	echo "All changelog links OK"
 
 release:
 	@if [ -n "$(VERSION)" ]; then \

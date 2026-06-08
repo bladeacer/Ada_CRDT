@@ -2,7 +2,7 @@
 
 Last-Writer-Wins Element Set using Lamport timestamps. Stores (element, Lamport_Time) pairs for add and remove sets. An element is present iff its add-timestamp exceeds its remove-timestamp. Uses logical Lamport timestamps instead of wall clocks, avoiding clock skew issues in distributed deployments.
 
-> **Note:** 8 public item(s) shown below; 1 private internal item(s) are in the `private` section.
+> **Note:** 10 public item(s) shown below; 1 private internal item(s) are in the `private` section.
 
 ## Types
 
@@ -61,6 +61,13 @@ end record;
 | `Source` | The set to merge from. |
 | `Target` | The set to merge into. |
 
+### procedure Read_LWW_Element_Set (Stream : Ada.Streams.Root_Stream_Type; Item : CRDT.Lww_Element_Sets.LWW_Element_Set)
+
+| Parameter | Description |
+|-----------|-------------|
+| `Item` |  |
+| `Stream` |  |
+
 ### procedure Remove (S : CRDT.Lww_Element_Sets.LWW_Element_Set; E : CRDT.Lww_Element_Sets.Element_Type; TS : CRDT.Core.Lamport_Time)
 
 | Parameter | Description |
@@ -68,6 +75,13 @@ end record;
 | `E` | Element to remove. |
 | `S` | The set to modify. |
 | `TS` | Lamport timestamp for this remove operation. |
+
+### procedure Write_LWW_Element_Set (Stream : Ada.Streams.Root_Stream_Type; Item : CRDT.Lww_Element_Sets.LWW_Element_Set)
+
+| Parameter | Description |
+|-----------|-------------|
+| `Item` |  |
+| `Stream` |  |
 
 ---
 

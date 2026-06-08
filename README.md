@@ -38,6 +38,18 @@ make build
 make run
 ```
 
+---
+
+## Documentation
+
+[Click here to view the API docs](docs/api-docs/index.md).
+
+## Changelogs
+
+[Click here to view the Changelogs](docs/changelogs/index.md).
+
+---
+
 ## Core Types
 
 ### PN-Counter (Actor Map)

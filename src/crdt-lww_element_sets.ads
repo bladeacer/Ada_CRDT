@@ -6,6 +6,7 @@
 --
 --  @formal Element_Type  Type of elements to store in the set.
 --  @formal Max_Set_Size  Maximum number of distinct elements.
+with Ada.Streams;
 with CRDT.Core;
 
 generic
@@ -62,9 +63,22 @@ is
    procedure Merge (Target : in out LWW_Element_Set;
                      Source : LWW_Element_Set);
 
-   --  Remove all entries, resetting to empty state.
-   --  @param S  The set to clear.
-   procedure Clear (S : in out LWW_Element_Set);
+    --  Remove all entries, resetting to empty state.
+    --  @param S  The set to clear.
+    procedure Clear (S : in out LWW_Element_Set);
+
+   --  Serialize set to stream (V2: LEB128-encoded sizes + canonical element stream).
+   procedure Write_LWW_Element_Set
+     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
+      Item   : LWW_Element_Set);
+
+   --  Deserialize set from stream (auto-detects V1 vs V2).
+   procedure Read_LWW_Element_Set
+     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
+      Item   : out LWW_Element_Set);
+
+   for LWW_Element_Set'Write use Write_LWW_Element_Set;
+   for LWW_Element_Set'Read  use Read_LWW_Element_Set;
 
 private
 
