@@ -14,6 +14,16 @@ type Protocol_Kind is (Proto_V1, Proto_V2);
 
 ## Procedures
 
+### procedure Migrate_Header (Source : Ada.Streams.Root_Stream_Type; Dest : Ada.Streams.Root_Stream_Type; Kind : CRDT.Serialization.Protocol_Kind; Total : Standard.Natural; Count : Standard.Natural)
+
+| Parameter | Description |
+|-----------|-------------|
+| `Count` |  |
+| `Dest` |  |
+| `Kind` |  |
+| `Source` |  |
+| `Total` |  |
+
 ### procedure Read_Header (Stream : Ada.Streams.Root_Stream_Type; Kind : CRDT.Serialization.Protocol_Kind; Total : Standard.Natural; Count : Standard.Natural)
 
 | Parameter | Description |

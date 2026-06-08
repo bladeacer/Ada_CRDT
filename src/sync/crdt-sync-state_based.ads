@@ -38,7 +38,8 @@ is
    --  Merge received remote state into local state.
    --  @param Local   Local state to update.
    --  @param Remote  Remote state to merge from.
-   procedure Merge (Local : in out Replica_State; Remote : Replica_State);
+   procedure Merge (Local : in out Replica_State; Remote : Replica_State) with
+     Depends => (Local => (Local, Remote));
 
    --  Compute delta: how many items the remote is missing.
    --  @param Local      Local replica state.

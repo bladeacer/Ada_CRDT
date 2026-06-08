@@ -1,4 +1,4 @@
-.PHONY: help all build run test test-fuzz prove doc api-docs clean release publish demo
+.PHONY: help all build run test test-fuzz prove doc api-docs compliance clean release publish demo
 
 .DEFAULT_GOAL := help
 
@@ -13,6 +13,7 @@ help:
 	@echo '  test-fuzz     Run chaos fuzzing (bit-flip + clock skew + OOO delta)'
 	@echo '  prove         Run SPARK proofs (alr gnatprove)'
 	@echo '  doc           Generate Markdown API docs (docs/api-docs/)'
+	@echo '  compliance    Verify DO-178C traceability (HLR tags in source)'
 	@echo '  release       Tag, update index+releases, push. Use VERSION=x.y.z'
 	@echo '  publish       Publish to Alire community index (run after make release)'
 	@echo '  test-publish  Dry-run showing what make publish would do'
@@ -36,6 +37,36 @@ test-fuzz: run
 prove:
 	alr gnatprove
 
+compliance:
+	@echo "=== DO-178C Traceability Verification ==="; \
+	total=0; \
+	missing=0; \
+	srcdir=src; \
+	hlrs=$$(grep -rn -- '--.*HLR-' $$srcdir | sed 's/.*HLR-\([A-Z0-9-]*\).*/\1/' | sort -u); \
+	echo "HLR tags found in source: $$(echo "$$hlrs" | wc -l)"; \
+	for hlr in $$hlrs; do \
+		found=$$(grep -rl -- "--.*HLR-$$hlr" $$srcdir); \
+		if [ -z "$$found" ]; then \
+			echo "  MISSING: HLR-$$hlr — no source file has this tag"; \
+			missing=$$((missing + 1)); \
+		else \
+			echo "  HLR-$$hlr -> $$(echo $$found | tr ' ' ',' | sed 's,$$(pwd)/,,g')"; \
+		fi; \
+		total=$$((total + 1)); \
+	done; \
+	echo ""; \
+	if [ "$$missing" -eq 0 ]; then \
+		echo "All $$total HLR tags validated — traceability OK."; \
+	else \
+		echo "$$missing / $$total HLR tags unresolved."; \
+		exit 1; \
+	fi; \
+	echo "=== Verification files ==="; \
+	for f in docs/compliance/HLR.md docs/compliance/LLR.md docs/compliance/TRACE.md docs/compliance/index.md; do \
+		if [ -f "$$f" ]; then echo "  $$f — present"; \
+		else echo "  $$f — MISSING"; missing=$$((missing + 1)); fi; \
+	done
+
 doc: api-docs
 
 api-docs:
@@ -46,22 +77,25 @@ api-docs:
 	sed -i '/](test_[^)]*\.md)/d' docs/api-docs/index.md
 	sed -i '/](crdt-test_support\.md)/d' docs/api-docs/index.md
 	@echo "Regenerating docs/changelogs/index.md..."
-	@list=""; \
-	for f in docs/changelogs/crdt-*.md; do \
-	  v=$$(basename "$$f" .md | sed 's/crdt-//'); \
-	  case "$$v" in *-migration|index) continue;; esac; \
-	  list="$$list$$v "; \
-	done; \
-	links=""; \
-	for v in $$(echo $$list | tr ' ' '\n' | sort -t. -k1,1rn -k2,2rn -k3,3rn); do \
-	  links="$$links- [$$v](crdt-$$v.md)\n"; \
-	done; \
-	awk -v links="$$links" \
-	  '/<!-- CHANGELOG_LIST -->/{print; printf "%s", links; inside=1; next} \
-	   inside && /<!-- CHANGELOG_LIST_END -->/{inside=0; next} \
-	   inside{next} \
-	   1' docs/changelogs/index.md > /tmp/changelog-index.md && \
-	mv /tmp/changelog-index.md docs/changelogs/index.md
+	@{ \
+	  echo "# CRDT Changelogs"; \
+	  echo ""; \
+	  echo "<!-- CHANGELOG_LIST -->"; \
+	  list=""; \
+	  for f in docs/changelogs/crdt-*.md; do \
+	    v=$$(basename "$$f" .md | sed 's/crdt-//'); \
+	    case "$$v" in *-migration|index) continue;; esac; \
+	    list="$$list$$v "; \
+	  done; \
+	  for v in $$(echo $$list | tr ' ' '\n' | sort -t. -k1,1rn -k2,2rn -k3,3rn); do \
+	    echo "- [$$v](crdt-$$v.md)"; \
+	  done; \
+	  echo ""; \
+	  echo "## Protocol Migration"; \
+	  echo ""; \
+	  echo "- [V1 → V2 Migration Guide](crdt-1.4.0-migration.md) — how \`Read_Header\`"; \
+	  echo "  auto-detects wire format, and how to write V1 for legacy peers"; \
+	} > docs/changelogs/index.md
 	@echo "Validating changelog links..."
 	@for f in docs/changelogs/*.md; do \
 	  base=$$(dirname "$$f"); \

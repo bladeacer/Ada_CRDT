@@ -137,4 +137,22 @@ package body CRDT.Serialization is
       end case;
    end Read_Natural;
 
+   --------------------
+   --  Migrate_Header --
+   --------------------
+
+   procedure Migrate_Header
+     (Source : not null access Ada.Streams.Root_Stream_Type'Class;
+      Dest   : not null access Ada.Streams.Root_Stream_Type'Class;
+      Kind   : out Protocol_Kind;
+      Total  : out Natural;
+      Count  : out Natural)
+   is
+   begin
+      Read_Header (Source, Kind, Total, Count);
+      Core.LEB128.Encode (Dest, Core.Protocol_Version);
+      Core.LEB128.Encode (Dest, Total);
+      Core.LEB128.Encode (Dest, Count);
+   end Migrate_Header;
+
 end CRDT.Serialization;

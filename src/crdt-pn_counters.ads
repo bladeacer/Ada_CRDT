@@ -61,7 +61,8 @@ is
                          By    : Counter_Range := 1;
                          Actor : Core.Replica_Id) with
      Pre  => Can_Increment (C, By),
-     Post => Entry_Count (C) <= C.Max_Actors;
+     Post => Entry_Count (C) <= C.Max_Actors,
+     Depends => (C => (C, By, Actor));
 
    --  Decrement the counter by By for the given Actor (replica).
    --  @param C      The counter to modify.
@@ -71,7 +72,8 @@ is
                          By    : Counter_Range := 1;
                          Actor : Core.Replica_Id) with
      Pre  => Can_Decrement (C, By),
-     Post => Entry_Count (C) <= C.Max_Actors;
+     Post => Entry_Count (C) <= C.Max_Actors,
+     Depends => (C => (C, By, Actor));
 
    --  Merge another counter's state into this one.
    --  For each actor: takes the element-wise max of P and N.
@@ -80,14 +82,19 @@ is
    --  @param Source  Counter to merge from.
    procedure Merge (Target : in out PN_Counter;
                      Source : PN_Counter) with
-     Post => Entry_Count (Target) <= Target.Max_Actors;
+     Post => Entry_Count (Target) <= Target.Max_Actors,
+     Depends => (Target => (Target, Source));
 
    --  Serialize counter to stream (V2: LEB128-encoded).
+   --  @param Stream  Output stream to write to.
+   --  @param Item    Counter to serialize.
    procedure Write_PN_Counter
      (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
       Item   : PN_Counter);
 
    --  Deserialize counter from stream (auto-detects V1 vs V2).
+   --  @param Stream  Input stream to read from.
+   --  @param Item    Counter to populate from stream data.
    procedure Read_PN_Counter
      (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
       Item   : out PN_Counter);

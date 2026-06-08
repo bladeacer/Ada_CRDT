@@ -56,7 +56,7 @@ end record;
 
 ## Procedures
 
-### procedure Add (S : CRDT.Lww_Element_Sets.LWW_Element_Set; E : CRDT.Lww_Element_Sets.Element_Type; TS : CRDT.Core.Lamport_Time) `[Post]`
+### procedure Add (S : CRDT.Lww_Element_Sets.LWW_Element_Set; E : CRDT.Lww_Element_Sets.Element_Type; TS : CRDT.Core.Lamport_Time) `[Post]` `[Depends]`
 
 | Parameter | Description |
 |-----------|-------------|
@@ -64,13 +64,13 @@ end record;
 | `S` | The set to modify. |
 | `TS` | Lamport timestamp for this add operation. |
 
-### procedure Clear (S : CRDT.Lww_Element_Sets.LWW_Element_Set) `[Post]`
+### procedure Clear (S : CRDT.Lww_Element_Sets.LWW_Element_Set) `[Post]` `[Depends]`
 
 | Parameter | Description |
 |-----------|-------------|
 | `S` | The set to clear. |
 
-### procedure Merge (Target : CRDT.Lww_Element_Sets.LWW_Element_Set; Source : CRDT.Lww_Element_Sets.LWW_Element_Set) `[Post]`
+### procedure Merge (Target : CRDT.Lww_Element_Sets.LWW_Element_Set; Source : CRDT.Lww_Element_Sets.LWW_Element_Set) `[Post]` `[Depends]`
 
 | Parameter | Description |
 |-----------|-------------|
@@ -81,10 +81,10 @@ end record;
 
 | Parameter | Description |
 |-----------|-------------|
-| `Item` |  |
-| `Stream` |  |
+| `Item` | Set to populate from stream data. |
+| `Stream` | Input stream to read from. |
 
-### procedure Remove (S : CRDT.Lww_Element_Sets.LWW_Element_Set; E : CRDT.Lww_Element_Sets.Element_Type; TS : CRDT.Core.Lamport_Time) `[Post]`
+### procedure Remove (S : CRDT.Lww_Element_Sets.LWW_Element_Set; E : CRDT.Lww_Element_Sets.Element_Type; TS : CRDT.Core.Lamport_Time) `[Post]` `[Depends]`
 
 | Parameter | Description |
 |-----------|-------------|
@@ -96,8 +96,8 @@ end record;
 
 | Parameter | Description |
 |-----------|-------------|
-| `Item` |  |
-| `Stream` |  |
+| `Item` | Set to serialize. |
+| `Stream` | Output stream to write to. |
 
 ---
 

@@ -6,11 +6,16 @@
 --  The version router in CRDT.Serialization.Read_Header auto-detects
 --  V1 vs V2 and dispatches field reads to the correct decoder,
 --  so callers never need to touch this package directly.
+--
+--  Requirements traceability:
+--  - HLR-PROTO-LEGACY: V1 fixed-width integer reading
 with Ada.Streams;
 
 package CRDT.Serialization.Legacy is
 
    --  Read a Natural encoded as a fixed 4-byte Natural'Write (V1 wire format).
+   --  @param Stream  Input stream to read from.
+   --  @param Value   Decoded 32-bit natural value.
    procedure Read_Natural_V1
      (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
       Value  : out Natural);

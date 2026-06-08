@@ -66,7 +66,8 @@ is
    procedure Add (S  : in out LWW_Element_Set;
                    E  : Element_Type;
                    TS : Core.Lamport_Time) with
-     Post => Add_Count (S) <= S.Capacity;
+     Post => Add_Count (S) <= S.Capacity,
+     Depends => (S => (S, E, TS));
 
    --  Remove an element with the given Lamport timestamp.
    --  @param S   The set to modify.
@@ -75,7 +76,8 @@ is
    procedure Remove (S  : in out LWW_Element_Set;
                       E  : Element_Type;
                       TS : Core.Lamport_Time) with
-     Post => Add_Count (S) <= S.Capacity;
+     Post => Add_Count (S) <= S.Capacity,
+     Depends => (S => (S, E, TS));
 
    --  Merge another set's add/remove entries into this set.
    --  For each entry, keeps the higher timestamp.
@@ -83,19 +85,25 @@ is
    --  @param Source  The set to merge from.
    procedure Merge (Target : in out LWW_Element_Set;
                      Source : LWW_Element_Set) with
-     Post => Add_Count (Target) <= Target.Capacity;
+     Post => Add_Count (Target) <= Target.Capacity,
+     Depends => (Target => (Target, Source));
 
     --  Remove all entries, resetting to empty state.
     --  @param S  The set to clear.
     procedure Clear (S : in out LWW_Element_Set) with
-      Post => Add_Count (S) = 0 and then Remove_Count (S) = 0;
+      Post => Add_Count (S) = 0 and then Remove_Count (S) = 0,
+      Depends => (S => null);
 
    --  Serialize set to stream (V2: LEB128-encoded sizes + canonical element stream).
+   --  @param Stream  Output stream to write to.
+   --  @param Item    Set to serialize.
    procedure Write_LWW_Element_Set
      (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
       Item   : LWW_Element_Set);
 
    --  Deserialize set from stream (auto-detects V1 vs V2).
+   --  @param Stream  Input stream to read from.
+   --  @param Item    Set to populate from stream data.
    procedure Read_LWW_Element_Set
      (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
       Item   : out LWW_Element_Set);

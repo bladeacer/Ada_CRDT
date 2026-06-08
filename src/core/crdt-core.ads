@@ -147,7 +147,8 @@ is
                  then Target (I) = Source (I)
                  else Target (I) = Target'Old (I)))
              and then VTime_Leq (Source, Target)
-             and then VTime_Leq (Target'Old, Target);
+             and then VTime_Leq (Target'Old, Target),
+     Depends => (Target => (Target, Source));
 
    --  Increment entry Idx by one.
    --  @param VT   Vector clock to modify.
@@ -156,7 +157,8 @@ is
      Pre  => Idx in VT'Range and then VT (Idx) < Natural'Last,
      Post => VT (Idx) = VT'Old (Idx) + 1
              and then (for all I in VT'Range =>
-                         (if I /= Idx then VT (I) = VT'Old (I)));
+                         (if I /= Idx then VT (I) = VT'Old (I))),
+     Depends => (VT => (VT, Idx));
 
    --  Generate a new globally unique replica identifier.
    --  Uses a cryptographically seeded random generator.

@@ -57,7 +57,7 @@ Default_Initial_Condition;
 
 ## Procedures
 
-### procedure Decrement (C : CRDT.Pn_Counters.PN_Counter; By : CRDT.Pn_Counters.Counter_Range; Actor : CRDT.Core.Replica_Id) `[Pre]` `[Post]`
+### procedure Decrement (C : CRDT.Pn_Counters.PN_Counter; By : CRDT.Pn_Counters.Counter_Range; Actor : CRDT.Core.Replica_Id) `[Pre]` `[Post]` `[Depends]`
 
 | Parameter | Description |
 |-----------|-------------|
@@ -65,7 +65,7 @@ Default_Initial_Condition;
 | `By` | Amount to decrement (default 1). |
 | `C` | The counter to modify. |
 
-### procedure Increment (C : CRDT.Pn_Counters.PN_Counter; By : CRDT.Pn_Counters.Counter_Range; Actor : CRDT.Core.Replica_Id) `[Pre]` `[Post]`
+### procedure Increment (C : CRDT.Pn_Counters.PN_Counter; By : CRDT.Pn_Counters.Counter_Range; Actor : CRDT.Core.Replica_Id) `[Pre]` `[Post]` `[Depends]`
 
 | Parameter | Description |
 |-----------|-------------|
@@ -73,7 +73,7 @@ Default_Initial_Condition;
 | `By` | Amount to increment (default 1). |
 | `C` | The counter to modify. |
 
-### procedure Merge (Target : CRDT.Pn_Counters.PN_Counter; Source : CRDT.Pn_Counters.PN_Counter) `[Post]`
+### procedure Merge (Target : CRDT.Pn_Counters.PN_Counter; Source : CRDT.Pn_Counters.PN_Counter) `[Post]` `[Depends]`
 
 | Parameter | Description |
 |-----------|-------------|
@@ -84,15 +84,15 @@ Default_Initial_Condition;
 
 | Parameter | Description |
 |-----------|-------------|
-| `Item` |  |
-| `Stream` |  |
+| `Item` | Counter to populate from stream data. |
+| `Stream` | Input stream to read from. |
 
 ### procedure Write_PN_Counter (Stream : Ada.Streams.Root_Stream_Type; Item : CRDT.Pn_Counters.PN_Counter)
 
 | Parameter | Description |
 |-----------|-------------|
-| `Item` |  |
-| `Stream` |  |
+| `Item` | Counter to serialize. |
+| `Stream` | Output stream to write to. |
 
 ---
 

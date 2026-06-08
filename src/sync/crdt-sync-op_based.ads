@@ -43,10 +43,14 @@ is
    type Op_Log (Capacity : Positive) is private;
 
    --  Return the total entry count (including GC'd).
+   --  @param Log  Operation log to query.
+   --  @return Total number of entries written.
    function Log_Count (Log : Op_Log) return Natural with
      Post => Log_Count'Result <= Log.Capacity;
 
    --  Return the GC watermark.
+   --  @param Log  Operation log to query.
+   --  @return Number of acknowledged (GC'd) entries.
    function Log_GC (Log : Op_Log) return Natural with
      Post => Log_GC'Result <= Log.Capacity;
 
@@ -55,7 +59,8 @@ is
    --  @param Log  Operation log to append to.
    --  @param Op   Operation to record.
    procedure Append (Log : in out Op_Log; Op : Operation) with
-     Post => Log_Count (Log) <= Log.Capacity;
+     Post => Log_Count (Log) <= Log.Capacity,
+     Depends => (Log => (Log, Op));
 
    --  Number of unacknowledged operations.
    --  @param Log  Operation log to query.
@@ -72,13 +77,15 @@ is
    --  @param Log       Operation log to modify.
    --  @param Up_To_Seq  Acknowledge all operations with Seq <= this.
    procedure Acknowledge (Log : in out Op_Log; Up_To_Seq : Natural) with
-     Post => Log_GC (Log) <= Log_Count (Log);
+     Post => Log_GC (Log) <= Log_Count (Log),
+     Depends => (Log => (Log, Up_To_Seq));
 
    --  Compact the log, physically removing acknowledged operations.
    --  @param Log  Operation log to compact.
    procedure Compact (Log : in out Op_Log) with
      Post => Log_GC (Log) = 0
-             and then Log_Count (Log) <= Log.Capacity;
+             and then Log_Count (Log) <= Log.Capacity,
+     Depends => (Log => Log);
 
 private
 

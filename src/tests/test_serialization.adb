@@ -3,6 +3,7 @@ with CRDT.Pn_Counters;
 with CRDT.Lww_Element_Sets;
 with CRDT.Rga;
 with CRDT.Core;
+with CRDT.Serialization;
 with Ada.Streams;
 with Ada.Streams.Stream_IO;
 with Ada.Text_IO; use Ada.Text_IO;
@@ -400,11 +401,136 @@ package body Test_Serialization is
        Put_Line ("[Migration: LWW V1->V2] done.");
     end Test_Migration_LWW_Roundtrip;
 
+    procedure Test_Migrate_Header is
+      use Ada.Streams;
+      use Ada.Streams.Stream_IO;
+      use CRDT.Serialization;
+      F_In  : Ada.Streams.Stream_IO.File_Type;
+      F_Out : Ada.Streams.Stream_IO.File_Type;
+      subtype SEO is Stream_Element_Offset;
+      Buf  : Stream_Element_Array (SEO'(1) .. 20);
+      Idx  : SEO := SEO'(1);
+      procedure WB (B : Stream_Element) is
+      begin Buf (Idx) := B; Idx := Idx + 1; end WB;
+      procedure WN (V : Natural) is
+      begin
+         WB (Stream_Element (V mod 256));
+         WB (Stream_Element ((V / 256) mod 256));
+         WB (Stream_Element ((V / 65536) mod 256));
+         WB (Stream_Element ((V / 16777216) mod 256));
+      end WN;
+      Kind     : Protocol_Kind;
+      Total    : Natural;
+      Count    : Natural;
+      V2_Total : Natural;
+      V2_Count : Natural;
+   begin
+      New_Line;
+      Put_Line ("[Migrate_Header]");
+
+      --  Case 1: V1 -> V2
+      --  V1 header: [Ver as Natural:4][Total as Natural:4][Count as Natural:4]
+      Idx := SEO'(1);
+      WN (2); WN (42); WN (7);   -- Ver=2, Total=42, Count=7
+
+      Create (F_In, Out_File, "/tmp/crdt_v1_migrate_in.bin");
+      Ada.Streams.Stream_IO.Write (F_In, Buf (1 .. Idx - 1));
+      Close (F_In);
+
+      Open  (F_In,  In_File, "/tmp/crdt_v1_migrate_in.bin");
+      Create (F_Out, Out_File, "/tmp/crdt_v2_migrate_out.bin");
+
+      Migrate_Header
+        (Source => Stream (F_In),
+         Dest   => Stream (F_Out),
+         Kind   => Kind,
+         Total  => Total,
+         Count  => Count);
+
+      RunR.Check (Kind = Proto_V1,
+                  "Migrate_Header: detected V1");
+      RunR.Check (Total = 42,
+                  "Migrate_Header: Total = 42, got" & Natural'Image (Total));
+      RunR.Check (Count = 7,
+                  "Migrate_Header: Count = 7, got" & Natural'Image (Count));
+
+      Close (F_In);
+      Close (F_Out);
+
+      Open (F_Out, In_File, "/tmp/crdt_v2_migrate_out.bin");
+      Read_Header
+        (Stream => Stream (F_Out),
+         Kind   => Kind,
+         Total  => V2_Total,
+         Count  => V2_Count);
+      RunR.Check (Kind = Proto_V2,
+                  "Migrate_Header: output is V2");
+      RunR.Check (V2_Total = 42,
+                  "Migrate_Header: V2 Total = 42, got" &
+                    Natural'Image (V2_Total));
+      RunR.Check (V2_Count = 7,
+                  "Migrate_Header: V2 Count = 7, got" &
+                    Natural'Image (V2_Count));
+      Close (F_Out);
+
+      --  Case 2: V2 -> V2
+      --  V2 header: [Version as LEB128][Total as LEB128][Count as LEB128]
+      Idx := SEO'(1);
+      WB (2);                         -- Protocol_Version = 2 (LEB128, 1 byte)
+      WB (10);                        -- Total = 10 (LEB128, value < 128)
+      WB (3);                         -- Count = 3 (LEB128, value < 128)
+
+      Create (F_In, Out_File, "/tmp/crdt_v2_in.bin");
+      Ada.Streams.Stream_IO.Write (F_In, Buf (1 .. Idx - 1));
+      Close (F_In);
+
+      Open  (F_In,  In_File, "/tmp/crdt_v2_in.bin");
+      Create (F_Out, Out_File, "/tmp/crdt_v2_out.bin");
+
+      Migrate_Header
+        (Source => Stream (F_In),
+         Dest   => Stream (F_Out),
+         Kind   => Kind,
+         Total  => Total,
+         Count  => Count);
+
+      RunR.Check (Kind = Proto_V2,
+                  "Migrate_Header: detected V2 input");
+      RunR.Check (Total = 10,
+                  "Migrate_Header (V2): Total = 10, got" &
+                    Natural'Image (Total));
+      RunR.Check (Count = 3,
+                  "Migrate_Header (V2): Count = 3, got" &
+                    Natural'Image (Count));
+
+      Close (F_In);
+      Close (F_Out);
+
+      Open (F_Out, In_File, "/tmp/crdt_v2_out.bin");
+      Read_Header
+        (Stream => Stream (F_Out),
+         Kind   => Kind,
+         Total  => V2_Total,
+         Count  => V2_Count);
+      RunR.Check (Kind = Proto_V2,
+                  "Migrate_Header: V2->V2 output is V2");
+      RunR.Check (V2_Total = 10,
+                  "Migrate_Header: V2->V2 Total = 10, got" &
+                    Natural'Image (V2_Total));
+      RunR.Check (V2_Count = 3,
+                  "Migrate_Header: V2->V2 Count = 3, got" &
+                    Natural'Image (V2_Count));
+      Close (F_Out);
+
+      Put_Line ("[Migrate_Header] done.");
+   end Test_Migrate_Header;
+
 begin
    Test_Stream_Serialization;
    Test_Byte_Boundary;
    Test_V1_Migration;
    Test_Migration_PN_Counter;
    Test_Migration_LWW_Roundtrip;
+   Test_Migrate_Header;
 end Run;
 end Test_Serialization;

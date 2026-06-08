@@ -5,6 +5,10 @@
 --
 --  This allows users of old library versions to serialise data that
 --  newer library versions can seamlessly read and auto-migrate.
+--
+--  Requirements traceability:
+--  - HLR-PROTO-HEADER: Read wire-format protocol header
+--  - HLR-PROTO-DISPATCH: Version-aware field reading
 with Ada.Streams;
 
 package CRDT.Serialization is
@@ -17,6 +21,10 @@ package CRDT.Serialization is
    --  ready for item-by-item deserialization.
    --  Raises Constraint_Error for unsupported protocol versions.
    --  Raises End_Error on empty stream.
+   --  @param Stream  Input stream positioned at start of a CRDT payload.
+   --  @param Kind    Detected protocol version (V1 or V2).
+   --  @param Total   Total element count from header.
+   --  @param Count   Entry/item count from header.
    procedure Read_Header
      (Stream   : not null access Ada.Streams.Root_Stream_Type'Class;
       Kind     : out Protocol_Kind;
@@ -25,9 +33,30 @@ package CRDT.Serialization is
 
    --  Read a single Natural from the stream using the detected
    --  protocol version's encoding (Natural'Read for V1, LEB128 for V2).
+   --  @param Kind   Protocol version to use for decoding.
+   --  @param Stream Input stream to read from.
+   --  @param Value  Decoded natural value.
    procedure Read_Natural
      (Kind   : Protocol_Kind;
       Stream : not null access Ada.Streams.Root_Stream_Type'Class;
       Value  : out Natural);
+
+   --  Migrate a header from any protocol version to V2.
+   --  Reads the version-agnostic header from Source and writes a
+   --  V2-encoded header (LEB128 Protocol_Version + LEB128 Total +
+   --  LEB128 Count) to Dest.  After this call:
+   --     * Source is positioned just after the original header
+   --     * Dest has a fresh V2 header and is ready for field writes
+   --  @param Source  Input stream with V1 or V2 payload.
+   --  @param Dest    Output stream for V2-encoded header.
+   --  @param Kind    Detected protocol version of source.
+   --  @param Total   Total element count from source header.
+   --  @param Count   Entry/item count from source header.
+   procedure Migrate_Header
+     (Source : not null access Ada.Streams.Root_Stream_Type'Class;
+      Dest   : not null access Ada.Streams.Root_Stream_Type'Class;
+      Kind   : out Protocol_Kind;
+      Total  : out Natural;
+      Count  : out Natural);
 
 end CRDT.Serialization;
