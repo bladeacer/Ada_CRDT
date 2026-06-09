@@ -84,7 +84,7 @@ type RGA (Capacity : Positive) is private;
 |-----------|-------------|
 | `Position` | Cursor to check. |
 
-**Returns:** True if the cursor is within bounds.
+**Returns:** True if the cursor is not at the end.
 
 ### function Has_Element (Container : CRDT.Sequences.Naive.RGA; Position : CRDT.Sequences.Naive.Cursor) return Standard.Boolean
 

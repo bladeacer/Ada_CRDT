@@ -145,6 +145,37 @@ def parse_ada_pkg_desc(lines):
     return re.sub(r'\s+', ' ', desc).strip()
 
 
+def extract_params_from_decl(decl):
+    """Extract parameter names from a subprogram declaration using paren-balance."""
+    start = decl.find('(')
+    if start == -1:
+        return []
+    depth = 0
+    end = start
+    for i, ch in enumerate(decl[start:], start):
+        if ch == '(':
+            depth += 1
+        elif ch == ')':
+            depth -= 1
+            if depth == 0:
+                end = i
+                break
+    params_part = decl[start + 1:end]
+    result = []
+    for group in params_part.split(';'):
+        names_part = group.split(':')[0].strip()
+        for name in names_part.split(','):
+            name = name.strip()
+            if name:
+                result.append(name)
+    return result
+
+
+def annotation_key(name, param_names):
+    param_list = sorted(param_names)
+    return name + ":" + ",".join(param_list) if param_list else name
+
+
 def parse_ada_annotations(ads_path):
     """Parse .ads file for package description and per-subprogram annotations.
     Returns (pkg_desc, annotations, has_private, private_items).
@@ -209,7 +240,8 @@ def parse_ada_annotations(ads_path):
             if in_private:
                 private_items.append((kind, name))
             else:
-                annotations[name] = cur
+                key = annotation_key(name, cur["params"].keys())
+                annotations[key] = cur
                 cur = {"params": {}, "returns": ""}
         elif in_private and re.match(r'\w+\s*:', s):
             var_name = s.split(":")[0].strip()
@@ -249,9 +281,12 @@ def extract_aspects_from_ads(ads_path):
                     break
                 i += 1
             full_decl = " ".join(parts)
+            # extract parameter names for unique key
+            pnames = extract_params_from_decl(full_decl)
+            key = annotation_key(name, pnames)
             wm = re.search(r'\bwith\b\s*(.+?)\s*;', full_decl)
             if wm:
-                aspects[name] = "with " + wm.group(1).strip()
+                aspects[key] = "with " + wm.group(1).strip()
         else:
             i += 1
     return aspects
@@ -621,8 +656,9 @@ def render_package(title, desc, blocks, annotations, has_private, private_items,
         for name, decl, params_returns, desc in items:
             params, returns = params_returns
             sname = subprog_short_name(name)
-            anno = annotations.get(sname, {})
-            aspect_text = (subprog_aspects or {}).get(sname, "")
+            key = annotation_key(sname, params.keys())
+            anno = annotations.get(key, {})
+            aspect_text = (subprog_aspects or {}).get(key, "")
             badges = extract_aspect_badges(name + " " + aspect_text)
             badge_str = " " + " ".join(f"`{b}`" for b in badges) if badges else ""
             lines.append(f"### {name}{badge_str}\n")

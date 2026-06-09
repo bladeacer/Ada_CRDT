@@ -14,12 +14,12 @@ subtype Byte_Array is Stream_Element_Array;
 
 ## Procedures
 
-### procedure Decode (Buffer : CRDT.Core.LEB128.Byte_Array; Index : Ada.Streams.Stream_Element_Offset; Value : Standard.Natural) `[SPARK]`
+### procedure Decode (Buffer : CRDT.Core.LEB128.Byte_Array; Index : Ada.Streams.Stream_Element_Offset; Value : Standard.Natural) `[Pre]` `[Post]` `[SPARK]`
 
 | Parameter | Description |
 |-----------|-------------|
-| `Buffer` |  |
-| `Index` |  |
+| `Buffer` | Input byte buffer. |
+| `Index` | Start position; updated to one past the last read byte. |
 | `Value` | Decoded integer. |
 
 ### procedure Decode (Stream : Ada.Streams.Root_Stream_Type; Value : Standard.Natural) `[SPARK]`
@@ -29,12 +29,12 @@ subtype Byte_Array is Stream_Element_Array;
 | `Stream` | Source input stream. |
 | `Value` | Decoded integer. |
 
-### procedure Encode (Buffer : CRDT.Core.LEB128.Byte_Array; Index : Ada.Streams.Stream_Element_Offset; Value : Standard.Natural) `[SPARK]`
+### procedure Encode (Buffer : CRDT.Core.LEB128.Byte_Array; Index : Ada.Streams.Stream_Element_Offset; Value : Standard.Natural) `[Pre]` `[Post]` `[SPARK]`
 
 | Parameter | Description |
 |-----------|-------------|
-| `Buffer` |  |
-| `Index` |  |
+| `Buffer` | Output byte buffer. |
+| `Index` | Start position; updated to one past the last written byte. |
 | `Value` | Integer to encode (0 .. Natural'Last). |
 
 ### procedure Encode (Stream : Ada.Streams.Root_Stream_Type; Value : Standard.Natural) `[SPARK]`

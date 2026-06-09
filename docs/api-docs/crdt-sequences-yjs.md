@@ -99,7 +99,7 @@ type RGA (Item_Capacity : Positive) is private;
 |-----------|-------------|
 | `Position` | Cursor to check. |
 
-**Returns:** True if the cursor is within bounds.
+**Returns:** True if the cursor is not at the end.
 
 ### function Has_Element (Container : CRDT.Sequences.Yjs.RGA; Position : CRDT.Sequences.Yjs.Cursor) return Standard.Boolean
 
