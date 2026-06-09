@@ -1,6 +1,6 @@
 # CRDT.Serialization.Legacy
 
-CRDT: Conflict-Free Replicated Data Types for Ada/SPARK. Provides PN-Counters, LWW-Element-Sets, and Replicated Growable Arrays with modular sequence engines and thread-safe wrappers.
+Legacy V1 fixed-width deserialization mechanisms. Protocol V1 used 4-byte Natural'Read for all integer fields. These routines are kept isolated here so they do not clutter the main production code path. The version router in CRDT.Serialization.Read_Header auto-detects V1 vs V2 and dispatches field reads to the correct decoder, so callers never need to touch this package directly. Requirements traceability: - HLR-PROTO-LEGACY: V1 fixed-width integer reading
 
 > **Note:** All items in this package are public.
 
@@ -10,5 +10,5 @@ CRDT: Conflict-Free Replicated Data Types for Ada/SPARK. Provides PN-Counters, L
 
 | Parameter | Description |
 |-----------|-------------|
-| `Stream` |  |
-| `Value` |  |
+| `Stream` | Input stream to read from. |
+| `Value` | Decoded 32-bit natural value. |

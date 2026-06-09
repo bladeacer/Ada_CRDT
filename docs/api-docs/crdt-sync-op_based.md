@@ -1,8 +1,8 @@
 # CRDT.Sync.Op_Based
 
-CRDT: Conflict-Free Replicated Data Types for Ada/SPARK. Provides PN-Counters, LWW-Element-Sets, and Replicated Growable Arrays with modular sequence engines and thread-safe wrappers.
+Operation-Based (CmRDT) sync engine. Replicas broadcast granular, immutable mutation events. Downstream operations must be applied exactly once. Network trait: Hyper-low bandwidth consumption, ideal for ordered delivery channels (WebSockets, TCP/TLS streams). Requirements traceability: - HLR-SYNC-OP: Operation-based sync with bounded log - HLR-SYNC-ACK: Acknowledge + compact processed operations
 
-> **Note:** All items in this package are public.
+> **Note:** 10 public item(s) shown below; 2 private internal item(s) are in the `private` section.
 
 ## Types
 
@@ -64,45 +64,60 @@ end record;
 
 | Parameter | Description |
 |-----------|-------------|
-| `Index` |  |
-| `Log` |  |
+| `Index` | 1-based index. |
+| `Log` | Operation log to query. |
 
-### function Log_Count (Log : CRDT.Sync.Op_Based.Op_Log) return Standard.Natural
+**Returns:** Operation at that index (first log entry if out of bounds).
 
-| Parameter | Description |
-|-----------|-------------|
-| `Log` |  |
-
-### function Log_GC (Log : CRDT.Sync.Op_Based.Op_Log) return Standard.Natural
+### function Log_Count (Log : CRDT.Sync.Op_Based.Op_Log) return Standard.Natural `[Post]`
 
 | Parameter | Description |
 |-----------|-------------|
-| `Log` |  |
+| `Log` | Operation log to query. |
+
+**Returns:** Total number of entries written.
+
+### function Log_GC (Log : CRDT.Sync.Op_Based.Op_Log) return Standard.Natural `[Post]`
+
+| Parameter | Description |
+|-----------|-------------|
+| `Log` | Operation log to query. |
+
+**Returns:** Number of acknowledged (GC'd) entries.
 
 ### function Size (Log : CRDT.Sync.Op_Based.Op_Log) return Standard.Natural
 
 | Parameter | Description |
 |-----------|-------------|
-| `Log` |  |
+| `Log` | Operation log to query. |
+
+**Returns:** Count of operations not yet acknowledged.
 
 ## Procedures
 
-### procedure Acknowledge (Log : CRDT.Sync.Op_Based.Op_Log; Up_To_Seq : Standard.Natural)
+### procedure Acknowledge (Log : CRDT.Sync.Op_Based.Op_Log; Up_To_Seq : Standard.Natural) `[Post]` `[Depends]`
 
 | Parameter | Description |
 |-----------|-------------|
-| `Log` |  |
-| `Up_To_Seq` |  |
+| `Log` | Operation log to modify. |
+| `Up_To_Seq` | Acknowledge all operations with Seq <= this. |
 
-### procedure Append (Log : CRDT.Sync.Op_Based.Op_Log; Op : CRDT.Sync.Op_Based.Operation)
-
-| Parameter | Description |
-|-----------|-------------|
-| `Log` |  |
-| `Op` |  |
-
-### procedure Compact (Log : CRDT.Sync.Op_Based.Op_Log)
+### procedure Append (Log : CRDT.Sync.Op_Based.Op_Log; Op : CRDT.Sync.Op_Based.Operation) `[Post]` `[Depends]`
 
 | Parameter | Description |
 |-----------|-------------|
-| `Log` |  |
+| `Log` | Operation log to append to. |
+| `Op` | Operation to record. |
+
+### procedure Compact (Log : CRDT.Sync.Op_Based.Op_Log) `[Post]` `[Depends]`
+
+| Parameter | Description |
+|-----------|-------------|
+| `Log` | Operation log to compact. |
+
+---
+
+## Private Section
+
+- **type** `Op_Array`
+- **type** `Op_Log`

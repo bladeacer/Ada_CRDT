@@ -2,7 +2,7 @@
 
 HLC timestamp wrapping Core's HLC_Time.
 
-> **Note:** All items in this package are public.
+> **Note:** 9 public item(s) shown below; 2 private internal item(s) are in the `private` section.
 
 ## Types
 
@@ -20,38 +20,48 @@ type Instance is private;
 
 ## Functions
 
-### function "<" (Left : CRDT.HLC.HLC_Time; Right : CRDT.HLC.HLC_Time) return Standard.Boolean
+### function "<" (Left : CRDT.HLC.HLC_Time; Right : CRDT.HLC.HLC_Time) return Standard.Boolean `[Post]`
 
 | Parameter | Description |
 |-----------|-------------|
-| `Left` |  |
-| `Right` |  |
+| `Left` | Left HLC timestamp. |
+| `Right` | Right HLC timestamp. |
 
-### function "=" (Left : CRDT.HLC.HLC_Time; Right : CRDT.HLC.HLC_Time) return Standard.Boolean
+**Returns:** True if Left causally precedes Right.
 
-| Parameter | Description |
-|-----------|-------------|
-| `Left` |  |
-| `Right` |  |
-
-### function ">" (Left : CRDT.HLC.HLC_Time; Right : CRDT.HLC.HLC_Time) return Standard.Boolean
+### function "=" (Left : CRDT.HLC.HLC_Time; Right : CRDT.HLC.HLC_Time) return Standard.Boolean `[Post]`
 
 | Parameter | Description |
 |-----------|-------------|
-| `Left` |  |
-| `Right` |  |
+| `Left` | Left HLC timestamp. |
+| `Right` | Right HLC timestamp. |
+
+**Returns:** True if timestamps are identical.
+
+### function ">" (Left : CRDT.HLC.HLC_Time; Right : CRDT.HLC.HLC_Time) return Standard.Boolean `[Post]`
+
+| Parameter | Description |
+|-----------|-------------|
+| `Left` | Left HLC timestamp. |
+| `Right` | Right HLC timestamp. |
+
+**Returns:** True if Left causally follows Right.
 
 ### function Create (Node : CRDT.Core.Replica_Id) return CRDT.HLC.Instance
 
 | Parameter | Description |
 |-----------|-------------|
-| `Node` |  |
+| `Node` | Replica identifier. |
+
+**Returns:** Initialized HLC clock.
 
 ### function Now (Clock : CRDT.HLC.Instance) return CRDT.HLC.HLC_Time
 
 | Parameter | Description |
 |-----------|-------------|
-| `Clock` |  |
+| `Clock` | HLC instance to query. |
+
+**Returns:** Current HLC timestamp.
 
 ## Procedures
 
@@ -59,11 +69,18 @@ type Instance is private;
 
 | Parameter | Description |
 |-----------|-------------|
-| `Clock` |  |
-| `Remote` |  |
+| `Clock` | Local HLC instance. |
+| `Remote` | Timestamp received from a remote peer. |
 
 ### procedure Tick (Clock : CRDT.HLC.Instance)
 
 | Parameter | Description |
 |-----------|-------------|
-| `Clock` |  |
+| `Clock` | HLC instance to tick. |
+
+---
+
+## Private Section
+
+- **type** `Instance`
+- **function** `Now`

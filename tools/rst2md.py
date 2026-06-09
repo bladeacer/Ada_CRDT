@@ -262,16 +262,28 @@ def subprog_short_name(block_name):
     return m.group(1) if m else block_name
 
 
+def find_ads(pkg_basename):
+    """Search for .ads file in src/ subdirectories (excluding tests)."""
+    for root, dirs, files in os.walk("src/"):
+        dirs[:] = [d for d in dirs if d != "tests"]
+        for f in files:
+            if f == pkg_basename + ".ads":
+                return os.path.join(root, f)
+    return None
+
+
 def package_to_ads_path(pkg_name):
     """Convert CRDT.Lww_Element_Sets -> src/crdt-lww_element_sets.ads.
     For nested packages (e.g. CRDT.Protected.Shared_RGA) walks up the
     hierarchy until it finds an existing file."""
     parts = pkg_name.lower().split(".")
     for i in range(len(parts), 0, -1):
-        candidate = "src/" + "-".join(parts[:i]) + ".ads"
-        if os.path.isfile(candidate):
+        basename = "-".join(parts[:i])
+        candidate = find_ads(basename)
+        if candidate:
             return candidate
-    return "src/" + "-".join(parts) + ".ads"
+    basename = "-".join(parts)
+    return find_ads(basename) or "src/" + basename + ".ads"
 
 
 def extract_protected_type_decl(ads_path, type_name):

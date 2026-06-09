@@ -1,8 +1,8 @@
 # CRDT.Sync.State_Based
 
-CRDT: Conflict-Free Replicated Data Types for Ada/SPARK. Provides PN-Counters, LWW-Element-Sets, and Replicated Growable Arrays with modular sequence engines and thread-safe wrappers.
+State-Based (CvRDT) sync engine. Replicas exchange full or delta-compressed state using Hybrid Logical Clock (HLC) timestamps for causal ordering. Network trait: Highly resilient to lossy/unstable topologies (UDP, peer-to-peer mesh, radio datalinks) because state merges are fully idempotent. Requirements traceability: - HLR-SYNC-STATE: State-based sync with vector clocks - HLR-SYNC-DELTA: Delta computation for partial state exchange
 
-> **Note:** All items in this package are public.
+> **Note:** 6 public item(s) shown below; 1 private internal item(s) are in the `private` section.
 
 ## Types
 
@@ -24,31 +24,43 @@ end record;
 
 ## Functions
 
-### function Compute_Delta (Local : CRDT.Sync.State_Based.Replica_State; Remote_SV : CRDT.Core.VTime) return Standard.Natural
+### function Compute_Delta (Local : CRDT.Sync.State_Based.Replica_State; Remote_SV : CRDT.Core.VTime) return Standard.Natural `[Post]`
 
 | Parameter | Description |
 |-----------|-------------|
-| `Local` |  |
-| `Remote_SV` |  |
+| `Local` | Local replica state. |
+| `Remote_SV` | Remote state vector. |
+
+**Returns:** Count of items the remote peer is behind.
 
 ### function Create (Config : CRDT.Sync.State_Based.Sync_Config) return CRDT.Sync.State_Based.Replica_State
 
 | Parameter | Description |
 |-----------|-------------|
-| `Config` |  |
+| `Config` | Sync configuration. |
 
-### function Is_Ahead (SV : CRDT.Core.VTime; TS : CRDT.Core.Lamport_Time) return Standard.Boolean
+**Returns:** Freshly initialized replica state.
+
+### function Is_Ahead (SV : CRDT.Core.VTime; TS : CRDT.Core.Lamport_Time) return Standard.Boolean `[Post]`
 
 | Parameter | Description |
 |-----------|-------------|
-| `SV` |  |
-| `TS` |  |
+| `SV` | State vector to check. |
+| `TS` | Lamport timestamp to compare against. |
+
+**Returns:** True if the SV has entry at or past TS.
 
 ## Procedures
 
-### procedure Merge (Local : CRDT.Sync.State_Based.Replica_State; Remote : CRDT.Sync.State_Based.Replica_State)
+### procedure Merge (Local : CRDT.Sync.State_Based.Replica_State; Remote : CRDT.Sync.State_Based.Replica_State) `[Depends]`
 
 | Parameter | Description |
 |-----------|-------------|
-| `Local` |  |
-| `Remote` |  |
+| `Local` | Local state to update. |
+| `Remote` | Remote state to merge from. |
+
+---
+
+## Private Section
+
+- **type** `Replica_State`

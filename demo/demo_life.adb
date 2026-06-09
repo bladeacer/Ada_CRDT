@@ -108,102 +108,55 @@ procedure Demo_Life is
 
    type Cell_Action is (None, Make_Alive, Make_Dead);
 
+   procedure Sync_Yjs_From_Matrix (N : in out Node);
+
    procedure Next_Generation (N : in out Node; M : Grid_Mode) is
       Actions : array (1 .. Grid_Size, 1 .. Grid_Size) of Cell_Action :=
         (others => (others => None));
+      function Count_Neighbors is new Gen_Count_Neighbors (Cell_Alive => Is_Alive);
    begin
-      case M is
-         when Matrix =>
+      for R in 1 .. Grid_Size loop
+         for C in 1 .. Grid_Size loop
             declare
-               function Count_Neighbors is new Gen_Count_Neighbors (Cell_Alive => Is_Alive);
+               Alive     : constant Boolean := Is_Alive (N, R, C);
+               Neighbors : constant Integer := Count_Neighbors (N, R, C);
             begin
-               for R in 1 .. Grid_Size loop
-                  for C in 1 .. Grid_Size loop
-                     declare
-                        Alive     : constant Boolean := Is_Alive (N, R, C);
-                        Neighbors : constant Integer := Count_Neighbors (N, R, C);
-                     begin
-                        if Alive and (Neighbors < 2 or Neighbors > 3) then
-                           Actions (R, C) := Make_Dead;
-                        elsif not Alive and Neighbors = 3 then
-                           Actions (R, C) := Make_Alive;
-                        end if;
-                     end;
-                  end loop;
-               end loop;
-
-               for R in 1 .. Grid_Size loop
-                  for C in 1 .. Grid_Size loop
-                     case Actions (R, C) is
-                        when Make_Alive =>
-                           N.Clock.Stamp := N.Clock.Stamp + 1;
-                           Cell_Sets.Add (N.Cells, (R, C), N.Clock);
-                        when Make_Dead =>
-                           N.Clock.Stamp := N.Clock.Stamp + 1;
-                           Cell_Sets.Remove (N.Cells, (R, C), N.Clock);
-                        when None => null;
-                     end case;
-                  end loop;
-               end loop;
+               if Alive and (Neighbors < 2 or Neighbors > 3) then
+                  Actions (R, C) := Make_Dead;
+               elsif not Alive and Neighbors = 3 then
+                  Actions (R, C) := Make_Alive;
+               end if;
             end;
-          when Yjs_RGA =>
-             declare
-                function Count_Neighbors is new Gen_Count_Neighbors (Cell_Alive => Yjs_Is_Alive);
-                Grid : array (1 .. Grid_Size, 1 .. Grid_Size) of Boolean;
-             begin
-                for R in 1 .. Grid_Size loop
-                   for C in 1 .. Grid_Size loop
-                      Grid (R, C) := Yjs_Is_Alive (N, R, C);
-                   end loop;
-                end loop;
+         end loop;
+      end loop;
 
-                for R in 1 .. Grid_Size loop
-                   for C in 1 .. Grid_Size loop
-                      declare
-                         Alive     : constant Boolean := Grid (R, C);
-                         Neighbors : constant Integer := Count_Neighbors (N, R, C);
-                      begin
-                         if Alive and (Neighbors < 2 or Neighbors > 3) then
-                            Actions (R, C) := Make_Dead;
-                         elsif not Alive and Neighbors = 3 then
-                            Actions (R, C) := Make_Alive;
-                         end if;
-                      end;
-                   end loop;
-                end loop;
+      for R in 1 .. Grid_Size loop
+         for C in 1 .. Grid_Size loop
+            case Actions (R, C) is
+               when Make_Alive =>
+                  N.Clock.Stamp := N.Clock.Stamp + 1;
+                  Cell_Sets.Add (N.Cells, (R, C), N.Clock);
+               when Make_Dead =>
+                  N.Clock.Stamp := N.Clock.Stamp + 1;
+                  Cell_Sets.Remove (N.Cells, (R, C), N.Clock);
+               when None => null;
+            end case;
+         end loop;
+      end loop;
 
-                for R in 1 .. Grid_Size loop
-                   Char_RGA.Compact (N.Yjs_Cells (R));
-                   loop
-                      exit when Char_RGA.Size (N.Yjs_Cells (R)) = 0;
-                      Char_RGA.Delete (N.Yjs_Cells (R), 1);
-                      Char_RGA.Compact (N.Yjs_Cells (R));
-                   end loop;
-                   for C in 1 .. Grid_Size loop
-                      N.Seq := N.Seq + 1;
-                      Char_RGA.Insert (N.Yjs_Cells (R), C, (N.Id, N.Seq),
-                        (case Actions (R, C) is
-                           when Make_Alive => '#',
-                           when Make_Dead => '.',
-                           when None => (if Grid (R, C) then '#' else '.')));
-                   end loop;
-                end loop;
-             end;
-      end case;
+      if M = Yjs_RGA then
+         Sync_Yjs_From_Matrix (N);
+      end if;
    end Next_Generation;
 
    procedure Merge_Nodes (N1, N2 : in out Node; M : Grid_Mode) is
    begin
-      case M is
-         when Matrix =>
-            Cell_Sets.Merge (N1.Cells, N2.Cells);
-            Cell_Sets.Merge (N2.Cells, N1.Cells);
-         when Yjs_RGA =>
-            for R in 1 .. Grid_Size loop
-               Char_RGA.Merge (N1.Yjs_Cells (R), N2.Yjs_Cells (R));
-               Char_RGA.Merge (N2.Yjs_Cells (R), N1.Yjs_Cells (R));
-            end loop;
-      end case;
+      Cell_Sets.Merge (N1.Cells, N2.Cells);
+      Cell_Sets.Merge (N2.Cells, N1.Cells);
+      if M = Yjs_RGA then
+         Sync_Yjs_From_Matrix (N1);
+         Sync_Yjs_From_Matrix (N2);
+      end if;
    end Merge_Nodes;
 
    procedure Sync_Yjs_From_Matrix (N : in out Node) is
@@ -435,6 +388,7 @@ procedure Demo_Life is
           when 'm' | 'M' =>
              if S.Mode = Matrix then
                 S.Mode := Yjs_RGA;
+                -- Sync all three nodes from their converged matrix state.
                 Sync_Yjs_From_Matrix (S.N1);
                 Sync_Yjs_From_Matrix (S.N2);
                 Sync_Yjs_From_Matrix (S.N3);
