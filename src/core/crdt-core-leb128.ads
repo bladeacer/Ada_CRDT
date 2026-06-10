@@ -32,7 +32,9 @@ is
       Index  : in out Stream_Element_Offset;
       Value  : Natural) with
       SPARK_Mode,
-      Pre  => Index in Buffer'Range,
+      Pre  => Index in Buffer'Range
+              and then Buffer'Length >= Max_LEB128_Bytes
+              and then Index <= Buffer'Last - (Max_LEB128_Bytes - 1),
       Post => Index > Index'Old;
 
    --  Decode a LEB128-encoded Natural from Buffer starting at Index.
@@ -45,7 +47,9 @@ is
       Index  : in out Stream_Element_Offset;
       Value  : out Natural) with
       SPARK_Mode,
-      Pre  => Index in Buffer'Range,
+      Pre  => Index in Buffer'Range
+              and then Buffer'Length >= Max_LEB128_Bytes
+              and then Index <= Buffer'Last - (Max_LEB128_Bytes - 1),
       Post => Index > Index'Old;
 
    --  Encode a Natural as LEB128 bytes to the stream.

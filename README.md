@@ -67,7 +67,7 @@ all or vendor and version lock the library.
 
 **Always read the changelog and migration guide before upgrading.**
 
-CRDT maintains V1→V2 wire-format compatibility since 1.4.0 (the read path
+CRDT maintains V1 -> V2 wire-format compatibility since 1.4.0 (the read path
 auto-detects both formats), but there have been version-specific caveats:
 
 | If you are on | Upgrade path |
@@ -376,7 +376,7 @@ counters, [Riak](https://riak.com) CRDTs
 - RGA: [Yjs / YATA](https://github.com/yjs/yjs) (Kevin Jahns): block CRDT text editing
 - [Automerge](https://github.com/automerge/automerge)
 (Martin Kleppmann et al.): JSON CRDT
-- Fugue: tree-based interleaving prevention
+- [Fugue](https://arxiv.org/abs/2305.00583): tree-based interleaving prevention
 
 ## License
 
