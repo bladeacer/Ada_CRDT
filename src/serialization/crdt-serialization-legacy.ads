@@ -11,7 +11,9 @@
 --  - HLR-PROTO-LEGACY: V1 fixed-width integer reading
 with Ada.Streams;
 
-package CRDT.Serialization.Legacy is
+package CRDT.Serialization.Legacy with
+  SPARK_Mode => Off
+is
 
    --  Read a Natural encoded as a fixed 4-byte Natural'Write (V1 wire format).
    --  @param Stream  Input stream to read from.

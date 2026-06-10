@@ -6,7 +6,9 @@ with CRDT.Pn_Counters;
 with CRDT.Lww_Element_Sets;
 with CRDT.Rga;
 
-package CRDT.Protected is
+package CRDT.Protected with
+  SPARK_Mode => Off
+is
 
    --  Thread-safe PN-Counter.
    --  @field Max_Actors  Maximum number of distinct replicas.

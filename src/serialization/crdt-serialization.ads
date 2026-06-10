@@ -11,7 +11,9 @@
 --  - HLR-PROTO-DISPATCH: Version-aware field reading
 with Ada.Streams;
 
-package CRDT.Serialization is
+package CRDT.Serialization with
+  SPARK_Mode => Off
+is
 
    type Protocol_Kind is (Proto_V1, Proto_V2);
 
