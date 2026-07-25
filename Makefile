@@ -162,10 +162,22 @@ api-docs:
 	done; \
 	echo "All changelog links OK"
 
+dev-setup:
+	@echo "Setting up development environment with dev dependencies..."; \
+	cp alire-dev.toml alire.toml; \
+	echo "alire.toml now has development dependencies (gnatprove, gnatdoc_bin)."; \
+	echo "Run 'make prod-setup' to restore the clean publishing manifest."
+
+prod-setup:
+	@echo "Restoring clean publishing manifest..."; \
+	git checkout alire.toml; \
+	echo "alire.toml restored to clean publishing version."
+
 release:
 	@if [ -n "$(VERSION)" ]; then \
 		version="$(VERSION)"; \
 		sed -i 's/^version = ".*"/version = "'$$version'"/' alire.toml; \
+		sed -i 's/^version = ".*"/version = "'$$version'"/' alire-dev.toml; \
 	else \
 		version=$$(sed -n 's/^version = "\(.*\)"/\1/p' alire.toml); \
 	fi; \
@@ -190,30 +202,23 @@ release:
 	git tag -a "v$$version" -m "Release $$version"; \
 	echo "Tagged v$$version at $$commit"; \
 	git push origin HEAD && git push origin "v$$version"; \
-	echo "Pushed commit and tag v$$version"
+	echo "Pushed commit and tag v$$version"; \
+	echo ""; \
+	echo "Next: run 'make publish' to submit to Alire community index."
 
 publish:
 	@if [ -n "$$(git status --porcelain)" ]; then \
 		echo "Error: working tree is not clean. Commit or stash changes first."; \
 		exit 1; \
 	fi; \
-	echo "Creating sanitized manifest (stripping dev-only deps)..."; \
-	cp alire.toml alire-publish.toml; \
-	sed -i '/^executables = /d' alire-publish.toml; \
-	sed -i '/^\[\[depends-on\]\]$$/,+2d' alire-publish.toml; \
-	alr publish --manifest alire-publish.toml; \
-	rm -f alire-publish.toml
+	alr publish
 
 test-publish:
 	@version=$$(git describe --tags --abbrev=0 2>/dev/null || \
 		sed -n 's/^version = "\(.*\)"/\1/p' alire.toml); \
 	echo "=== test-publish dry-run ==="; \
 	echo "Version:  $$version"; \
-	echo "1. cp alire.toml alire-publish.toml"; \
-	echo "2. sed -i '/^executables = /d' alire-publish.toml"; \
-	echo "3. sed -i '/^\[\[depends-on\]\]$$/,+2d' alire-publish.toml"; \
-	echo "4. alr publish --manifest alire-publish.toml"; \
-	echo "5. rm -f alire-publish.toml"; \
+	echo "Action:   alr publish (auto-detects GitHub, test deps excluded)"; \
 	echo "Requires: GitHub PAT in GITHUB_TOKEN env var or gh auth token"; \
 	echo "Docs:     https://github.com/alire-project/alire/blob/master/doc/publishing.md"; \
 	echo "=== end dry-run ==="

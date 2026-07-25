@@ -6,6 +6,8 @@ Clock strategy selection (Lamport, Vector, Matrix), V3 wire protocol with
 clock-kind discriminator, clocked sync layer, generic LWW sets, SPARK proof
 expansion, and documentation modernization.
 
+Moved canonical from Codeberg to GitHub due to TOS changes on AI assisted code.
+
 ## New Features
 
 ### Clock Strategy Selection
