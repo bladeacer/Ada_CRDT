@@ -1,6 +1,7 @@
 with CRDT.Test_Support; use CRDT.Test_Support;
 with Ada.Text_IO; use Ada.Text_IO;
 with Test_Basic;
+with Test_Clocks;
 with Test_Lattice;
 with Test_RGA_Features;
 with Test_Serialization;
@@ -12,6 +13,7 @@ with Test_GoL;
 procedure Test_Crdt is
 
    R_Basic         : Runner;
+   R_Clocks        : Runner;
    R_Lattice       : Runner;
    R_RGA_Features  : Runner;
    R_Serialization : Runner;
@@ -77,6 +79,7 @@ begin
    Put_Line ("Running unit tests, property-based fuzzing, and chaos simulations...");
 
    Test_Basic.Run (R_Basic);
+   Test_Clocks.Run (R_Clocks);
    Test_Lattice.Run (R_Lattice);
    Test_RGA_Features.Run (R_RGA_Features);
    Test_Serialization.Run (R_Serialization);
@@ -92,6 +95,7 @@ begin
 
    Write_Summary_Table (Standard_Output);
    Write_Row (Standard_Output, "Basic", R_Basic, "PN+LWW+RGA+RGAs");
+   Write_Row (Standard_Output, "Clocks", R_Clocks, "Lamport+Vector+Matrix+Lww_Sets");
    Write_Row (Standard_Output, "Lattice Properties", R_Lattice, "law check");
    Write_Row (Standard_Output, "RGA Features", R_RGA_Features, "interleave+split+delta+GC");
    Write_Row (Standard_Output, "Serialization", R_Serialization, "V1+V2+byte-boundary");
@@ -101,11 +105,13 @@ begin
    Write_Row (Standard_Output, "Game of Life", R_GoL, "neighbors+blinker+sync+conv+mode");
    HR;
 
-   Total_Passed := R_Basic.Passed + R_Lattice.Passed + R_RGA_Features.Passed
-                  + R_Serialization.Passed + R_Engines.Passed + R_Convergence.Passed
+   Total_Passed := R_Basic.Passed + R_Clocks.Passed + R_Lattice.Passed
+                  + R_RGA_Features.Passed + R_Serialization.Passed
+                  + R_Engines.Passed + R_Convergence.Passed
                   + R_Fuzz.Passed + R_GoL.Passed;
-   Total_Failed := R_Basic.Failed + R_Lattice.Failed + R_RGA_Features.Failed
-                  + R_Serialization.Failed + R_Engines.Failed + R_Convergence.Failed
+   Total_Failed := R_Basic.Failed + R_Clocks.Failed + R_Lattice.Failed
+                  + R_RGA_Features.Failed + R_Serialization.Failed
+                  + R_Engines.Failed + R_Convergence.Failed
                   + R_Fuzz.Failed + R_GoL.Failed;
 
    --  Also write to file for README integration
@@ -113,15 +119,16 @@ begin
       F : File_Type;
    begin
       Create (F, Out_File, "test_result.md");
-      Write_Summary_Table (F);
-      Write_Row (F, "Basic", R_Basic, "PN+LWW+RGA+RGAs");
-      Write_Row (F, "Lattice Properties", R_Lattice, "law check");
-      Write_Row (F, "RGA Features", R_RGA_Features, "interleave+split+delta+GC");
-      Write_Row (F, "Serialization", R_Serialization, "V1+V2+byte-boundary");
-      Write_Row (F, "Engines", R_Engines, "Yjs+Naive+Sync");
-      Write_Row (F, "Convergence", R_Convergence, "merge+skew+saturation");
-      Write_Row (F, "Fuzz", R_Fuzz, "chaos+10k+partitions");
-      Write_Row (F, "Game of Life", R_GoL, "neighbors+blinker+sync+conv+mode");
+       Write_Summary_Table (F);
+       Write_Row (F, "Basic", R_Basic, "PN+LWW+RGA+RGAs");
+       Write_Row (F, "Clocks", R_Clocks, "Lamport+Vector+Matrix+Lww_Sets");
+       Write_Row (F, "Lattice Properties", R_Lattice, "law check");
+       Write_Row (F, "RGA Features", R_RGA_Features, "interleave+split+delta+GC");
+       Write_Row (F, "Serialization", R_Serialization, "V1+V2+byte-boundary");
+       Write_Row (F, "Engines", R_Engines, "Yjs+Naive+Sync");
+       Write_Row (F, "Convergence", R_Convergence, "merge+skew+saturation");
+       Write_Row (F, "Fuzz", R_Fuzz, "chaos+10k+partitions");
+       Write_Row (F, "Game of Life", R_GoL, "neighbors+blinker+sync+conv+mode");
       HR (F);
       New_Line (F);
       Put_Line (F, "  Passed:" & Natural'Image (Total_Passed)

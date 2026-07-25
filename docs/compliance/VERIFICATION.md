@@ -44,6 +44,7 @@ These match the pattern of existing justified overflow checks elsewhere.
 | Category | Test File | Tests |
 |----------|-----------|-------|
 | Basic CRDT ops | `test_basic.adb` | PN-Counter, LWW, RGA, RGAs |
+| Clock strategies | `test_clocks.adb` | Lamport, Vector, Matrix ops, Lww_Sets with all strategies |
 | Convergence | `test_convergence.adb` | 3-way split, anti-interleaving, clock skew, saturation |
 | Lattice laws | `test_lattice.adb` | Commutativity, idempotency, associativity |
 | RGA features | `test_rga_features.adb` | Chaotic interleaving, tombstones, splitting, delta sync, GC |
@@ -51,7 +52,7 @@ These match the pattern of existing justified overflow checks elsewhere.
 | Sequence engines | `test_engines.adb` | Yjs iterators, Naive engine, sync layer |
 | Fuzz testing | `test_fuzz.adb` | Bit-flip, clock skew, OOO delta, property fuzzer, partitions |
 | Game of Life | `test_gol.adb` | Neighbors, blinker, matrix<->Yjs sync, convergence, mode switch |
-| **Total** | | **10250** |
+| **Total** | | **10290** |
 
 ## DO-178C Traceability
 

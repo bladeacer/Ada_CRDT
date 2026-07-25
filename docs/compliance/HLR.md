@@ -20,6 +20,27 @@ merge (element-wise max), and per-replica Lamport-counter tracking.
 
 ---
 
+## HLR-CORE-CLOCKS — Clock Strategy Selection
+Provide interchangeable clock strategies (Lamport, Vector, Matrix) with
+a uniform comparison, merge, increment, and serialisation interface.
+
+**Source:** `src/core/crdt-clocks.ads`, `src/core/crdt-clocks-lamport.ads`,
+           `src/core/crdt-clocks-vector.ads`, `src/core/crdt-clocks-matrix.ads`
+
+**Derived LLRs:** LLR-CORE-CLOCKS
+
+---
+
+## HLR-CORE-CLOCKS-MATRIX — Matrix Clock Operations
+Provide a 2D matrix-clock data type with element-wise comparison,
+merge (element-wise max), and per-row/column increment.
+
+**Source:** `src/core/crdt-clocks-matrix.ads`
+
+**Derived LLRs:** LLR-CORE-CLOCKS-MATRIX
+
+---
+
 ## HLR-CORE-PROTO — Wire Protocol Version
 Define the current wire-protocol version number and provide LEB128
 encode/decode primitives used by V2 serialisation.

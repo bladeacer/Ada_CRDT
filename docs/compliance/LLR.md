@@ -48,6 +48,36 @@ Proof: Postcondition, Functional Contract
 
 ---
 
+## LLR-CORE-CLOCKS — Clock Strategy Interface
+
+**Parent HLR:** HLR-CORE-CLOCKS
+
+| Subprogram | Contract Summary |
+|---|---|
+| `Clocks.Lamport."<"` | Compares two Lamport timestamps |
+| `Clocks.Lamport."="` | Equality of two Lamport timestamps |
+| `Clocks.Lamport.Max` | Returns max(L, R) |
+| `Clocks.Lamport.Write_Clock` | LEB128-encode Stamp + Node |
+| `Clocks.Lamport.Read_Clock` | LEB128-decode Stamp + Node |
+| `Clocks.Vector."<"` | Compares two VTime values |
+| `Clocks.Vector."="` | Equality of two VTime values |
+| `Clocks.Vector.Max` | Element-wise max of two VTime values |
+| `Clocks.Vector.Increment` | Increments entry Idx by 1 |
+| `Clocks.Vector.Merge` | Element-wise max merge |
+| `Clocks.Vector.Write_Clock` | LEB128-encode all entries |
+| `Clocks.Vector.Read_Clock` | LEB128-decode all entries |
+| `Clocks.Matrix."<"` | Compares two Matrix clocks |
+| `Clocks.Matrix."="` | Equality of two Matrix clocks |
+| `Clocks.Matrix.Max` | Element-wise max of two Matrix clocks |
+| `Clocks.Matrix.Increment` | Increments entry (Row, Col) by 1 |
+| `Clocks.Matrix.Merge` | Element-wise max merge |
+| `Clocks.Matrix.Write_Clock` | LEB128-encode all N² entries |
+| `Clocks.Matrix.Read_Clock` | LEB128-decode all N² entries |
+
+Proof: Verified by round-trip tests (clocks-related)
+
+---
+
 ## LLR-CORE-VC — Vector Clock Operations
 
 **Parent HLR:** HLR-CORE-VC
