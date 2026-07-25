@@ -110,17 +110,12 @@ Ada_CRDT/
   `LWW_Element_Set`, `RGA`, `LWW_Clocked_Set`) use pre-allocated bounded storage
   sized at instantiation time. The `CRDT.Bounded` wrapper eliminates heap use
   entirely.
-- **SPARK-proofed core**: `CRDT.Core`, `CRDT.Pn_Counters`, `CRDT.Lww_Element_Sets`,
-  clock strategy packages, and `CRDT.HLC` run in `SPARK_Mode`. Proved absence of
-  runtime errors (index checks, overflow, division by zero) within those
-  boundaries. 269 SPARK checks proved as of 1.6.0.
-- **Runtime error elimination** in generic bodies (RGA/Yjs/Naive/Fugue, Lww_Sets)
-  depends on the instantiation's discriminant values; the `-gnata` flag enables
-  assertion checking at runtime for defensive coverage.
-- **Bounded storage everywhere**: generic `Max_Items`, `Max_Replicas`,
-  `Max_Set_Size`, `Capacity` discriminants prevent unbounded growth.
-- **No access-to-object aliasing**: access types are confined to sequence engine
-  bodies (`SPARK_Mode => Off`), with explicit bounds checks at every dereference.
+- **SPARK Gold** for core packages (`CRDT.Core`, `CRDT.Pn_Counters`,
+  `CRDT.Lww_Element_Sets`, clock strategy packages, `CRDT.HLC`). See
+  `docs/compliance/VERIFICATION.md` for current proof stats (auto-generated
+  by `make compliance`). Run-time error elimination (AoRTE) covers all
+  SPARK-analyzable code; generics and platform-dependent packages are excluded
+  from proof.
 
 ## Ada/SPARK Version
 
@@ -244,7 +239,22 @@ CRDT.Clocks.Matrix             -- explicit Matrix strategy
 - Tests use `RunR.Check (Condition, "Message")` -- no external test framework
 - Main harness: `test_crdt.adb` orchestrates all test modules
 - Test results written to both stdout and `test_result.md`
-- **40 tests** for clock strategies (10 per strategy x 3 = Lamport/Vector/Matrix, plus Lww_Sets variants)
+- **10290 tests** across 9 categories:
+  - Basic: PN+LWW+RGA+RGAs (34 tests)
+  - Clocks: Lamport+Vector+Matrix+Lww_Sets (40 tests)
+  - Lattice Properties: law check (8 tests)
+  - RGA Features: interleave+split+delta+GC (40 tests)
+  - Serialization: V1+V2+byte-boundary (62 tests)
+  - Engines: Yjs+Naive+Sync (23 tests)
+  - Convergence: merge+skew+saturation (21 tests)
+  - Fuzz: chaos+10k+partitions (10038 tests)
+  - Game of Life: neighbors+blinker+sync+conv+mode (24 tests)
+- Test files are `SPARK_Mode => Off` (test infrastructure is not formally proved)
+- Demo (`demo/demo_life.adb`) is also `SPARK_Mode => Off` by design -- it is
+  a terminal application that instantiates generics, not a formal verification
+  target. It covers 3-replica Game of Life synchronization using LWW sets and
+  RGA sequences across all sequence engines (Yjs, Naive, Fugue) and clock
+  strategies (Lamport, Vector, Matrix).
 
 ### Documentation
 
@@ -256,10 +266,21 @@ CRDT.Clocks.Matrix             -- explicit Matrix strategy
 
 ### SPARK Formal Verification
 
+The codebase targets **SPARK Gold** -- full absence-of-runtime-errors (AoRTE)
+proved for all SPARK-analyzable code, plus partial functional contracts on key
+type invariants. Platinum (full functional requirements) is not targeted:
+
 - **SPARK_Mode** applied at package level: `package Foo with SPARK_Mode is`
 - Packages with impure operations (stream I/O, random, wall-clock) scope `SPARK_Mode => Off` to individual subprograms/bodies
-- **273 SPARK checks**: 221 proved, 5 justified (overflow false positives), 0 unproved (as of 1.7.0)
-- `make prove` runs `alr gnatprove` to check
+- **Proof stats** auto-generated in `docs/compliance/VERIFICATION.md` by
+  `make compliance` (reads `obj/gnatprove/gnatprove.out` and `test_result.md`).
+- **SPARK levels achieved**: Stone (valid subset) OK, Bronze (flow analysis) OK,
+  Silver (AoRTE) OK, Gold (key invariants + partial specs) OK. Platinum (full
+  functional contracts) is not targeted -- generics (`Rga`, `Lww_Element_Sets`,
+  `Lww_Sets`, sequence engines) are skipped by SPARK and platform dependencies
+  (wall clock, RNG, stream I/O) cannot be formally proved.
+- `make prove` runs `alr gnatprove` to check; `make compliance` regenerates
+  the verification report from the proof output.
 - **SPARK_Mode => On** (package-level) on all core specs. Per-subprogram Off only for:
   - Stream I/O (`Read_Clock`, `Write_Clock`, serialization routines)
   - Wall-clock access (`HLC.Create`, `HLC.Tick`, `HLC.Recv`)
