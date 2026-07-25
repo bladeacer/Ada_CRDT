@@ -12,5 +12,5 @@
 
 ## Protocol Migration
 
-- [V1 → V2 Migration Guide](crdt-1.4.0-migration.md) — how `Read_Header`
+- [V1 -> V2 Migration Guide](crdt-1.4.0-migration.md) -- how `Read_Header`
   auto-detects wire format, and how to write V1 for legacy peers

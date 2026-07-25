@@ -1,6 +1,6 @@
 # CRDT.Lww_Element_Sets
 
-Last-Writer-Wins Element Set using Lamport timestamps. Stores (element, Lamport_Time) pairs for add and remove sets. An element is present iff its add-timestamp exceeds its remove-timestamp. Uses logical Lamport timestamps instead of wall clocks, avoiding clock skew issues in distributed deployments. Requirements traceability: - HLR-LWW-CONTAINS: Element membership query - HLR-LWW-ADD: Add element with Lamport timestamp - HLR-LWW-REMOVE: Remove element with Lamport timestamp - HLR-LWW-MERGE: Merge two LWW element sets - HLR-LWW-SERIAL: V1/V2 wire format round-trip
+Last-Writer-Wins Element Set using Lamport timestamps. Stores (element, Lamport_Time) pairs for add and remove sets. An element is present if its add-timestamp exceeds its remove-timestamp. Uses logical Lamport timestamps instead of wall clocks, avoiding clock skew issues in distributed deployments. DEPRECATED: Prefer CRDT.Lww_Sets which supports any clock strategy (Lamport, Vector, Matrix) via the CRDT.Clocks.* hierarchy. This package is retained for backward compatibility but no new features will be added. Requirements traceability: - HLR-LWW-CONTAINS: Element membership query - HLR-LWW-ADD: Add element with Lamport timestamp - HLR-LWW-REMOVE: Remove element with Lamport timestamp - HLR-LWW-MERGE: Merge two LWW element sets - HLR-LWW-SERIAL: V1/V2 wire format round-trip
 
 > **Note:** 12 public item(s) shown below; 1 private internal item(s) are in the `private` section.
 

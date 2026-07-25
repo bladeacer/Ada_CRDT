@@ -27,7 +27,7 @@ alr with crdt
 | Component | Package | API Docs |
 |-----------|---------|----------|
 | PN-Counter | `CRDT.Pn_Counters` | [docs](docs/api-docs/crdt-pn_counters.md) |
-| LWW Set (Lamport) | `CRDT.Lww_Element_Sets` | [docs](docs/api-docs/crdt-lww_element_sets.md) |
+| LWW Set (Lamport, **deprecated**) | `CRDT.Lww_Element_Sets` | [docs](docs/api-docs/crdt-lww_element_sets.md) |
 | LWW Set (any clock) | `CRDT.Lww_Sets` | [docs](docs/api-docs/crdt-lww_sets.md) |
 | RGA Sequence | `CRDT.Rga` | [docs](docs/api-docs/crdt-rga.md) |
 | Clock strategies | `CRDT.Clocks.*` | [docs](docs/api-docs/crdt-clocks.md) |
@@ -61,46 +61,15 @@ make run
 
 ## Documentation
 
-[Click here to view the API docs](docs/api-docs/index.md).
+Full API reference: [docs/api-docs/index.md](docs/api-docs/index.md)
+Generated from docstring annotations via `make doc`. Covers all public
+and private entities.
 
-## Changelogs
+## Upgrading
 
-[Click here to view the Changelogs](docs/changelogs/index.md).
-
-### On Compatibility
-
-Much like [Golang on 1.0 compatibility](https://go.dev/doc/go1compat),
-this library aims to maintain full backwards compatibility with version 1.0.0.
-
-This means that even if future version of wire protocol are added, there will
-still be legacy support for reading older formats.
-
-Compatibility is done on a best effort basis, there might be some minor
-incompatible changes here and there. The versioned changelogs and migration
-guide(s) should help with deciding whether to upgrade/migrate, not upgrade at
-all or vendor and version lock the library.
-
-> The latter is generally preferred especially for more serious use cases.
-
-### On Upgrading
-
-**Always read the changelog and migration guide before upgrading.**
-
-CRDT maintains V1 -> V2 wire-format compatibility since 1.4.0 (the read path
-auto-detects both formats), but there have been version-specific caveats:
-
-| If you are on | Upgrade path |
-|---|---|
-| **< 1.2.0** (V1 write only) | Jump to **>= 1.4.0**: V1 data is readable. Data written by 1.4.0+ uses V2 (LEB128). |
-| **1.2.0 - 1.3.0** (V2 write only) | Upgrade to **>= 1.4.0**: your V2 data is readable. No source changes needed. |
-| **>= 1.4.0** | Any later version is a drop-in replacement. |
-
-See the [changelogs](docs/changelogs/index.md) and
-[migration guide](docs/changelogs/crdt-1.4.0-migration.md) before updating
-your `alire.toml` dependency.
-
-> If you vendor the source, pin your `alire.toml` to a specific version and
-> test the upgrade in a staging environment before deploying.
+See [changelogs](docs/changelogs/index.md) and
+[migration guide](docs/changelogs/crdt-1.4.0-migration.md) before bumping
+your `alire.toml` dependency. Wire format is auto-detected (V1/V2/V3).
 
 ---
 
@@ -126,29 +95,32 @@ CRDT.Pn_Counters.Merge (A, B);  -- value = 15
 
 Package: `CRDT.Pn_Counters`
 
-### LWW-Element-Set (Lamport Timestamps)
+### LWW-Clocked-Set (any clock strategy)
 
-Last-Writer-Wins set using logical clocks (no wall-clock skew).
-See [API docs](docs/api-docs/crdt-lww_element_sets.md) for full interface
-reference.
+Last-Writer-Wins set parameterised over any clock strategy
+(Lamport, Vector, or Matrix). See [API docs](docs/api-docs/crdt-lww_sets.md)
+for full interface reference.
 
 ```ada
-with CRDT.Lww_Element_Sets;
-package Int_Set is new CRDT.Lww_Element_Sets (Integer, 100);
+with CRDT.Lww_Sets;
+with CRDT.Clocks.Vector;
+package V is new CRDT.Clocks.Vector (Max_Replicas => 8);
+package S is new CRDT.Lww_Sets (Integer, 100, V.Clock_Time,
+  Clk_Kind     => CRDT.Clocks.Clock_Vector,
+  ">"          => V.">",
+  Max          => V.Max,
+  Write_Clock  => V.Write_Clock,
+  Read_Clock   => V.Read_Clock);
 
-S1 : Int_Set.LWW_Element_Set (Capacity => 100);
-S2 : Int_Set.LWW_Element_Set (Capacity => 100);
+Set : S.LWW_Clocked_Set (Capacity => 100);
+TS  : V.Clock_Time := (others => 0);
 
-Int_Set.Add (S1, 42, (Stamp => 100, Node => 1));
-Int_Set.Add (S2, 99, (Stamp => 50,  Node => 2));
-Int_Set.Remove (S1, 42, (Stamp => 200, Node => 1));
-
-Int_Set.Merge (S1, S2);
--- S1: contains 99 (added, never removed)
--- S1: contains 42 only if re-added with Stamp > 200
+S.Add (Set, 42, TS);
+S.Add (Set, 99, TS);
+S.Remove (Set, 42, TS);
 ```
 
-Package: `CRDT.Lww_Element_Sets` (generic over `Element_Type`, `Capacity`)
+Package: `CRDT.Lww_Sets` (generic over any `CRDT.Clocks.*` strategy)
 
 ### RGA Sequence
 
@@ -230,30 +202,13 @@ Compact (Log);                       -- purge acknowledged ops
 
 ## Wrappers
 
-Safety/constraint layers on top of core types.
+- **`CRDT.Protected`**: Thread-safe protected-object wrappers (no locking).
+- **`CRDT.Bounded`**: Compile-time bounded, zero-heap allocation.
 
-### Thread-Safe (`CRDT.Protected`)
-
-Protected-object wrappers (no manual locking):
-
-```ada
-with CRDT.Protected;
-
-C : CRDT.Protected.Shared_PN_Counter (Max_Actors => 3);
-C.Increment (5, Actor => 1);
-C.Decrement (2, Actor => 1);
 ```
-
-Also: `Shared_LWW` and `Shared_RGA` generics.
-
-### Bounded (`CRDT.Bounded`)
-
-Compile-time bounded, zero heap allocation:
-
-```ada
 with CRDT.Bounded;
-package Bnd_RGA is new CRDT.Bounded.Bounded_RGA (Character, 100);
-R : Bnd_RGA.Sequence;  -- fully bounded, heap-free
+package Bnd is new CRDT.Bounded.Bounded_RGA (Character, 100);
+R : Bnd.Sequence;
 ```
 
 ---
@@ -341,57 +296,23 @@ Prerequisites: [Alire](https://alire.ada.dev) (manages GNAT automatically),
 
 ![Conway's Game of Life Demo](./demo.webp)
 
-A real-time TUI simulation of Conway's Game of Life to stress-test and visually
-prove the library's eventual consistency engine across three independent nodes.
-
-### Running
+Real-time TUI simulation stress-testing eventual consistency across three
+independent nodes. `LWW_Element_Set` for cell state, Yjs RGA for text rows.
 
 ```bash
 make demo
 ```
 
-### Features
-
-Dual Backends (Toggle with M)
-- Matrix Mode: Tracks live cells as discrete (Row, Col) elements in an
-`LWW_Element_Set`. Uses Lamport timestamps to resolve split-brain conflicts with
-absolute set consistency.
-- `Yjs_RGA` Mode: Tracks grid rows as RGA Character sequences with chunk-splitting.
-Serves as a sequence stress test by continuously sweeping, deleting, and
-rebuilding text rows.
-
-Simulation Boundaries & Performance
-- Eventual Convergence: Replicas achieve strong eventual consistency eventually,
-mimicking real-world gossip protocol behaviours.
-
-- Complexity Evaluation: Tests the RGA merger's $O(n \cdot m)$ sequence loop,
-utilizing linear array pointer scans and an internal O(n^2) bubble-sort under
-high-frequency load.
-
-> tldr; yjs RGA is not a great CRDT type for Conway's Game of Life unlike `LWW_Element_Set`.
->
-> As mentioned earlier, it **helps to understand how suitable** each backend is for a given use case.
-
-- Zero-Heap Footprint: Relies on `CRDT.Bounded` types to completely eliminate
-runtime allocation leaks during explosive cell birth/death cycles.
-
-- Split-Brain Testing: Simulates random 0-5s per-node network freezes.
-Disconnected nodes queue updates locally and auto-reconcile seamlessly upon healing.
-
-Controls
-- Terminal Safety: Built on native vt100 escape bindings with robust SIGINT
-  handling to guarantee full cursor and attribute restoration on exit.
-- Keybinds: Q Quit, R Reset, P Global Pause, M Toggle Engine Type,
-  C Cycle Clock_Kind (Lamport/Vector/Matrix).
+**Controls**: Q Quit, R Reset, P Pause, M Toggle Engine, C Cycle Clock_Kind.
 
 ---
 
 ## SPARK Proof
 
 Core packages (`CRDT.Core`, `CRDT.Pn_Counters`, `CRDT.Clocks.*`) SPARK-proven
-for run-time check elimination (269 checks proved). Generics (Sequences, LWW,
-RGA) are instantiation-dependent; runtime assertions (`-gnata`) provide
-defensive coverage.
+for run-time check elimination (273 checks, 221 proved, 5 justified, 0 unproved).
+Generics (Sequences, LWW, RGA) are instantiation-dependent; runtime assertions
+(`-gnata`) provide defensive coverage.
 
 ---
 

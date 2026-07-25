@@ -1,8 +1,12 @@
 --  Last-Writer-Wins Element Set using Lamport timestamps.
 --  Stores (element, Lamport_Time) pairs for add and remove sets.
---  An element is present iff its add-timestamp exceeds its remove-timestamp.
+--  An element is present if its add-timestamp exceeds its remove-timestamp.
 --  Uses logical Lamport timestamps instead of wall clocks,
 --  avoiding clock skew issues in distributed deployments.
+--
+--  DEPRECATED: Prefer CRDT.Lww_Sets which supports any clock strategy
+--  (Lamport, Vector, Matrix) via the CRDT.Clocks.* hierarchy. This package
+--  is retained for backward compatibility but no new features will be added.
 --
 --  @formal Element_Type  Type of elements to store in the set.
 --  @formal Max_Set_Size  Maximum number of distinct elements.

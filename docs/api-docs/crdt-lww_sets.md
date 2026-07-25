@@ -2,7 +2,7 @@
 
 Generic Last-Writer-Wins Element Set over any clock strategy.
 Stores (element, Clock_Time) pairs for add and remove sets.
-An element is present iff its add-timestamp exceeds its remove-timestamp.
+An element is present if its add-timestamp exceeds its remove-timestamp.
 
 > **Note:** 12 public item(s) shown below; 1 private internal item(s) are in the `private` section.
 

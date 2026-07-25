@@ -103,9 +103,9 @@ ascii-check:
 	extensions="ads adb md py toml gpr yaml yml"; \
 	error=0; \
 	for ext in $$extensions; do \
-		files=$$(find . -name "*.$$ext" -not -path "./.git/*" -not -path "./alire/*" -not -path "./config/*" -not -path "./obj/*" -not -path "./docs/*" 2>/dev/null); \
+		files=$$(find . -name "*.$$ext" -not -path "./.git/*" -not -path "./alire/*" -not -path "./config/*" -not -path "./obj/*" 2>/dev/null); \
 		for f in $$files; do \
-			case "$$f" in *vt100*|*README.md) continue;; esac; \
+			case "$$f" in *vt100*|*README.md|*docs/api-docs/*) continue;; esac; \
 	if LC_ALL=C grep -q '[^ -~	]' "$$f" 2>/dev/null; then \
 				echo "  NON-ASCII: $$f"; \
 				error=$$((error + 1)); \
@@ -128,6 +128,7 @@ api-docs:
 	rm -f docs/api-docs/test_*.md docs/api-docs/crdt-test_support.md
 	sed -i '/](test_[^)]*\.md)/d' docs/api-docs/index.md
 	sed -i '/](crdt-test_support\.md)/d' docs/api-docs/index.md
+	python3 tools/gen-coverage.py
 	@echo "Regenerating docs/changelogs/index.md..."
 	@{ \
 	  echo "# CRDT Changelogs"; \
@@ -145,7 +146,7 @@ api-docs:
 	  echo ""; \
 	  echo "## Protocol Migration"; \
 	  echo ""; \
-	  echo "- [V1 → V2 Migration Guide](crdt-1.4.0-migration.md) — how \`Read_Header\`"; \
+	  echo "- [V1 -> V2 Migration Guide](crdt-1.4.0-migration.md) -- how \`Read_Header\`"; \
 	  echo "  auto-detects wire format, and how to write V1 for legacy peers"; \
 	} > docs/changelogs/index.md
 	@echo "Validating changelog links..."
