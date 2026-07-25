@@ -22,6 +22,21 @@ alr with crdt
 
 [View on Alire Community Index](https://alire.ada.dev/crates/crdt).
 
+### Quick Reference
+
+| Component | Package | API Docs |
+|-----------|---------|----------|
+| PN-Counter | `CRDT.Pn_Counters` | [docs](docs/api-docs/crdt-pn_counters.md) |
+| LWW Set (Lamport) | `CRDT.Lww_Element_Sets` | [docs](docs/api-docs/crdt-lww_element_sets.md) |
+| LWW Set (any clock) | `CRDT.Lww_Sets` | [docs](docs/api-docs/crdt-lww_sets.md) |
+| RGA Sequence | `CRDT.Rga` | [docs](docs/api-docs/crdt-rga.md) |
+| Clock strategies | `CRDT.Clocks.*` | [docs](docs/api-docs/crdt-clocks.md) |
+| State-based sync | `CRDT.Sync.State_Based` | [docs](docs/api-docs/crdt-sync-state_based.md) |
+| Op-based sync | `CRDT.Sync.Op_Based` | [docs](docs/api-docs/crdt-sync-op_based.md) |
+| Thread-safe wrappers | `CRDT.Protected` | [docs](docs/api-docs/crdt-protected.md) |
+| Bounded wrappers | `CRDT.Bounded` | [docs](docs/api-docs/crdt-bounded.md) |
+| HLC | `CRDT.HLC` | [docs](docs/api-docs/crdt-hlc.md) |
+
 ### Local Index
 
 ```bash
@@ -86,13 +101,6 @@ your `alire.toml` dependency.
 
 > If you vendor the source, pin your `alire.toml` to a specific version and
 > test the upgrade in a staging environment before deploying.
-
-### Roadmap
-
-- Ada SPARK Mode enabled for more of the codebase
-- Verified Ada Gold/Platinum for more of the codebase
-- More robust unit tests
-- Targeting [DO-178C compliance](https://www.do178.org/)
 
 ---
 
@@ -266,12 +274,26 @@ CRDT.HLC.Recv (Clock, Remote);  -- on receive, reconcile with remote time
 
 ## Wire Protocol
 
-All serialized CRDT state begins with `Core.Protocol_Version` (currently `2`):
+All serialized CRDT state begins with a protocol version byte, detected
+automatically on read:
 
 ```
-[Protocol_Version : Natural]  (LEB128-encoded)
-[Payload]
+V1: [4-byte Natural version][4-byte Total][4-byte Count]...
+V2: [LEB128 version=2][LEB128 Total][LEB128 Count]...
+V3: [LEB128 version=3][clock_kind byte][LEB128 Total][LEB128 Count]...
 ```
+
+| Version | Format | Auto-detected |
+|---------|--------|---------------|
+| V1 (legacy) | Fixed-width `Natural'Read`/`Write` for all fields | Yes (first 4 bytes) |
+| V2 (default write) | [LEB128](https://en.wikipedia.org/wiki/LEB128) for all integer fields | Yes (first byte = 2) |
+| V3 (clocked) | LEB128 + clock kind discriminator byte | Yes (first byte = 3) |
+
+Legacy types (`LWW_Element_Sets`, `RGA`, `PN_Counters`) continue to write V2
+for maximum backward compatibility. New generic types (`Lww_Sets`) write V3
+with the appropriate clock strategy identifier.
+
+V1/V2 data can be migrated to V3 via `CRDT.Serialization.Migrate_Header_To_V3`.
 
 ### LEB128 Encoding
 
@@ -282,6 +304,7 @@ positions, and counts) use 1-2 bytes.
 
 Fields encoded with LEB128:
 - Protocol version (1 byte)
+- Clock kind byte (V3 only)
 - Per-node element count in sets
 - Sequence length and replica/sequence ID pairs
 - Tombstone and strut counts in RGA chunks
@@ -336,7 +359,7 @@ Simulation Boundaries & Performance
 mimicking real-world gossip protocol behaviours.
 
 - Complexity Evaluation: Tests the RGA merger's $O(n \cdot m)$ sequence loop,
-utilizing linear array pointer scans and an internal O(n²) bubble-sort under
+utilizing linear array pointer scans and an internal O(n^2) bubble-sort under
 high-frequency load.
 
 > tldr; yjs RGA is not a great CRDT type for Conway's Game of Life unlike `LWW_Element_Set`.
@@ -351,8 +374,9 @@ Disconnected nodes queue updates locally and auto-reconcile seamlessly upon heal
 
 Controls
 - Terminal Safety: Built on native vt100 escape bindings with robust SIGINT
-handling to guarantee full cursor and attribute restoration on exit.
-- Keybinds: Q Quit, R Reset, P Global Pause, M Toggle Engine Type.
+  handling to guarantee full cursor and attribute restoration on exit.
+- Keybinds: Q Quit, R Reset, P Global Pause, M Toggle Engine Type,
+  C Cycle Clock_Kind (Lamport/Vector/Matrix).
 
 ---
 

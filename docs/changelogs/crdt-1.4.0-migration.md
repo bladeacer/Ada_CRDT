@@ -1,4 +1,4 @@
-# V1 → V2 Protocol Migration
+# V1 -> V2 Protocol Migration
 
 _Applies to CRDT >= 1.4.0_
 
@@ -7,7 +7,7 @@ _Applies to CRDT >= 1.4.0_
 CRDT 1.0.0 and 1.1.0 serialised all integer values (header fields, node IDs,
 lengths) using Ada's fixed 4-byte `Natural'Write` encoding (**V1 protocol**).
 Starting with 1.2.0, the library switched to variable-length LEB128 encoding
-(**V2 protocol**) for space efficiency — but V1 data could not yet be read.
+(**V2 protocol**) for space efficiency  --  but V1 data could not yet be read.
 Starting with 1.4.0, the read path supports both formats via auto-detection.
 
 ## Auto-Detection
@@ -15,12 +15,12 @@ Starting with 1.4.0, the read path supports both formats via auto-detection.
 The `Read_Header` procedure inspects the first 4 bytes of the stream:
 
 ```
-Byte 1:  LEB128(2)  — protocol discriminator (always 0x02)
-Byte 2:  LEB128(Total) — present in both V1 and V2
-Byte 3:  LEB128(Count) — part of V2 encoding
+Byte 1:  LEB128(2)   --  protocol discriminator (always 0x02)
+Byte 2:  LEB128(Total)  --  present in both V1 and V2
+Byte 3:  LEB128(Count)  --  part of V2 encoding
 Byte 4:
-  - 0x00  → V1 (fixed 4-byte Natural'Read for all remaining fields)
-  - ≠ 0x00 → V2 (LEB128 for all remaining fields)
+  - 0x00  -> V1 (fixed 4-byte Natural'Read for all remaining fields)
+  - /= 0x00 -> V2 (LEB128 for all remaining fields)
 ```
 
 After `Read_Header` returns, callers dispatch via `Read_Natural` which uses
@@ -41,7 +41,7 @@ begin
    Ada.Streams.Stream_IO.Open (File, In_File, "data.bin");
    Stream := Ada.Streams.Stream_IO.Stream (File);
 
-   --  Auto-detects V1 or V2 — no changes needed
+   --  Auto-detects V1 or V2  --  no changes needed
    CRDT.Serialization.Read_Header (Stream.all'Access, Kind, Total, Count);
 
    for I in 1 .. Count loop

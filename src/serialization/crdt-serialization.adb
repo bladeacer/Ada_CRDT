@@ -190,6 +190,23 @@ package body CRDT.Serialization is
       Core.LEB128.Encode (Stream, Count);
    end Write_Header_V3;
 
+   -------------------------
+   -- Migrate_Header_To_V3 --
+   -------------------------
+
+   procedure Migrate_Header_To_V3
+     (Source     : not null access Ada.Streams.Root_Stream_Type'Class;
+      Dest       : not null access Ada.Streams.Root_Stream_Type'Class;
+      Kind       : out Protocol_Kind;
+      Total      : out Natural;
+      Count      : out Natural;
+      Clock_Kind : out CRDT.Clocks.Clock_Kind)
+   is
+   begin
+      Read_Header (Source, Kind, Total, Count, Clock_Kind);
+      Write_Header_V3 (Dest, Total, Count, Clock_Kind);
+   end Migrate_Header_To_V3;
+
    --------------------
    --  Migrate_Header --
    --------------------

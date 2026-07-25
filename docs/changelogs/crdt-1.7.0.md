@@ -10,13 +10,13 @@ Clock strategy selection, Matrix clock support, and generic LWW sets.
 
 Three interchangeable clock strategies under a new `CRDT.Clocks` package hierarchy:
 
-- **`CRDT.Clocks.Lamport`** — wraps `Core.Lamport_Time` (Stamp + Node). Minimal overhead, no concurrency detection.
-- **`CRDT.Clocks.Vector`** — wraps `Core.VTime` per-replica counters. Full causal history, concurrent update detection. **Recommended default for production**.
-- **`CRDT.Clocks.Matrix`** — new 2D matrix clock ([N×N] array). Tracks knowledge propagation across replicas: `M[i][j]` = node i's knowledge of node j's events. Enables distributed GC and richer causality queries.
+- **`CRDT.Clocks.Lamport`**  --  wraps `Core.Lamport_Time` (Stamp + Node). Minimal overhead, no concurrency detection.
+- **`CRDT.Clocks.Vector`**  --  wraps `Core.VTime` per-replica counters. Full causal history, concurrent update detection. **Recommended default for production**.
+- **`CRDT.Clocks.Matrix`**  --  new 2D matrix clock ([NxN] array). Tracks knowledge propagation across replicas: `M[i][j]` = node i's knowledge of node j's events. Enables distributed GC and richer causality queries.
 
 Each strategy provides a uniform interface: `Clock_Time` type, comparison operators (`<`, `=`, `>`), `Max`, `Increment`, `Merge`, and `Write_Clock`/`Read_Clock` for serialization.
 
-### CRDT.Lww_Sets — Generic LWW over Clock Strategy
+### CRDT.Lww_Sets  --  Generic LWW over Clock Strategy
 
 New generic package that works with any clock strategy:
 

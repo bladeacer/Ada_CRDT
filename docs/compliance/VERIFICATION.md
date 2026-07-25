@@ -34,7 +34,7 @@ All packages with SPARK-compatible specs are annotated: `CRDT.Sync` (trivial typ
 ### Unproved Checks Notes
 
 10 unproved checks (all medium-level) are in `CRDT.Core.LEB128.Decode`/`Encode`
-buffer-based primitives — overflow/range checks on 64-bit arithmetic that SPARK
+buffer-based primitives  --  overflow/range checks on 64-bit arithmetic that SPARK
 cannot resolve but are safe at runtime (bounded for-loops, buffer-size contracts).
 9 are run-time checks; 1 is a functional contract (`Index > Index'Old` postcondition).
 These match the pattern of existing justified overflow checks elsewhere.

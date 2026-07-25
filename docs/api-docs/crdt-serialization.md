@@ -24,6 +24,17 @@ type Protocol_Kind is (Proto_V1, Proto_V2, Proto_V3);
 | `Source` | Input stream with V1 or V2 payload. |
 | `Total` | Total element count from source header. |
 
+### procedure Migrate_Header_To_V3 (Source : Ada.Streams.Root_Stream_Type; Dest : Ada.Streams.Root_Stream_Type; Kind : CRDT.Serialization.Protocol_Kind; Total : Standard.Natural; Count : Standard.Natural; Clock_Kind : CRDT.Clocks.Clock_Kind)
+
+| Parameter | Description |
+|-----------|-------------|
+| `Clock_Kind` | Clock kind written to Dest (from source for V3, |
+| `Count` | Entry/item count from source header. |
+| `Dest` | Output stream for V3-encoded header. |
+| `Kind` | Detected protocol version of source (V1, V2, or V3). |
+| `Source` | Input stream with V1, V2, or V3 payload. |
+| `Total` | Total element count from source header. |
+
 ### procedure Read_Header (Stream : Ada.Streams.Root_Stream_Type; Kind : CRDT.Serialization.Protocol_Kind; Total : Standard.Natural; Count : Standard.Natural; Clock_Kind : CRDT.Clocks.Clock_Kind)
 
 | Parameter | Description |

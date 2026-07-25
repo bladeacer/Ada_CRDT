@@ -1,5 +1,11 @@
 # CRDT Codebase Guide for AI Agents
 
+## Project Purpose
+
+A Conflict-Free Replicated Data Types (CRDT) library for Ada/SPARK, providing
+PN-Counters, LWW-Element-Sets, RGA sequences, and clock-strategy-aware sync
+layers. See [README.md](README.md) for a user-oriented overview.
+
 ## Codebase Structure
 
 ```
@@ -73,10 +79,10 @@ Ada_CRDT/
 |--------|-------------|--------------|
 | `build` | Compile library + tests | `alr build` (filters out `.sframe` linker noise) |
 | `run` / `test` | Build + run test suite | `alr run` (all 10290+ tests) |
-| `test-fuzz` | Same as `test` | Fuzz tests are part of the regular suite |
 | `prove` | SPARK formal verification | `alr gnatprove` |
 | `doc` / `api-docs` | Generate Markdown API docs | `gnatdoc` -> RST -> `tools/rst2md.py` -> `docs/api-docs/` |
-| `compliance` | Verify DO-178C traceability | Scans source HLR tags, validates files exist |
+| `compliance` | Verify DO-178C traceability | Scans source HLR tags, validates HLR.md coverage |
+| `ascii-check` | Enforce ASCII-only charset across source files | `LC_ALL=C grep` for bytes > 0x7E |
 | `release` | Tag + publish new version | Updates metadata, commits, tags, pushes |
 | `publish` | Publish to Alire community index | Archives source, pushes to community index |
 | `demo` | Build + run Game of Life demo | `cd demo && alr build && ./demo_life` |
@@ -91,11 +97,85 @@ Ada_CRDT/
 
 ### Compiler Flags (from `crdt.gpr`)
 
-- `-gnat12`  --  Ada 2012 language standard
-- `-gnata`  --  Assertions enabled (for SPARK contracts at runtime)
-- `-gnatwa`  --  All warnings
-- `-gnatwF`  --  Warnings on unreferenced formal parameters
-- `-gnatwsh`  --  Warnings on suspicious contract
+- `-gnat12` -- Ada 2012 language standard (DO-178C baseline; Ada 2022 features
+  not yet required for DAL-C certification objectives)
+- `-gnata` -- Assertions enabled (for SPARK contracts at runtime)
+- `-gnatwa` -- All warnings
+- `-gnatwF` -- Warnings on unreferenced formal parameters
+- `-gnatwsh` -- Warnings on suspicious contract
+
+## Safety and Memory Safety
+
+- **No heap allocation** for CRDT data -- all containers (`PN_Counter`,
+  `LWW_Element_Set`, `RGA`, `LWW_Clocked_Set`) use pre-allocated bounded storage
+  sized at instantiation time. The `CRDT.Bounded` wrapper eliminates heap use
+  entirely.
+- **SPARK-proofed core**: `CRDT.Core`, `CRDT.Pn_Counters`, `CRDT.Lww_Element_Sets`,
+  clock strategy packages, and `CRDT.HLC` run in `SPARK_Mode`. Proved absence of
+  runtime errors (index checks, overflow, division by zero) within those
+  boundaries. 269 SPARK checks proved as of 1.6.0.
+- **Runtime error elimination** in generic bodies (RGA/Yjs/Naive/Fugue, Lww_Sets)
+  depends on the instantiation's discriminant values; the `-gnata` flag enables
+  assertion checking at runtime for defensive coverage.
+- **Bounded storage everywhere**: generic `Max_Items`, `Max_Replicas`,
+  `Max_Set_Size`, `Capacity` discriminants prevent unbounded growth.
+- **No access-to-object aliasing**: access types are confined to sequence engine
+  bodies (`SPARK_Mode => Off`), with explicit bounds checks at every dereference.
+
+## Ada/SPARK Version
+
+- **Ada standard**: Ada 2012 (`-gnat12`). Ada 2022 is available in GNAT 15 but
+  not yet adopted -- would require full re-verification of SPARK proofs.
+- **SPARK**: SPARK 2014 (proved with `alr gnatprove`).
+- **GNAT version**: 15.2.1 (managed by Alire).
+- **Toolchain**: FSF GNAT via Alire. No vendor lock-in.
+- The Ada 2012 baseline aligns with DO-178C DAL-C objectives: current
+  certification toolchains (AdaCore GNAT Pro) target Ada 2012 for safety-critical
+  work. Ada 2022 adoption would be considered for a major version bump with a
+  dedicated proof campaign.
+
+## DO-178C DAL-C Targeting
+
+- **DAL-C** (Development Assurance Level C) means a failure may cause passenger
+  inconvenience but NOT injury or loss of life.
+- 24 High-Level Requirements (HLRs) tracked via `-- - HLR-XXXX` tags in `.ads`
+  files. Validated by `make compliance` which checks:
+  - Every source HLR tag has a corresponding entry in `HLR.md`
+  - Every HLR in `HLR.md` has a matching source tag (no orphans)
+  - All compliance artifacts (`HLR.md`, `LLR.md`, `TRACE.md`, `index.md`) exist
+- DAL-C implications for this codebase:
+  - Requirements are stated (HLR.md) and refined (LLR.md) but DO NOT require
+    the full independence of DAL-A (separate verification team).
+  - SPARK proof is accepted as verification evidence (replaces unit testing for
+    proved subprograms).
+  - Test coverage targets are less stringent than DAL-A/B.
+  - Tool qualification for GNAT/SPARK is not mandatory at DAL-C (Tool
+    Qualification Level TQL-4 applies, which is usually satisfied by the tool's
+    track record).
+- **Not targeting** DAL-A or DAL-B: no separate verification team, no MC/DC
+  coverage, no object code analysis. These would require a different development
+  process and budget.
+
+## Internal (Non-Public) Interfaces
+
+The following are exposed in the visible part of package specs for technical
+reasons (Ada visibility rules for child packages / generics) but are NOT part
+of the stable public API:
+
+| Subprogram | Reason exposed | Internal? |
+|---|---|---|
+| `CRDT.Core.VTime_Less`, `VTime_Leq`, `VTime_Eq`, `VTime_Merge`, `VTime_Increment` | Used by `CRDT.Sync.State_Based` and `CRDT.Clocks.Vector` | Yes |
+| `CRDT.Core.HLC_Less`, `HLC_Eq`, `HLC_Max` | Used by `CRDT.HLC` child package | Yes |
+| `CRDT.Core.Lamport_Max` | Used by `CRDT.Clocks.Lamport` | Yes |
+| `CRDT.Serialization.Legacy` | Isolated in child package, not part of main API | Yes |
+| `CRDT.Serialization.Protocol_Kind` | Returned by `Read_Header` for callers | Partially |
+| `CRDT.Sync.State_Vector` | Base type for both sync strategies | Partially |
+| `CRDT.Clocks.Clock_Kind` | Used in serialization header | Partially |
+
+These may change between minor versions without notice. External code should
+not depend on them directly. The public API consists of the type-generic
+packages (`Lww_Element_Sets`, `Rga`, `Pn_Counters`, `Lww_Sets`, etc.) and
+their documented subprograms.
 
 ## Backward Compatibility Guarantee
 
@@ -107,17 +187,21 @@ Specific guarantees:
 - All public package names and subprogram signatures are stable
 - New features are additive (new packages, new generic formal parameters with defaults)
 - Existing generics (`Lww_Element_Sets`, `Rga`, `Rgas`, `Protected`, `Bounded`) keep their exact signatures
-- Clock strategies default to Vector (introduced in 1.7.0)  --  Lamport remains available
-- Wire protocol is versioned (`Protocol_Version` constant). V1 readers can read V2/V3 data (with Lamport-only fields). V2 readers can read V3 data (Lamport fields + clock type extension)
+- Clock strategies default to Vector (introduced in 1.7.0) -- Lamport remains available
+- Wire protocol is versioned (`Protocol_Version` constant). V1 readers can read V2 data.
+  V2 readers can read V3 data (Lamport fields + clock type extension).
+  V3 readers can read all V1, V2, and V3 data.
 - Breaking changes require a major version bump
+- Internal interfaces (see table above) are excluded from the guarantee
 
-Exception: wire format V1 -> V2 migration (1.4.0) was a one-time breaking change, fully documented with a migration guide.
+Exception: wire format V1 -> V2 migration (1.4.0) was a one-time breaking change,
+fully documented with a migration guide.
 
 ## Conventions
 
 ### Naming
 
-- **Ada packages**: `CRDT.Sync.State_Based`, `CRDT.Clocks.Lamport`  --  hierarchical, PascalCase
+- **Ada packages**: `CRDT.Sync.State_Based`, `CRDT.Clocks.Lamport` -- hierarchical, PascalCase
 - **Source files**: snake_case matching the child package: `crdt-sync-state_based.ads`
 - **Types**: PascalCase: `Replica_Id`, `Lamport_Time`, `LWW_Element_Set`
 - **Subprograms**: PascalCase: `Add`, `Contains`, `Merge`, `Write_LWW_Element_Set`
@@ -129,7 +213,7 @@ Exception: wire format V1 -> V2 migration (1.4.0) was a one-time breaking change
 - No tabs (`-gnatyh`)
 - No trailing blanks (`-gnatyb`)
 - 200-char line limit (`-gnatym`)
-- UTF-8 encoding (`-gnatW8`)  --  but all source MUST be pure ASCII (enforced by `make ascii-check`)
+- UTF-8 encoding (`-gnatW8`) -- but all source MUST be pure ASCII (enforced by `make ascii-check`)
 - Comment style: `--  ` (double hyphen, two spaces, then text)
 - Private sections clearly delineated with `private` keyword
 - DO-178C HLR tags: `--  - HLR-XXXX: description` in package header
@@ -159,7 +243,7 @@ CRDT.Clocks.Matrix             -- explicit Matrix strategy
 - Test files live in `src/tests/`
 - Each test module corresponds to a category (basic, clocks, rga_features, etc.)
 - Test modules follow the pattern: `procedure Run (RunR : in out Runner)`
-- Tests use `RunR.Check (Condition, "Message")`  --  no external test framework
+- Tests use `RunR.Check (Condition, "Message")` -- no external test framework
 - Main harness: `test_crdt.adb` orchestrates all test modules
 - Test results written to both stdout and `test_result.md`
 - **40 tests** for clock strategies (10 per strategy x 3 = Lamport/Vector/Matrix, plus Lww_Sets variants)
@@ -178,21 +262,19 @@ CRDT.Clocks.Matrix             -- explicit Matrix strategy
 - All 269 SPARK checks proved (fully proved codebase as of 1.6.0)
 - `make prove` runs `alr gnatprove` to check
 - Key `SPARK_Mode => Off` justifications:
-  - `Ada.Numerics.Discrete_Random` (RNG)  --  `New_Replica_Id`
-  - `Ada.Calendar.Clock` (wall-clock)  --  HLC `Create`/`Tick`/`Recv`
-  - Stream I/O  --  Write/Read serialization routines
-  - Access types  --  RGA/Naive/Fugue engine bodies
+  - `Ada.Numerics.Discrete_Random` (RNG) -- `New_Replica_Id`
+  - `Ada.Calendar.Clock` (wall-clock) -- HLC `Create`/`Tick`/`Recv`
+  - Stream I/O -- Write/Read serialization routines
+  - Access types -- RGA/Naive/Fugue engine bodies
 
-### DO-178C Targeting
+### DO-178C Artifacts
 
-- Targeting **DAL-C** (Development Assurance Level C)
-- **24 HLRs** validated by `make compliance`
-- Artifacts in `docs/compliance/`:
-  - `HLR.md`  --  High-Level Requirements with source file references
-  - `LLR.md`  --  Low-Level Requirements mapped to Ada subprograms
-  - `TRACE.md`  --  Bidirectional traceability matrix
-  - `VERIFICATION.md`  --  SPARK proof stats + test results
-  - `index.md`  --  Overview
+Artifacts in `docs/compliance/`:
+- `HLR.md` -- High-Level Requirements with source file references
+- `LLR.md` -- Low-Level Requirements mapped to Ada subprograms
+- `TRACE.md` -- Bidirectional traceability matrix
+- `VERIFICATION.md` -- SPARK proof stats + test results
+- `index.md` -- Overview, DAL-C scope
 - HLR tags in source: `--  - HLR-XXXX: description` (comments in `.ads` file headers)
 - New features must add corresponding HLRs/LLRs and HLR tags
 - `make compliance` must pass before release
@@ -220,6 +302,10 @@ All generated by `make doc` / `make api-docs`:
 
 ### ASCII Charset Enforcement
 
-All source files (`.ads`, `.adb`, `.md`, `.py`, `.toml`, `.gpr`, `.yaml`, `.yml`) MUST contain only ASCII characters (0x00-0x7F). Enforced by `make ascii-check`. Non-ASCII characters (smart quotes, em-dashes, non-breaking spaces, UTF-8 multibyte sequences) are forbidden even in comments and documentation.
+All source files (`.ads`, `.adb`, `.md`, `.py`, `.toml`, `.gpr`, `.yaml`, `.yml`)
+MUST contain only ASCII characters (0x00-0x7F). Enforced by `make ascii-check`.
+Non-ASCII characters (smart quotes, em-dashes, non-breaking spaces, UTF-8
+multibyte sequences) are forbidden even in comments and documentation.
 
-To check: `find . -name '*.ads' -o -name '*.adb' -o -name '*.md' -o -name '*.py' -o -name '*.toml' -o -name '*.gpr' -o -name '*.yaml' -o -name '*.yml' | xargs -I{} sh -c 'LC_ALL=C grep -n "[^\x00-\x7F]" "{}" && echo "NON-ASCII in: {}"' || echo "All ASCII OK"`
+To check manually:
+`LC_ALL=C grep -rn '[^ -~'$'\t'']' . --include='*.ads' --include='*.adb' ...`

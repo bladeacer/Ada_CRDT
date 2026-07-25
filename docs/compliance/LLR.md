@@ -4,7 +4,7 @@ Each LLR traces to its parent HLR and identifies the Ada subprogram(s)
 that implement it.  SPARK contracts (pre/post/depends) serve as
 object-code-level formal verification of these requirements.
 
-## LLR-CORE-TS — Lamport Time Operations
+## LLR-CORE-TS  --  Lamport Time Operations
 
 **Parent HLR:** HLR-CORE-TS
 
@@ -20,7 +20,7 @@ Proof: Postcondition, Functional Contract
 
 ---
 
-## LLR-HLC-CLOCK — HLC Instance Lifecycle
+## LLR-HLC-CLOCK  --  HLC Instance Lifecycle
 
 **Parent HLR:** HLR-HLC-CLOCK, HLR-CORE-TS
 
@@ -34,7 +34,7 @@ Proof: Postcondition (Tick/Recv ensure monotonicity)
 
 ---
 
-## LLR-HLC-ORDER — HLC Ordering
+## LLR-HLC-ORDER  --  HLC Ordering
 
 **Parent HLR:** HLR-HLC-ORDER
 
@@ -48,7 +48,7 @@ Proof: Postcondition, Functional Contract
 
 ---
 
-## LLR-CORE-CLOCKS — Clock Strategy Interface
+## LLR-CORE-CLOCKS  --  Clock Strategy Interface
 
 **Parent HLR:** HLR-CORE-CLOCKS
 
@@ -71,14 +71,14 @@ Proof: Postcondition, Functional Contract
 | `Clocks.Matrix.Max` | Element-wise max of two Matrix clocks |
 | `Clocks.Matrix.Increment` | Increments entry (Row, Col) by 1 |
 | `Clocks.Matrix.Merge` | Element-wise max merge |
-| `Clocks.Matrix.Write_Clock` | LEB128-encode all N² entries |
-| `Clocks.Matrix.Read_Clock` | LEB128-decode all N² entries |
+| `Clocks.Matrix.Write_Clock` | LEB128-encode all N^2 entries |
+| `Clocks.Matrix.Read_Clock` | LEB128-decode all N^2 entries |
 
 Proof: Verified by round-trip tests (clocks-related)
 
 ---
 
-## LLR-CORE-VC — Vector Clock Operations
+## LLR-CORE-VC  --  Vector Clock Operations
 
 **Parent HLR:** HLR-CORE-VC
 
@@ -93,7 +93,7 @@ Proof: Loop Invariant, Postcondition, Functional Contract
 
 ---
 
-## LLR-CORE-PROTO — Protocol Version & LEB128
+## LLR-CORE-PROTO  --  Protocol Version & LEB128
 
 **Parent HLR:** HLR-CORE-PROTO
 
@@ -107,7 +107,7 @@ Proof: Run-time / assertion (LEB128 is tested)
 
 ---
 
-## LLR-CNTR-VALUE — PN-Counter Value Query
+## LLR-CNTR-VALUE  --  PN-Counter Value Query
 
 **Parent HLR:** HLR-CNTR-VALUE
 
@@ -120,7 +120,7 @@ Proof: Postcondition, Expression Function
 
 ---
 
-## LLR-CNTR-OP — PN-Counter Increment/Decrement
+## LLR-CNTR-OP  --  PN-Counter Increment/Decrement
 
 **Parent HLR:** HLR-CNTR-OP
 
@@ -133,7 +133,7 @@ Proof: Postcondition (entry count <= capacity), Depends
 
 ---
 
-## LLR-CNTR-MERGE — PN-Counter Merge
+## LLR-CNTR-MERGE  --  PN-Counter Merge
 
 **Parent HLR:** HLR-CNTR-MERGE
 
@@ -146,7 +146,7 @@ Proof: Postcondition, Loop Invariant, Depends
 
 ---
 
-## LLR-CNTR-SERIAL — PN-Counter Round Trip
+## LLR-CNTR-SERIAL  --  PN-Counter Round Trip
 
 **Parent HLR:** HLR-CNTR-SERIAL
 
@@ -159,7 +159,7 @@ Proof: Verified by round-trip tests (10218 test cases)
 
 ---
 
-## LLR-LWW-CONTAINS — LWW Set Membership
+## LLR-LWW-CONTAINS  --  LWW Set Membership
 
 **Parent HLR:** HLR-LWW-CONTAINS
 
@@ -173,7 +173,7 @@ Proof: Postcondition, Expression Function
 
 ---
 
-## LLR-LWW-ADD — LWW Set Add
+## LLR-LWW-ADD  --  LWW Set Add
 
 **Parent HLR:** HLR-LWW-ADD
 
@@ -185,7 +185,7 @@ Proof: Postcondition (add_count <= capacity), Depends
 
 ---
 
-## LLR-LWW-REMOVE — LWW Set Remove
+## LLR-LWW-REMOVE  --  LWW Set Remove
 
 **Parent HLR:** HLR-LWW-REMOVE
 
@@ -197,7 +197,7 @@ Proof: Postcondition (add_count <= capacity), Depends
 
 ---
 
-## LLR-LWW-MERGE — LWW Set Merge
+## LLR-LWW-MERGE  --  LWW Set Merge
 
 **Parent HLR:** HLR-LWW-MERGE
 
@@ -209,7 +209,7 @@ Proof: Postcondition, Depends
 
 ---
 
-## LLR-LWW-SERIAL — LWW Set Round Trip
+## LLR-LWW-SERIAL  --  LWW Set Round Trip
 
 **Parent HLR:** HLR-LWW-SERIAL
 
@@ -222,7 +222,7 @@ Proof: Verified by round-trip tests
 
 ---
 
-## LLR-SYNC-OP — Operation Log
+## LLR-SYNC-OP  --  Operation Log
 
 **Parent HLR:** HLR-SYNC-OP
 
@@ -237,7 +237,7 @@ Proof: Postcondition (count <= capacity), Expression Function, Depends
 
 ---
 
-## LLR-SYNC-ACK — Operation Acknowledge
+## LLR-SYNC-ACK  --  Operation Acknowledge
 
 **Parent HLR:** HLR-SYNC-ACK
 
@@ -249,7 +249,7 @@ Proof: Postcondition, Depends
 
 ---
 
-## LLR-SYNC-STATE — State Comparison & Merge
+## LLR-SYNC-STATE  --  State Comparison & Merge
 
 **Parent HLR:** HLR-SYNC-STATE
 
@@ -262,7 +262,7 @@ Proof: Loop Invariant (Is_Ahead), Postcondition, Depends
 
 ---
 
-## LLR-SYNC-DELTA — Delta Computation
+## LLR-SYNC-DELTA  --  Delta Computation
 
 **Parent HLR:** HLR-SYNC-DELTA
 
@@ -274,7 +274,7 @@ Proof: Postcondition
 
 ---
 
-## LLR-PROTO-HEADER — Protocol Header Dispatch
+## LLR-PROTO-HEADER  --  Protocol Header Dispatch
 
 **Parent HLR:** HLR-PROTO-HEADER
 
@@ -287,7 +287,7 @@ Proof: Verified by round-trip tests
 
 ---
 
-## LLR-PROTO-DISPATCH — Field Dispatch
+## LLR-PROTO-DISPATCH  --  Field Dispatch
 
 **Parent HLR:** HLR-PROTO-DISPATCH
 
@@ -299,7 +299,7 @@ Proof: Verified by round-trip tests
 
 ---
 
-## LLR-PROTO-LEGACY — V1 Fallback
+## LLR-PROTO-LEGACY  --  V1 Fallback
 
 **Parent HLR:** HLR-PROTO-LEGACY
 

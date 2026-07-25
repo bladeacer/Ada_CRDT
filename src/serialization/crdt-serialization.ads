@@ -62,6 +62,29 @@ is
       Count    : Natural;
       Clk_Kind : CRDT.Clocks.Clock_Kind);
 
+   --  Migrate a header from any protocol version to V3.
+   --  Reads the version-agnostic header from Source and writes a
+   --  V3-encoded header (version 3 + clock kind + LEB128 Total +
+   --  LEB128 Count) to Dest.  V1/V2 data is auto-detected and
+   --  promoted to V3.  V3 data is passed through (clock kind is
+   --  preserved from the source).
+   --  After this call Source is positioned just after the original header
+   --  and Dest has a fresh V3 header ready for field writes.
+   --  @param Source     Input stream with V1, V2, or V3 payload.
+   --  @param Dest       Output stream for V3-encoded header.
+   --  @param Kind       Detected protocol version of source (V1, V2, or V3).
+   --  @param Total      Total element count from source header.
+   --  @param Count      Entry/item count from source header.
+   --  @param Clock_Kind Clock kind written to Dest (from source for V3,
+   --                    caller-specified clock kind for V1/V2).
+   procedure Migrate_Header_To_V3
+     (Source     : not null access Ada.Streams.Root_Stream_Type'Class;
+      Dest       : not null access Ada.Streams.Root_Stream_Type'Class;
+      Kind       : out Protocol_Kind;
+      Total      : out Natural;
+      Count      : out Natural;
+      Clock_Kind : out CRDT.Clocks.Clock_Kind);
+
    --  Migrate a header from any protocol version to V2.
    --  Reads the version-agnostic header from Source and writes a
    --  V2-encoded header (LEB128 Protocol_Version + LEB128 Total +
