@@ -197,14 +197,23 @@ publish:
 		echo "Error: working tree is not clean. Commit or stash changes first."; \
 		exit 1; \
 	fi; \
-	alr publish
+	echo "Creating sanitized manifest (stripping dev-only deps)..."; \
+	cp alire.toml alire-publish.toml; \
+	sed -i '/^executables = /d' alire-publish.toml; \
+	sed -i '/^\[\[depends-on\]\]$$/,+2d' alire-publish.toml; \
+	alr publish --manifest alire-publish.toml; \
+	rm -f alire-publish.toml
 
 test-publish:
 	@version=$$(git describe --tags --abbrev=0 2>/dev/null || \
 		sed -n 's/^version = "\(.*\)"/\1/p' alire.toml); \
 	echo "=== test-publish dry-run ==="; \
 	echo "Version:  $$version"; \
-	echo "Action:   alr publish  (auto-detects GitHub from git remote)"; \
+	echo "1. cp alire.toml alire-publish.toml"; \
+	echo "2. sed -i '/^executables = /d' alire-publish.toml"; \
+	echo "3. sed -i '/^\[\[depends-on\]\]$$/,+2d' alire-publish.toml"; \
+	echo "4. alr publish --manifest alire-publish.toml"; \
+	echo "5. rm -f alire-publish.toml"; \
 	echo "Requires: GitHub PAT in GITHUB_TOKEN env var or gh auth token"; \
 	echo "Docs:     https://github.com/alire-project/alire/blob/master/doc/publishing.md"; \
 	echo "=== end dry-run ==="
