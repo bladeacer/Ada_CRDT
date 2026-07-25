@@ -123,7 +123,7 @@ doc: api-docs
 
 api-docs:
 	mkdir -p obj
-	alr exec -- gnatdoc -P crdt.gpr --backend=rst --output-dir=obj/gnatdoc-rst
+	alr exec -- gnatdoc -P crdt.gpr --backend=rst --generate private --output-dir=obj/gnatdoc-rst
 	python3 tools/rst2md.py obj/gnatdoc-rst docs/api-docs
 	rm -f docs/api-docs/test_*.md docs/api-docs/crdt-test_support.md
 	sed -i '/](test_[^)]*\.md)/d' docs/api-docs/index.md

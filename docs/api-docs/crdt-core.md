@@ -2,7 +2,7 @@
 
 Unique identifier for a replica in the distributed system.
 
-> **Note:** All items in this package are public.
+> **Note:** 17 public item(s) shown below; 4 private internal item(s) are in the `private` section.
 
 ## Types
 
@@ -71,37 +71,29 @@ Default_Component_Value => 0;
 
 | Parameter | Description |
 |-----------|-------------|
-| `Left` | Left HLC timestamp. |
-| `Right` | Right HLC timestamp. |
-
-**Returns:** True if timestamps are identical.
+| `Left` |  |
+| `Right` |  |
 
 ### function HLC_Less (Left : CRDT.Core.HLC_Time; Right : CRDT.Core.HLC_Time) return Standard.Boolean `[Post]`
 
 | Parameter | Description |
 |-----------|-------------|
-| `Left` | Left HLC timestamp. |
-| `Right` | Right HLC timestamp. |
-
-**Returns:** True if Left causally precedes Right.
+| `Left` |  |
+| `Right` |  |
 
 ### function HLC_Max (Left : CRDT.Core.HLC_Time; Right : CRDT.Core.HLC_Time) return CRDT.Core.HLC_Time `[Post]`
 
 | Parameter | Description |
 |-----------|-------------|
-| `Left` | First HLC timestamp. |
-| `Right` | Second HLC timestamp. |
-
-**Returns:** The causally later timestamp.
+| `Left` |  |
+| `Right` |  |
 
 ### function Lamport_Max (Left : CRDT.Core.Lamport_Time; Right : CRDT.Core.Lamport_Time) return CRDT.Core.Lamport_Time `[Post]`
 
 | Parameter | Description |
 |-----------|-------------|
-| `Left` | First timestamp. |
-| `Right` | Second timestamp. |
-
-**Returns:** The causally later timestamp.
+| `Left` |  |
+| `Right` |  |
 
 ### function New_Replica_Id return CRDT.Core.Replica_Id `[SPARK]`
 
@@ -149,3 +141,12 @@ Default_Component_Value => 0;
 |-----------|-------------|
 | `Source` | Vector clock to merge from. |
 | `Target` | Vector clock to update. |
+
+---
+
+## Private Section
+
+- **function** `Lamport_Max`
+- **function** `HLC_Less`
+- **function** `HLC_Eq`
+- **function** `HLC_Max`

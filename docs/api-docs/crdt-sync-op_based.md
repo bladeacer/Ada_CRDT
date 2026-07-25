@@ -2,9 +2,15 @@
 
 Operation-Based (CmRDT) sync engine. Replicas broadcast granular, immutable mutation events. Downstream operations must be applied exactly once. Network trait: Hyper-low bandwidth consumption, ideal for ordered delivery channels (WebSockets, TCP/TLS streams). Requirements traceability: - HLR-SYNC-OP: Operation-based sync with bounded log - HLR-SYNC-ACK: Acknowledge + compact processed operations
 
-> **Note:** 10 public item(s) shown below; 2 private internal item(s) are in the `private` section.
+> **Note:** 13 public item(s) shown below; 2 private internal item(s) are in the `private` section.
 
 ## Types
+
+### type Op_Array
+
+```ada
+type Op_Array is array (Positive range <>) of Operation;
+```
 
 ### type Op_Kind
 
@@ -15,7 +21,11 @@ type Op_Kind is (Op_Insert, Op_Delete, Op_Increment, Op_Decrement);
 ### type Op_Log
 
 ```ada
-type Op_Log (Capacity : Positive) is private;
+type Op_Log (Capacity : Positive) is record
+Ops   : Op_Array (1 .. Capacity);
+Count : Natural := 0;
+GC    : Natural := 0;
+end record;
 ```
 
 ### type Operation
@@ -76,6 +86,22 @@ end record;
 | `Log` | Operation log to query. |
 
 **Returns:** Total number of entries written.
+
+### function Log_Count (Log : CRDT.Sync.Op_Based.Op_Log) return Standard.Natural `[Post]`
+
+| Parameter | Description |
+|-----------|-------------|
+| `Log` | Operation log to query. |
+
+**Returns:** Total number of entries written.
+
+### function Log_GC (Log : CRDT.Sync.Op_Based.Op_Log) return Standard.Natural `[Post]`
+
+| Parameter | Description |
+|-----------|-------------|
+| `Log` | Operation log to query. |
+
+**Returns:** Number of acknowledged (GC'd) entries.
 
 ### function Log_GC (Log : CRDT.Sync.Op_Based.Op_Log) return Standard.Natural `[Post]`
 

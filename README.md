@@ -109,7 +109,8 @@ your `alire.toml` dependency.
 ### PN-Counter (Actor Map)
 
 Per-replica increments/decrements. Fixed memory (3 replicas = 3 slots),
-regardless of op count.
+regardless of op count. See [API docs](docs/api-docs/crdt-pn_counters.md)
+for full interface reference.
 
 ```ada
 with CRDT.Pn_Counters;
@@ -128,6 +129,8 @@ Package: `CRDT.Pn_Counters`
 ### LWW-Element-Set (Lamport Timestamps)
 
 Last-Writer-Wins set using logical clocks (no wall-clock skew).
+See [API docs](docs/api-docs/crdt-lww_element_sets.md) for full interface
+reference.
 
 ```ada
 with CRDT.Lww_Element_Sets;
@@ -193,6 +196,9 @@ package S is new CRDT.Sequences.Naive (Character, 100);
 ```
 
 ### Sync Layer
+
+See [API docs](docs/api-docs/crdt-sync-state_based.md) and
+[docs](docs/api-docs/crdt-sync-op_based.md) for full interface reference.
 
 State-based (CvRDT) with delta sync and HLC:
 
@@ -382,8 +388,10 @@ Controls
 
 ## SPARK Proof
 
-Core packages (`CRDT.Pn_Counters`) SPARK-proven for run-time check elimination.
-Generics (Sequences, LWW, RGA) are instantiation-dependent.
+Core packages (`CRDT.Core`, `CRDT.Pn_Counters`, `CRDT.Clocks.*`) SPARK-proven
+for run-time check elimination (269 checks proved). Generics (Sequences, LWW,
+RGA) are instantiation-dependent; runtime assertions (`-gnata`) provide
+defensive coverage.
 
 ---
 

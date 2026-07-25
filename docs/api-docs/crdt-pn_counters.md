@@ -2,9 +2,25 @@
 
 PN-Counter with per-replica actor map. Tracks increments (P) and decrements (N) for each replica independently. Fixed memory: 3 replicas = 3 slots regardless of millions of ops. Value = sum(P) - sum(N). Requirements traceability: - HLR-CNTR-VALUE: Query net counter value across all replicas - HLR-CNTR-OP: Increment/decrement with per-replica tracking - HLR-CNTR-MERGE: Merge two counter states into one - HLR-CNTR-SERIAL: V1/V2 wire format round-trip
 
-> **Note:** 11 public item(s) shown below; 3 private internal item(s) are in the `private` section.
+> **Note:** 16 public item(s) shown below; 3 private internal item(s) are in the `private` section.
 
 ## Types
+
+### type Actor_Array
+
+```ada
+type Actor_Array is array (Positive range <>) of Actor_Entry;
+```
+
+### type Actor_Entry
+
+```ada
+type Actor_Entry is record
+Actor : Core.Replica_Id := 1;
+P     : Counter_Range := 0;
+N     : Counter_Range := 0;
+end record;
+```
 
 ### type Counter_Range
 
@@ -15,11 +31,22 @@ subtype Counter_Range is Natural;
 ### type PN_Counter
 
 ```ada
-type PN_Counter (Max_Actors : Positive) is private with
-Default_Initial_Condition;
+type PN_Counter (Max_Actors : Positive) is record
+Entries : Actor_Array (1 .. Max_Actors);
+Count   : Natural := 0;
+end record;
 ```
 
 ## Functions
+
+### function Can_Decrement (C : CRDT.Pn_Counters.PN_Counter; By : CRDT.Pn_Counters.Counter_Range) return Standard.Boolean
+
+| Parameter | Description |
+|-----------|-------------|
+| `By` | Amount to decrement. |
+| `C` | The counter. |
+
+**Returns:** Always True.
 
 ### function Can_Decrement (C : CRDT.Pn_Counters.PN_Counter; By : CRDT.Pn_Counters.Counter_Range) return Standard.Boolean
 
@@ -38,6 +65,23 @@ Default_Initial_Condition;
 | `C` | The counter. |
 
 **Returns:** Always True.
+
+### function Can_Increment (C : CRDT.Pn_Counters.PN_Counter; By : CRDT.Pn_Counters.Counter_Range) return Standard.Boolean
+
+| Parameter | Description |
+|-----------|-------------|
+| `By` | Amount to increment. |
+| `C` | The counter. |
+
+**Returns:** Always True.
+
+### function Entry_Count (C : CRDT.Pn_Counters.PN_Counter) return Standard.Natural `[Post]`
+
+| Parameter | Description |
+|-----------|-------------|
+| `C` | The counter to query. |
+
+**Returns:** Entry count, always <= Max_Actors.
 
 ### function Entry_Count (C : CRDT.Pn_Counters.PN_Counter) return Standard.Natural `[Post]`
 

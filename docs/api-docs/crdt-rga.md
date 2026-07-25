@@ -2,7 +2,7 @@
 
 Replicated Growable Array (RGA) - default Yjs-style chunk-based engine. Contiguous elements written by the same replica are stored in sized blocks (Max_Stride), dramatically reducing allocation overhead vs. per-character nodes. Default sequence engine for CRDT. Industry equivalence: Yjs/YATA algorithm. Supports structural splitting, state vector delta sync, tombstone garbage collection, and protocol-versioned serialization.
 
-> **Note:** 20 public item(s) shown below; 4 private internal item(s) are in the `private` section.
+> **Note:** 23 public item(s) shown below; 4 private internal item(s) are in the `private` section.
 
 ## Types
 
@@ -10,6 +10,18 @@ Replicated Growable Array (RGA) - default Yjs-style chunk-based engine. Contiguo
 
 ```ada
 type Element_Array is array (Positive range <>) of Element_Type;
+```
+
+### type Element_Store
+
+```ada
+type Element_Store is array (1 .. Max_Stride) of Element_Type;
+```
+
+### type Item_Array
+
+```ada
+type Item_Array is array (Positive range <>) of RGA_Item;
 ```
 
 ### type Node_Id
@@ -39,7 +51,25 @@ type Replica_Max_Seq_Array is array (Positive range <>) of Replica_Max_Seq;
 ### type RGA
 
 ```ada
-type RGA (Item_Capacity : Positive) is private;
+type RGA (Item_Capacity : Positive) is record
+Items   : Item_Array (1 .. Item_Capacity);
+Head    : Natural := 0;
+Count   : Natural := 0;
+Free    : Natural := 0;
+Total   : Natural := 0;
+end record;
+```
+
+### type RGA_Item
+
+```ada
+type RGA_Item is record
+Id      : Node_Id;
+Content : Element_Store;
+Len     : Natural := 0;
+Deleted : Boolean := False;
+Next    : Natural := 0;
+end record;
 ```
 
 ## Functions

@@ -2,20 +2,29 @@
 
 Naive per-element RGA engine. Every single element is its own individually allocated node. Useful for: educational baselines, chaotic editing environments, or small sequences where per-element overhead is acceptable.
 
-> **Note:** 22 public item(s) shown below; 4 private internal item(s) are in the `private` section.
+> **Note:** 24 public item(s) shown below; 4 private internal item(s) are in the `private` section.
 
 ## Types
 
 ### type Cursor
 
 ```ada
-type Cursor is private;
+type Cursor is record
+Total : Natural := 0;
+Pos   : Natural := 0;
+end record;
 ```
 
 ### type Element_Array
 
 ```ada
 type Element_Array is array (Positive range <>) of Element_Type;
+```
+
+### type Item_Array
+
+```ada
+type Item_Array is array (Positive range <>) of RGA_Item;
 ```
 
 ### type Node_Id
@@ -30,7 +39,24 @@ end record;
 ### type RGA
 
 ```ada
-type RGA (Capacity : Positive) is private;
+type RGA (Capacity : Positive) is record
+Items   : Item_Array (1 .. Capacity);
+Head    : Natural := 0;
+Count   : Natural := 0;
+Free    : Natural := 0;
+Total   : Natural := 0;
+end record;
+```
+
+### type RGA_Item
+
+```ada
+type RGA_Item is record
+Id      : Node_Id;
+Value   : Element_Type;
+Deleted : Boolean := False;
+Next    : Natural := 0;
+end record;
 ```
 
 ## Functions

@@ -9,7 +9,10 @@ State-Based (CvRDT) sync engine. Replicas exchange full or delta-compressed stat
 ### type Replica_State
 
 ```ada
-type Replica_State (Max_Replicas : Positive) is private;
+type Replica_State (Max_Replicas : Positive) is record
+HLC_Clock : CRDT.HLC.Instance;
+SV        : Core.VTime (1 .. Max_Replicas);
+end record;
 ```
 
 ### type Sync_Config

@@ -2,7 +2,7 @@
 
 HLC timestamp wrapping Core's HLC_Time.
 
-> **Note:** 9 public item(s) shown below; 2 private internal item(s) are in the `private` section.
+> **Note:** 10 public item(s) shown below; 2 private internal item(s) are in the `private` section.
 
 ## Types
 
@@ -15,7 +15,11 @@ type HLC_Time is new Core.HLC_Time;
 ### type Instance
 
 ```ada
-type Instance is private;
+type Instance is record
+Wall : Ada.Calendar.Time;
+Node : Core.Replica_Id;
+Log  : Natural := 0;
+end record;
 ```
 
 ## Functions
@@ -54,6 +58,14 @@ type Instance is private;
 | `Node` | Replica identifier. |
 
 **Returns:** Initialized HLC clock.
+
+### function Now (Clock : CRDT.HLC.Instance) return CRDT.HLC.HLC_Time
+
+| Parameter | Description |
+|-----------|-------------|
+| `Clock` | HLC instance to query. |
+
+**Returns:** Current HLC timestamp.
 
 ### function Now (Clock : CRDT.HLC.Instance) return CRDT.HLC.HLC_Time
 

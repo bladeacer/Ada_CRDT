@@ -2,20 +2,35 @@
 
 Yjs-style splitting block RGA engine. Groups contiguous characters written by the same client into memory blocks (size Max_Stride). Structural splitting splits a block when an insert targets its middle, then stitches the new block in between. Uses a pre-allocated contiguous array of blocks (memory arena) to avoid heap fragmentation. Industry equivalence: Yjs YATA algorithm.
 
-> **Note:** 26 public item(s) shown below; 5 private internal item(s) are in the `private` section.
+> **Note:** 29 public item(s) shown below; 5 private internal item(s) are in the `private` section.
 
 ## Types
 
 ### type Cursor
 
 ```ada
-type Cursor is private;
+type Cursor is record
+Total : Natural := 0;
+Pos   : Natural := 0;
+end record;
 ```
 
 ### type Element_Array
 
 ```ada
 type Element_Array is array (Positive range <>) of Element_Type;
+```
+
+### type Element_Store
+
+```ada
+type Element_Store is array (1 .. Max_Stride) of Element_Type;
+```
+
+### type Item_Array
+
+```ada
+type Item_Array is array (Positive range <>) of RGA_Item;
 ```
 
 ### type Node_Id
@@ -45,7 +60,25 @@ type Replica_Max_Seq_Array is array (Positive range <>) of Replica_Max_Seq;
 ### type RGA
 
 ```ada
-type RGA (Item_Capacity : Positive) is private;
+type RGA (Item_Capacity : Positive) is record
+Items   : Item_Array (1 .. Item_Capacity);
+Head    : Natural := 0;
+Count   : Natural := 0;
+Free    : Natural := 0;
+Total   : Natural := 0;
+end record;
+```
+
+### type RGA_Item
+
+```ada
+type RGA_Item is record
+Id      : Node_Id;
+Content : Element_Store;
+Len     : Natural := 0;
+Deleted : Boolean := False;
+Next    : Natural := 0;
+end record;
 ```
 
 ## Functions

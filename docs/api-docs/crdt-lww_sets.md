@@ -11,7 +11,12 @@ An element is present iff its add-timestamp exceeds its remove-timestamp.
 ### type LWW_Clocked_Set
 
 ```ada
-type LWW_Clocked_Set (Capacity : Positive) is private;
+type LWW_Clocked_Set (Capacity : Positive) is record
+Add_Array    : Timestamp_Array (1 .. Capacity);
+Add_Size     : Natural := 0;
+Remove_Array : Timestamp_Array (1 .. Capacity);
+Remove_Size  : Natural := 0;
+end record;
 ```
 
 ### type Timestamp_Array

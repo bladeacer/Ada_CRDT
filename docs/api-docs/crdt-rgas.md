@@ -21,7 +21,10 @@ subtype RGA_Entry is RGA_Pkg.RGA (Max_RGA_Size);
 ### type RGAs
 
 ```ada
-type RGAs (Count : Positive) is private;
+type RGAs (Count : Positive) is record
+A    : RGA_Array (1 .. Count);
+Sz   : Natural := 0;
+end record;
 ```
 
 ## Functions

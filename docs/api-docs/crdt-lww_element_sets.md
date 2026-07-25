@@ -9,7 +9,12 @@ Last-Writer-Wins Element Set using Lamport timestamps. Stores (element, Lamport_
 ### type LWW_Element_Set
 
 ```ada
-type LWW_Element_Set (Capacity : Positive) is private;
+type LWW_Element_Set (Capacity : Positive) is record
+Add_Array    : Timestamp_Array (1 .. Capacity);
+Add_Size     : Natural := 0;
+Remove_Array : Timestamp_Array (1 .. Capacity);
+Remove_Size  : Natural := 0;
+end record;
 ```
 
 ### type Timestamp_Array

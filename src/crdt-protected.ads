@@ -7,7 +7,7 @@ with CRDT.Lww_Element_Sets;
 with CRDT.Rga;
 
 package CRDT.Protected with
-  SPARK_Mode => Off
+   SPARK_Mode
 is
 
    --  Thread-safe PN-Counter.

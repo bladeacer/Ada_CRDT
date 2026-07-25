@@ -6,7 +6,7 @@ Legacy V1 fixed-width deserialization mechanisms. Protocol V1 used 4-byte Natura
 
 ## Procedures
 
-### procedure Read_Natural_V1 (Stream : Ada.Streams.Root_Stream_Type; Value : Standard.Natural)
+### procedure Read_Natural_V1 (Stream : Ada.Streams.Root_Stream_Type; Value : Standard.Natural) `[SPARK]`
 
 | Parameter | Description |
 |-----------|-------------|

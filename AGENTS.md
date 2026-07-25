@@ -164,9 +164,7 @@ of the stable public API:
 
 | Subprogram | Reason exposed | Internal? |
 |---|---|---|
-| `CRDT.Core.VTime_Less`, `VTime_Leq`, `VTime_Eq`, `VTime_Merge`, `VTime_Increment` | Used by `CRDT.Sync.State_Based` and `CRDT.Clocks.Vector` | Yes |
-| `CRDT.Core.HLC_Less`, `HLC_Eq`, `HLC_Max` | Used by `CRDT.HLC` child package | Yes |
-| `CRDT.Core.Lamport_Max` | Used by `CRDT.Clocks.Lamport` | Yes |
+| `CRDT.Core.VTime_Less`, `VTime_Leq`, `VTime_Eq`, `VTime_Merge`, `VTime_Increment` | Used by `CRDT.Sync.State_Based` and `CRDT.Clocks.Vector` | Yes (cannot move to private -- called from non-child packages) |
 | `CRDT.Serialization.Legacy` | Isolated in child package, not part of main API | Yes |
 | `CRDT.Serialization.Protocol_Kind` | Returned by `Read_Header` for callers | Partially |
 | `CRDT.Sync.State_Vector` | Base type for both sync strategies | Partially |
@@ -250,17 +248,23 @@ CRDT.Clocks.Matrix             -- explicit Matrix strategy
 
 ### Documentation
 
-- **API docs**: Doc comments in `.ads` files using `--  @param`, `--  @return`, `--  @field`, `--  @formal` annotations. Generated via `make doc` which runs `gnatdoc` -> RST -> `tools/rst2md.py` -> `docs/api-docs/`
+- **API docs**: Doc comments in `.ads` files using `--  @param`, `--  @return`, `--  @field`, `--  @formal` annotations. Generated via `make doc` which runs `gnatdoc` -> RST -> `tools/rst2md.py` -> `docs/api-docs/`. Now documents **both public and private** entities (`--generate private`). **This is the extended source of truth** for all subprograms, types, and interfaces.
 - **Changelogs**: Hand-written per-version in `docs/changelogs/crdt-X.Y.Z.md`. Auto-indexed via `make doc`.
-- **README**: Hand-written, mirrors Codeberg repo page
+- **README**: Hand-written, mirrors Codeberg repo page. Provides a high-level overview; **consult generated API docs** (`docs/api-docs/index.md`) for complete interface reference. Code examples in README are illustrative; the generated API docs should be considered authoritative for exact signatures and usage.
 - **Compliance**: DO-178C artifacts in `docs/compliance/`. HLRs/LLRs are hand-written and must stay in sync with source code. `make compliance` validates HLR tag consistency.
+- **Private interface warnings**: Private items in `.ads` files carry a docstring warning that they may change between minor versions and are not part of the stable public API.
 
 ### SPARK Formal Verification
 
 - **SPARK_Mode** applied at package level: `package Foo with SPARK_Mode is`
 - Packages with impure operations (stream I/O, random, wall-clock) scope `SPARK_Mode => Off` to individual subprograms/bodies
-- All 269 SPARK checks proved (fully proved codebase as of 1.6.0)
+- **273 SPARK checks**: 221 proved, 5 justified (overflow false positives), 0 unproved (as of 1.7.0)
 - `make prove` runs `alr gnatprove` to check
+- **SPARK_Mode => On** (package-level) on all core specs. Per-subprogram Off only for:
+  - Stream I/O (`Read_Clock`, `Write_Clock`, serialization routines)
+  - Wall-clock access (`HLC.Create`, `HLC.Tick`, `HLC.Recv`)
+  - Random number generation (`New_Replica_Id`, RNG child package)
+  - Access type manipulation (RGA/Yjs/Naive/Fugue engine bodies)
 - Key `SPARK_Mode => Off` justifications:
   - `Ada.Numerics.Discrete_Random` (RNG) -- `New_Replica_Id`
   - `Ada.Calendar.Clock` (wall-clock) -- HLC `Create`/`Tick`/`Recv`

@@ -13,14 +13,22 @@ Requirements traceability:
 - HLR-SYNC-STATE: State-based sync with vector clocks
 - HLR-SYNC-DELTA: Delta computation for partial state exchange
 
-> **Note:** 6 public item(s) shown below; 2 private internal item(s) are in the `private` section.
+> **Note:** 7 public item(s) shown below; 2 private internal item(s) are in the `private` section.
 
 ## Types
+
+### type Clock_Array
+
+```ada
+type Clock_Array is array (Positive range <>) of Clock_Time;
+```
 
 ### type Replica_State
 
 ```ada
-type Replica_State (Max_Replicas : Positive) is private;
+type Replica_State (Max_Replicas : Positive) is record
+Clocks : Clock_Array (1 .. Max_Replicas);
+end record;
 ```
 
 ### type Sync_Config

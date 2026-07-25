@@ -14,7 +14,7 @@ type Protocol_Kind is (Proto_V1, Proto_V2, Proto_V3);
 
 ## Procedures
 
-### procedure Migrate_Header (Source : Ada.Streams.Root_Stream_Type; Dest : Ada.Streams.Root_Stream_Type; Kind : CRDT.Serialization.Protocol_Kind; Total : Standard.Natural; Count : Standard.Natural)
+### procedure Migrate_Header (Source : Ada.Streams.Root_Stream_Type; Dest : Ada.Streams.Root_Stream_Type; Kind : CRDT.Serialization.Protocol_Kind; Total : Standard.Natural; Count : Standard.Natural) `[SPARK]`
 
 | Parameter | Description |
 |-----------|-------------|
@@ -24,7 +24,7 @@ type Protocol_Kind is (Proto_V1, Proto_V2, Proto_V3);
 | `Source` | Input stream with V1 or V2 payload. |
 | `Total` | Total element count from source header. |
 
-### procedure Migrate_Header_To_V3 (Source : Ada.Streams.Root_Stream_Type; Dest : Ada.Streams.Root_Stream_Type; Kind : CRDT.Serialization.Protocol_Kind; Total : Standard.Natural; Count : Standard.Natural; Clock_Kind : CRDT.Clocks.Clock_Kind)
+### procedure Migrate_Header_To_V3 (Source : Ada.Streams.Root_Stream_Type; Dest : Ada.Streams.Root_Stream_Type; Kind : CRDT.Serialization.Protocol_Kind; Total : Standard.Natural; Count : Standard.Natural; Clock_Kind : CRDT.Clocks.Clock_Kind) `[SPARK]`
 
 | Parameter | Description |
 |-----------|-------------|
@@ -35,7 +35,7 @@ type Protocol_Kind is (Proto_V1, Proto_V2, Proto_V3);
 | `Source` | Input stream with V1, V2, or V3 payload. |
 | `Total` | Total element count from source header. |
 
-### procedure Read_Header (Stream : Ada.Streams.Root_Stream_Type; Kind : CRDT.Serialization.Protocol_Kind; Total : Standard.Natural; Count : Standard.Natural; Clock_Kind : CRDT.Clocks.Clock_Kind)
+### procedure Read_Header (Stream : Ada.Streams.Root_Stream_Type; Kind : CRDT.Serialization.Protocol_Kind; Total : Standard.Natural; Count : Standard.Natural; Clock_Kind : CRDT.Clocks.Clock_Kind) `[SPARK]`
 
 | Parameter | Description |
 |-----------|-------------|
@@ -45,7 +45,7 @@ type Protocol_Kind is (Proto_V1, Proto_V2, Proto_V3);
 | `Stream` | Input stream positioned at start of a CRDT payload. |
 | `Total` | Total element count from header. |
 
-### procedure Read_Natural (Kind : CRDT.Serialization.Protocol_Kind; Stream : Ada.Streams.Root_Stream_Type; Value : Standard.Natural)
+### procedure Read_Natural (Kind : CRDT.Serialization.Protocol_Kind; Stream : Ada.Streams.Root_Stream_Type; Value : Standard.Natural) `[SPARK]`
 
 | Parameter | Description |
 |-----------|-------------|
@@ -53,7 +53,7 @@ type Protocol_Kind is (Proto_V1, Proto_V2, Proto_V3);
 | `Stream` | Input stream to read from. |
 | `Value` | Decoded natural value. |
 
-### procedure Write_Header_V3 (Stream : Ada.Streams.Root_Stream_Type; Total : Standard.Natural; Count : Standard.Natural; Clk_Kind : CRDT.Clocks.Clock_Kind)
+### procedure Write_Header_V3 (Stream : Ada.Streams.Root_Stream_Type; Total : Standard.Natural; Count : Standard.Natural; Clk_Kind : CRDT.Clocks.Clock_Kind) `[SPARK]`
 
 | Parameter | Description |
 |-----------|-------------|

@@ -2,20 +2,29 @@
 
 Fugue-style tree-based RGA engine. Replaces flat linked lists with a binary search tree hierarchy designed to eliminate string interleaving (the "zipper" bug when users type concurrently at the same position). Node_Id includes a Depth component for tree positioning. In-order traversal produces the document sequence.
 
-> **Note:** 22 public item(s) shown below; 4 private internal item(s) are in the `private` section.
+> **Note:** 24 public item(s) shown below; 4 private internal item(s) are in the `private` section.
 
 ## Types
 
 ### type Cursor
 
 ```ada
-type Cursor is private;
+type Cursor is record
+Total : Natural := 0;
+Pos   : Natural := 0;
+end record;
 ```
 
 ### type Element_Array
 
 ```ada
 type Element_Array is array (Positive range <>) of Element_Type;
+```
+
+### type Item_Array
+
+```ada
+type Item_Array is array (Positive range <>) of RGA_Item;
 ```
 
 ### type Node_Id
@@ -31,7 +40,26 @@ end record;
 ### type RGA
 
 ```ada
-type RGA (Capacity : Positive) is private;
+type RGA (Capacity : Positive) is record
+Items   : Item_Array (1 .. Capacity);
+Root    : Natural := 0;
+Count   : Natural := 0;
+Free    : Natural := 0;
+Total   : Natural := 0;
+end record;
+```
+
+### type RGA_Item
+
+```ada
+type RGA_Item is record
+Id      : Node_Id;
+Value   : Element_Type;
+Deleted : Boolean := False;
+Parent  : Natural := 0;
+Left    : Natural := 0;
+Right   : Natural := 0;
+end record;
 ```
 
 ## Functions

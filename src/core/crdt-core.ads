@@ -54,15 +54,7 @@ is
      Post => (">"'Result = (not (Left < Right)
                             and then not (Left = Right)));
 
-   --  Return the maximum of two Lamport timestamps.
-   --  @param Left   First timestamp.
-   --  @param Right  Second timestamp.
-   --  @return The causally later timestamp.
-   function Lamport_Max (Left, Right : Lamport_Time) return Lamport_Time with
-     Post => (if Left > Right then Lamport_Max'Result = Left
-              else Lamport_Max'Result = Right);
-
-   --  Hybrid Logical Clock timestamp combining physical wall clock
+    --  Hybrid Logical Clock timestamp combining physical wall clock
    --  with a logical component for causality across clock-skewed nodes.
    --  @field Wall  Physical wall-clock time.
    --  @field Node  Replica that generated this timestamp.
@@ -73,37 +65,7 @@ is
       Log  : Natural := 0;
    end record;
 
-   --  HLC less-than: compares Wall, then Log, then Node.
-   --  @param Left   Left HLC timestamp.
-   --  @param Right  Right HLC timestamp.
-   --  @return True if Left causally precedes Right.
-   function HLC_Less (Left, Right : HLC_Time) return Boolean with
-     Post => (HLC_Less'Result =
-               (if Left.Wall < Right.Wall then True
-                elsif Left.Wall > Right.Wall then False
-                elsif Left.Log < Right.Log then True
-                elsif Left.Log > Right.Log then False
-                else Left.Node < Right.Node));
-
-   --  HLC equality: all three fields must match.
-   --  @param Left   Left HLC timestamp.
-   --  @param Right  Right HLC timestamp.
-   --  @return True if timestamps are identical.
-   function HLC_Eq (Left, Right : HLC_Time) return Boolean with
-     Post => (HLC_Eq'Result =
-               (Left.Wall = Right.Wall
-                and then Left.Log = Right.Log
-                and then Left.Node = Right.Node));
-
-   --  Return the maximum of two HLC timestamps.
-   --  @param Left   First HLC timestamp.
-   --  @param Right  Second HLC timestamp.
-   --  @return The causally later timestamp.
-   function HLC_Max (Left, Right : HLC_Time) return HLC_Time with
-     Post => (if HLC_Less (Left, Right) then HLC_Max'Result = Right
-              else HLC_Max'Result = Left);
-
-   --  Vector clock for tracking per-replica event counts.
+    --  Vector clock for tracking per-replica event counts.
    --  Index 1 corresponds to the first replica seen.
    type VTime is array (Positive range <>) of Natural with
      Default_Component_Value => 0;
@@ -160,14 +122,45 @@ is
                          (if I /= Idx then VT (I) = VT'Old (I))),
      Depends => (VT => (VT, Idx));
 
-   --  Generate a new globally unique replica identifier.
-   --  Uses a cryptographically seeded random generator.
-   --  @return A fresh Replica_Id not previously returned.
-   function New_Replica_Id return Replica_Id with
-     SPARK_Mode => Off;
+    --  Generate a new globally unique replica identifier.
+    --  Uses a cryptographically seeded random generator.
+    --  @return A fresh Replica_Id not previously returned.
+    function New_Replica_Id return Replica_Id with
+      SPARK_Mode => Off;
 
-   --  Wire protocol version for all serialized CRDT state.
-   --  Increment when making breaking changes to the binary format.
-   Protocol_Version : constant Natural := 3;
+    --  Wire protocol version for all serialized CRDT state.
+    --  Increment when making breaking changes to the binary format.
+    Protocol_Version : constant Natural := 3;
+
+private
+
+   --  Internal helpers used in contracts and body of this package only.
+   --  WARNING: These subprograms are implementation details. They are
+   --  exposed in the private part for technical visibility reasons but
+   --  are NOT part of the stable public API. They may change or be
+   --  removed between minor versions. Do not depend on them from
+   --  external code unless you understand the implications.
+
+   function Lamport_Max (Left, Right : Lamport_Time) return Lamport_Time with
+     Post => (if Left > Right then Lamport_Max'Result = Left
+              else Lamport_Max'Result = Right);
+
+   function HLC_Less (Left, Right : HLC_Time) return Boolean with
+     Post => (HLC_Less'Result =
+               (if Left.Wall < Right.Wall then True
+                elsif Left.Wall > Right.Wall then False
+                elsif Left.Log < Right.Log then True
+                elsif Left.Log > Right.Log then False
+                else Left.Node < Right.Node));
+
+   function HLC_Eq (Left, Right : HLC_Time) return Boolean with
+     Post => (HLC_Eq'Result =
+               (Left.Wall = Right.Wall
+                and then Left.Log = Right.Log
+                and then Left.Node = Right.Node));
+
+   function HLC_Max (Left, Right : HLC_Time) return HLC_Time with
+     Post => (if HLC_Less (Left, Right) then HLC_Max'Result = Right
+              else HLC_Max'Result = Left);
 
 end CRDT.Core;
