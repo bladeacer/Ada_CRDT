@@ -197,56 +197,16 @@ publish:
 		echo "Error: working tree is not clean. Commit or stash changes first."; \
 		exit 1; \
 	fi; \
-	version=$$(ls alire/releases/crdt-*.toml 2>/dev/null | sort -V | tail -1 | sed 's/.*crdt-\(.*\)\.toml/\1/'); \
-	if [ -z "$$version" ]; then \
-		echo "Error: could not detect version from alire/releases/"; \
-		exit 1; \
-	fi; \
-	echo "Publishing crdt $$version (from alire/releases/crdt-$$version.toml) to Alire community index..."; \
-	publish_dir="$$HOME/.local/share/alire/publish/community"; \
-	orig_dir=$$(pwd); \
-	if [ ! -d "$$publish_dir" ]; then \
-		echo "Error: $$publish_dir not found"; \
-		exit 1; \
-	fi; \
-	cd "$$publish_dir" && git pull && cd "$$orig_dir"; \
-	alr publish "https://codeberg.org/bladeacer/Ada_CRDT/archive/v$$version.tar.gz" || true; \
-	cd "$$publish_dir" && \
-	git reset --soft HEAD~1 && \
-	index_file="index/cr/crdt/crdt-$$version.toml"; \
-	if [ -f "$$index_file" ]; then \
-		sed -i \
-			-e '/^executables = /d' \
-			-e '/^\[\[depends-on\]\]/d' \
-			-e '/^gnatprove = /d' \
-			-e '/^gnatdoc_bin = /d' \
-			"$$index_file"; \
-		git add -A && \
-		git commit -m "crdt $$version (via alr publish)" && \
-		git push origin && \
-		cd "$$orig_dir" && git restore .; \
-		echo "Published crdt $$version to community index."; \
-	else \
-		echo "Error: $$index_file not found in $$publish_dir"; \
-		cd "$$orig_dir" && git restore .; \
-		exit 1; \
-	fi
+	alr publish
 
 test-publish:
-	@version=$$(ls alire/releases/crdt-*.toml 2>/dev/null | sort -V | tail -1 | sed 's/.*crdt-\(.*\)\.toml/\1/'); \
-	if [ -z "$$version" ]; then \
-		echo "Error: could not detect version from alire/releases/"; \
-		exit 1; \
-	fi; \
+	@version=$$(git describe --tags --abbrev=0 2>/dev/null || \
+		sed -n 's/^version = "\(.*\)"/\1/p' alire.toml); \
 	echo "=== test-publish dry-run ==="; \
 	echo "Version:  $$version"; \
-	echo "Config:   alire/releases/crdt-$$version.toml"; \
-	echo "Archive:  https://codeberg.org/bladeacer/Ada_CRDT/archive/v$$version.tar.gz"; \
-	echo "Index:    index/cr/crdt/crdt-$$version.toml"; \
-	echo "Publish:  alr publish <archive>"; \
-	echo "Cleanup:  sed on index file (executables, depends-on, gnatprove, gnatdoc_bin)"; \
-	echo "Push:     git add + commit + push to community index"; \
-	echo "Cleanup:   cd back to project root and run git restore ."; \
+	echo "Action:   alr publish  (auto-detects GitHub from git remote)"; \
+	echo "Requires: GitHub PAT in GITHUB_TOKEN env var or gh auth token"; \
+	echo "Docs:     https://github.com/alire-project/alire/blob/master/doc/publishing.md"; \
 	echo "=== end dry-run ==="
 
 demo:

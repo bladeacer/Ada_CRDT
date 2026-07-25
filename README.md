@@ -5,8 +5,10 @@
 CRDT (Conflict-Free Replicated Data Types) library for Ada/SPARK.
 
 Note: This is a push mirror, the canonical is
-[on Codeberg](https://codeberg.org/bladeacer/ada_crdt). No issues or pull
-requests will be accepted here. Submit proposed changes there instead.
+[on GitHub](https://github.com/bladeacer/Ada_CRDT). The
+[Codeberg repository](https://codeberg.org/bladeacer/ada_crdt) was archived
+due to Codeberg TOS changes on AI assisted code. No issues or pull requests
+will be accepted there. Submit proposed changes on GitHub instead.
 
 ## LLM Usage disclosure
 
@@ -40,7 +42,7 @@ alr with crdt
 ### Local Index
 
 ```bash
-alr index --add git+https://codeberg.org/bladeacer/ada_crdt.git --name crdt
+alr index --add git+https://github.com/bladeacer/Ada_CRDT.git --name crdt
 alr with crdt
 ```
 
@@ -51,7 +53,7 @@ Then, include `with "crdt";` in your `.gpr` file.
 Clone and build locally:
 
 ```bash
-git clone https://codeberg.org/bladeacer/ada_crdt.git
+git clone https://github.com/bladeacer/Ada_CRDT.git
 cd ada_crdt
 make build
 make run
