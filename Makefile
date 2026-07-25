@@ -1,4 +1,4 @@
-.PHONY: help all build run test test-fuzz prove doc api-docs compliance clean release publish demo
+.PHONY: help all build run test test-fuzz prove doc api-docs compliance ascii-check clean release publish demo
 
 .DEFAULT_GOAL := help
 
@@ -14,6 +14,7 @@ help:
 	@echo '  prove         Run SPARK proofs (alr gnatprove)'
 	@echo '  doc           Generate Markdown API docs (docs/api-docs/)'
 	@echo '  compliance    Verify DO-178C traceability (HLR tags in source)'
+	@echo '  ascii-check   Enforce ASCII-only charset across all source files'
 	@echo '  release       Tag, update index+releases, push. Use VERSION=x.y.z'
 	@echo '  publish       Publish to Alire community index (run after make release)'
 	@echo '  test-publish  Dry-run showing what make publish would do'
@@ -39,33 +40,84 @@ prove:
 
 compliance:
 	@echo "=== DO-178C Traceability Verification ==="; \
-	total=0; \
-	missing=0; \
+	errors=0; \
 	srcdir=src; \
-	hlrs=$$(grep -rn -- '--.*HLR-' $$srcdir | sed 's/.*HLR-\([A-Z0-9-]*\).*/\1/' | sort -u); \
-	echo "HLR tags found in source: $$(echo "$$hlrs" | wc -l)"; \
-	for hlr in $$hlrs; do \
-		found=$$(grep -rl -- "--.*HLR-$$hlr" $$srcdir); \
+	\
+	hlr_file="docs/compliance/HLR.md"; \
+	llr_file="docs/compliance/LLR.md"; \
+	trace_file="docs/compliance/TRACE.md"; \
+	index_file="docs/compliance/index.md"; \
+	\
+	echo "--- HLR tag scan ---"; \
+	source_hlrs=$$(grep -rn -- '--.*HLR-' $$srcdir | sed 's/.*HLR-\([A-Z0-9-]*\).*/\1/' | sort -u); \
+	src_count=$$(echo "$$source_hlrs" | wc -l); \
+	echo "HLR tags found in source: $$src_count"; \
+	for hlr in $$source_hlrs; do \
+		found=$$(grep -rl -- "--.*HLR-$$hlr" $$srcdir 2>/dev/null); \
 		if [ -z "$$found" ]; then \
 			echo "  MISSING: HLR-$$hlr — no source file has this tag"; \
-			missing=$$((missing + 1)); \
+			errors=$$((errors + 1)); \
 		else \
-			echo "  HLR-$$hlr -> $$(echo $$found | tr ' ' ',' | sed 's,$$(pwd)/,,g')"; \
+			echo "  HLR-$$hlr -> $$(echo $$found | tr ' ' ',' | sed 's,$(CURDIR)/,,g')"; \
 		fi; \
-		total=$$((total + 1)); \
 	done; \
-	echo ""; \
-	if [ "$$missing" -eq 0 ]; then \
-		echo "All $$total HLR tags validated — traceability OK."; \
+	\
+	if [ -f "$$hlr_file" ]; then \
+		echo ""; \
+		echo "--- HLR.md coverage ---"; \
+		doc_hlrs=$$(sed -n 's/.*HLR-\([A-Z0-9-]*\).*/\1/p' "$$hlr_file" | sort -u); \
+		for hlr in $$source_hlrs; do \
+			if ! echo "$$doc_hlrs" | grep -q "$$hlr"; then \
+				echo "  MISSING in HLR.md: HLR-$$hlr"; \
+				errors=$$((errors + 1)); \
+			fi; \
+		done; \
+		for hlr in $$doc_hlrs; do \
+			if ! echo "$$source_hlrs" | grep -q "$$hlr"; then \
+				echo "  STALE in HLR.md: HLR-$$hlr (not in source)"; \
+				errors=$$((errors + 1)); \
+			fi; \
+		done; \
+		if [ $$errors -eq 0 ]; then echo "  All HLRs in source match HLR.md."; \
+		fi; \
 	else \
-		echo "$$missing / $$total HLR tags unresolved."; \
-		exit 1; \
+		echo "  MISSING: $$hlr_file"; \
+		errors=$$((errors + 1)); \
 	fi; \
-	echo "=== Verification files ==="; \
-	for f in docs/compliance/HLR.md docs/compliance/LLR.md docs/compliance/TRACE.md docs/compliance/index.md; do \
+	\
+	for f in "$$llr_file" "$$trace_file" "$$index_file"; do \
 		if [ -f "$$f" ]; then echo "  $$f — present"; \
-		else echo "  $$f — MISSING"; missing=$$((missing + 1)); fi; \
-	done
+		else echo "  $$f — MISSING"; errors=$$((errors + 1)); fi; \
+	done; \
+	\
+	echo ""; \
+	if [ "$$errors" -eq 0 ]; then \
+		echo "All compliance checks passed."; \
+	else \
+		echo "$$errors compliance issue(s) found."; \
+		exit 1; \
+	fi
+
+ascii-check:
+	@echo "=== ASCII Charset Verification ==="; \
+	extensions="ads adb md py toml gpr yaml yml"; \
+	error=0; \
+	for ext in $$extensions; do \
+		files=$$(find . -name "*.$$ext" -not -path "./.git/*" -not -path "./alire/*" -not -path "./config/*" -not -path "./obj/*" -not -path "./docs/*" 2>/dev/null); \
+		for f in $$files; do \
+			case "$$f" in *vt100*|*README.md) continue;; esac; \
+	if LC_ALL=C grep -q '[^ -~	]' "$$f" 2>/dev/null; then \
+				echo "  NON-ASCII: $$f"; \
+				error=$$((error + 1)); \
+			fi; \
+		done; \
+	done; \
+	if [ $$error -eq 0 ]; then \
+		echo "All source files are pure ASCII."; \
+	else \
+		echo "$$error file(s) contain non-ASCII characters."; \
+		exit 1; \
+	fi
 
 doc: api-docs
 

@@ -1,4 +1,5 @@
 with Ada.Streams;
+with CRDT.Clocks;
 with CRDT.Serialization;
 with CRDT.Core.LEB128;
 
@@ -126,7 +127,7 @@ is
       Item   : PN_Counter) with SPARK_Mode => Off
    is
    begin
-      CRDT.Core.LEB128.Encode (Stream, CRDT.Core.Protocol_Version);
+      CRDT.Core.LEB128.Encode (Stream, 2);
       CRDT.Core.LEB128.Encode (Stream, 0);  -- Total = 0 (unused)
       CRDT.Core.LEB128.Encode (Stream, Item.Count);
       for I in 1 .. Item.Count loop
@@ -136,15 +137,16 @@ is
       end loop;
    end Write_PN_Counter;
 
-   procedure Read_PN_Counter
-     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
-      Item   : out PN_Counter) with SPARK_Mode => Off
-   is
-      Kind  : CRDT.Serialization.Protocol_Kind;
-      Total : Natural;
-      Count : Natural;
-   begin
-      CRDT.Serialization.Read_Header (Stream, Kind, Total, Count);
+    procedure Read_PN_Counter
+      (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
+       Item   : out PN_Counter) with SPARK_Mode => Off
+    is
+       Kind      : CRDT.Serialization.Protocol_Kind;
+       Total     : Natural;
+       Count     : Natural;
+       Ignore_CK : CRDT.Clocks.Clock_Kind;
+    begin
+       CRDT.Serialization.Read_Header (Stream, Kind, Total, Count, Ignore_CK);
       if Count > Item.Max_Actors then
          raise Constraint_Error with
            "PN_Counter stream has more entries than Max_Actors";

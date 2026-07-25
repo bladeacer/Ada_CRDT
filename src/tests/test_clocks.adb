@@ -148,23 +148,22 @@ package body Test_Clocks is
          package VClock is new CRDT.Clocks.Vector (Max_R);
          use VClock;
 
-         package LWW is new CRDT.Lww_Sets
-           (Element_Type => Integer,
-            Max_Set_Size => Max_Sz,
-            Clock_Time   => Clock_Time,
-            "<"          => "<",
-            "="          => "=",
-            ">"          => ">",
-            Max          => Max,
-            Write_Clock  => Write_Clock,
-            Read_Clock   => Read_Clock);
+          package LWW is new CRDT.Lww_Sets
+            (Element_Type => Integer,
+             Max_Set_Size => Max_Sz,
+             Clock_Time   => Clock_Time,
+             Clk_Kind     => CRDT.Clocks.Clock_Vector,
+             "<"          => "<",
+             "="          => "=",
+             ">"          => ">",
+             Max          => Max,
+             Write_Clock  => Write_Clock,
+             Read_Clock   => Read_Clock);
 
-         S : LWW.LWW_Clocked_Set (Max_Sz);
-      begin
-         New_Line;
-         Put_Line ("[Lww_Sets.Vector]");
-
-         RunR.Check (not LWW.Contains (S, 42), "Empty: Contains(42) = False");
+          S : LWW.LWW_Clocked_Set (Max_Sz);
+       begin
+          New_Line;
+          RunR.Check (not LWW.Contains (S, 42), "Empty: Contains(42) = False");
 
          LWW.Add (S, 42, (1, 0, 0, 0));
          RunR.Check (LWW.Contains (S, 42), "Add(42, vec=(1,0,0,0)): Contains = True");
@@ -199,16 +198,17 @@ package body Test_Clocks is
       procedure Test_Lww_Sets_Lamport is
          Max_Sz : constant Positive := 10;
 
-         package LWW is new CRDT.Lww_Sets
-           (Element_Type => Integer,
-            Max_Set_Size => Max_Sz,
-            Clock_Time   => CRDT.Clocks.Lamport.Clock_Time,
-            "<"          => CRDT.Clocks.Lamport."<",
-            "="          => CRDT.Clocks.Lamport."=",
-            ">"          => CRDT.Clocks.Lamport.">",
-            Max          => CRDT.Clocks.Lamport.Max,
-            Write_Clock  => CRDT.Clocks.Lamport.Write_Clock,
-            Read_Clock   => CRDT.Clocks.Lamport.Read_Clock);
+          package LWW is new CRDT.Lww_Sets
+            (Element_Type => Integer,
+             Max_Set_Size => Max_Sz,
+             Clock_Time   => CRDT.Clocks.Lamport.Clock_Time,
+             Clk_Kind     => CRDT.Clocks.Clock_Lamport,
+             "<"          => CRDT.Clocks.Lamport."<",
+             "="          => CRDT.Clocks.Lamport."=",
+             ">"          => CRDT.Clocks.Lamport.">",
+             Max          => CRDT.Clocks.Lamport.Max,
+             Write_Clock  => CRDT.Clocks.Lamport.Write_Clock,
+             Read_Clock   => CRDT.Clocks.Lamport.Read_Clock);
 
          S : LWW.LWW_Clocked_Set (Max_Sz);
       begin
@@ -242,16 +242,17 @@ package body Test_Clocks is
          package MClock is new CRDT.Clocks.Matrix (Max_R);
          use MClock;
 
-         package LWW is new CRDT.Lww_Sets
-           (Element_Type => Integer,
-            Max_Set_Size => Max_Sz,
-            Clock_Time   => Clock_Time,
-            "<"          => "<",
-            "="          => "=",
-            ">"          => ">",
-            Max          => Max,
-            Write_Clock  => Write_Clock,
-            Read_Clock   => Read_Clock);
+          package LWW is new CRDT.Lww_Sets
+            (Element_Type => Integer,
+             Max_Set_Size => Max_Sz,
+             Clock_Time   => Clock_Time,
+             Clk_Kind     => CRDT.Clocks.Clock_Matrix,
+             "<"          => "<",
+             "="          => "=",
+             ">"          => ">",
+             Max          => Max,
+             Write_Clock  => Write_Clock,
+             Read_Clock   => Read_Clock);
 
          S : LWW.LWW_Clocked_Set (Max_Sz);
       begin

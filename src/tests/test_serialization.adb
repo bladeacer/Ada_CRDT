@@ -1,4 +1,5 @@
 with CRDT.Test_Support; use CRDT.Test_Support;
+with CRDT.Clocks;
 with CRDT.Pn_Counters;
 with CRDT.Lww_Element_Sets;
 with CRDT.Rga;
@@ -403,11 +404,12 @@ package body Test_Serialization is
     end Test_Migration_LWW_Roundtrip;
 
     procedure Test_Migrate_Header is
-      use Ada.Streams;
-      use Ada.Streams.Stream_IO;
-      use CRDT.Serialization;
-      F_In  : Ada.Streams.Stream_IO.File_Type;
-      F_Out : Ada.Streams.Stream_IO.File_Type;
+       use Ada.Streams;
+       use Ada.Streams.Stream_IO;
+       use CRDT.Serialization;
+       Ignore_CK : CRDT.Clocks.Clock_Kind;
+       F_In  : Ada.Streams.Stream_IO.File_Type;
+       F_Out : Ada.Streams.Stream_IO.File_Type;
       subtype SEO is Stream_Element_Offset;
       Buf  : Stream_Element_Array (SEO'(1) .. 20);
       Idx  : SEO := SEO'(1);
@@ -459,13 +461,14 @@ package body Test_Serialization is
       Close (F_Out);
 
       Open (F_Out, In_File, "/tmp/crdt_v2_migrate_out.bin");
-      Read_Header
-        (Stream => Stream (F_Out),
-         Kind   => Kind,
-         Total  => V2_Total,
-         Count  => V2_Count);
-      RunR.Check (Kind = Proto_V2,
-                  "Migrate_Header: output is V2");
+       Read_Header
+         (Stream    => Stream (F_Out),
+          Kind      => Kind,
+          Total     => V2_Total,
+          Count     => V2_Count,
+          Clock_Kind => Ignore_CK);
+       RunR.Check (Kind = Proto_V2,
+                   "Migrate_Header: output is V2");
       RunR.Check (V2_Total = 42,
                   "Migrate_Header: V2 Total = 42, got" &
                     Natural'Image (V2_Total));
@@ -507,14 +510,15 @@ package body Test_Serialization is
       Close (F_In);
       Close (F_Out);
 
-      Open (F_Out, In_File, "/tmp/crdt_v2_out.bin");
-      Read_Header
-        (Stream => Stream (F_Out),
-         Kind   => Kind,
-         Total  => V2_Total,
-         Count  => V2_Count);
-      RunR.Check (Kind = Proto_V2,
-                  "Migrate_Header: V2->V2 output is V2");
+       Open (F_Out, In_File, "/tmp/crdt_v2_out.bin");
+       Read_Header
+         (Stream    => Stream (F_Out),
+          Kind      => Kind,
+          Total     => V2_Total,
+          Count     => V2_Count,
+          Clock_Kind => Ignore_CK);
+       RunR.Check (Kind = Proto_V2,
+                   "Migrate_Header: V2->V2 output is V2");
       RunR.Check (V2_Total = 10,
                   "Migrate_Header: V2->V2 Total = 10, got" &
                     Natural'Image (V2_Total));
@@ -527,10 +531,11 @@ package body Test_Serialization is
    end Test_Migrate_Header;
 
    procedure Test_V1_Backward_Compat is
-      use Ada.Streams;
-      use Ada.Streams.Stream_IO;
-      use CRDT.Serialization;
-      F : Ada.Streams.Stream_IO.File_Type;
+       use Ada.Streams;
+       use Ada.Streams.Stream_IO;
+       use CRDT.Serialization;
+       Ignore_CK : CRDT.Clocks.Clock_Kind;
+       F : Ada.Streams.Stream_IO.File_Type;
       subtype SEO is Stream_Element_Offset;
       Buf  : Stream_Element_Array (SEO'(1) .. 100);
       Idx  : SEO := SEO'(1);
@@ -557,7 +562,7 @@ package body Test_Serialization is
       Ada.Streams.Stream_IO.Write (F, Buf (1 .. Idx - 1));
       Close (F);
       Open (F, In_File, "/tmp/crdt_v1_empty_compat.bin");
-      Read_Header (Stream (F), Kind, Total, Count);
+      Read_Header (Stream (F), Kind, Total, Count, Ignore_CK);
       RunR.Check (Kind = Proto_V1,
                   "V1 back-compat: empty payload detected as V1");
       RunR.Check (Total = 0,
@@ -575,7 +580,7 @@ package body Test_Serialization is
       Ada.Streams.Stream_IO.Write (F, Buf (1 .. Idx - 1));
       Close (F);
       Open (F, In_File, "/tmp/crdt_v1_max_compat.bin");
-      Read_Header (Stream (F), Kind, Total, Count);
+      Read_Header (Stream (F), Kind, Total, Count, Ignore_CK);
       RunR.Check (Kind = Proto_V1,
                   "V1 back-compat: max payload detected as V1");
       RunR.Check (Total = Natural'Last,
@@ -594,7 +599,7 @@ package body Test_Serialization is
       Ada.Streams.Stream_IO.Write (F, Buf (1 .. Idx - 1));
       Close (F);
       Open (F, In_File, "/tmp/crdt_v2_proto_check.bin");
-      Read_Header (Stream (F), Kind, Total, Count);
+      Read_Header (Stream (F), Kind, Total, Count, Ignore_CK);
       RunR.Check (Kind = Proto_V2,
                   "V1 back-compat: V2 short header detected as V2");
       Close (F);

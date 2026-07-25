@@ -1,3 +1,4 @@
+with CRDT.Clocks;
 with CRDT.Core.LEB128;
 with CRDT.Serialization;
 
@@ -557,7 +558,7 @@ is
     is
        use Ada.Streams;
     begin
-       Core.LEB128.Encode (Stream, Core.Protocol_Version);
+       Core.LEB128.Encode (Stream, 2);
        Core.LEB128.Encode (Stream, Item.Total);
        Core.LEB128.Encode (Stream, Item.Count);
        declare
@@ -589,8 +590,9 @@ is
        Deleted   : Boolean;
        Prev_Idx  : Natural := 0;
        New_Idx   : Natural;
+       Ignore_CK : CRDT.Clocks.Clock_Kind;
     begin
-       Read_Header (Stream, Kind, Total, Num_Items);
+       Read_Header (Stream, Kind, Total, Num_Items, Ignore_CK);
 
         if Num_Items > Item.Item_Capacity then
            raise Constraint_Error with

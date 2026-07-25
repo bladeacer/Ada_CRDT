@@ -220,6 +220,16 @@ for V1, LEB128 for V2) based on protocol version detected by the header.
 
 ---
 
+## HLR-PROTO-LEB128 — LEB128 Encode/Decode
+Provide LEB128 variable-length integer encoding and decoding for
+compact wire-format representation of natural numbers.
+
+**Source:** `src/core/crdt-core-leb128.ads`
+
+**Derived LLRs:** LLR-PROTO-LEB128
+
+---
+
 ## HLR-PROTO-LEGACY — V1 Legacy Reading
 Provide V1 fixed-width (Natural'Read) fallback for reading individual
 integer fields from legacy streams.

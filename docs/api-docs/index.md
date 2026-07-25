@@ -30,3 +30,4 @@
 - [CRDT.Serialization.Legacy](crdt-serialization-legacy.md)
 - [CRDT.Sync.Op_Based](crdt-sync-op_based.md)
 - [CRDT.Sync.State_Based](crdt-sync-state_based.md)
+- [CRDT.Sync.State_Based.Clocked](crdt-sync-state_based-clocked.md)

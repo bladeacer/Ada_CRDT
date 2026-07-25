@@ -2,6 +2,7 @@ with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Characters.Latin_1;
 with Ada.Numerics.Discrete_Random;
 with Ada.Numerics.Float_Random;
+with CRDT.Clocks;
 with CRDT.Core;
 with CRDT.Lww_Element_Sets;
 with CRDT.Rga;
@@ -48,10 +49,11 @@ procedure Demo_Life is
    end record;
 
    type App_State is record
-      N1, N2, N3   : Node;
-      Gen          : Natural := 0;
-      Paused       : Boolean := False;
-      Mode         : Grid_Mode := Matrix;
+      N1, N2, N3    : Node;
+      Gen           : Natural := 0;
+      Paused        : Boolean := False;
+      Mode          : Grid_Mode := Matrix;
+      Clk_Strategy  : CRDT.Clocks.Clock_Kind := CRDT.Clocks.Clock_Lamport;
    end record;
 
    TL : constant String := "+";
@@ -306,14 +308,18 @@ procedure Demo_Life is
 
    begin
       VT100.Move_Cursor (0, 0);
-      Put_Line (TL & (1 .. Line_W - 2 => '=') & TR);
-      declare
-         Gen_S  : constant String := "Gen:" & Image_Trim (S.Gen);
-         Mode_S : constant String := (case S.Mode is when Matrix => "Mode:Matrix",
-                                       when Yjs_RGA => "Mode:Yjs_RGA");
-         Stat_S : constant String := (if S.Paused then "PAUSED" else "Running");
-         Status : constant String := " Ada CRDT | " & Gen_S & " | " & Mode_S
-           & " | " & Stat_S;
+       Put_Line (TL & (1 .. Line_W - 2 => '=') & TR);
+       declare
+          Gen_S  : constant String := "Gen:" & Image_Trim (S.Gen);
+          Mode_S : constant String := (case S.Mode is when Matrix => "Mode:Matrix",
+                                        when Yjs_RGA => "Mode:Yjs_RGA");
+          Clock_S : constant String := (case S.Clk_Strategy is
+            when CRDT.Clocks.Clock_Lamport => "Clock:Lamport",
+            when CRDT.Clocks.Clock_Vector => "Clock:Vector",
+            when CRDT.Clocks.Clock_Matrix => "Clock:Matrix");
+          Stat_S : constant String := (if S.Paused then "PAUSED" else "Running");
+          Status : constant String := " Ada CRDT | " & Gen_S & " | " & Mode_S
+            & " | " & Clock_S & " | " & Stat_S;
       begin
          Put (V);
          Put (Status);
@@ -362,14 +368,16 @@ procedure Demo_Life is
       Put_Line (TL & (1 .. Line_W - 2 => '-') & TR);
       Put (V);
       Put ("  ["); VT100.Set_Attribute (VT100.Revers); Put ("Q"); VT100.Set_Attribute (VT100.Reset);
-      Put ("]uit  [");
-      VT100.Set_Attribute (VT100.Revers); Put ("R"); VT100.Set_Attribute (VT100.Reset);
-      Put ("]eset  [");
-      VT100.Set_Attribute (VT100.Revers); Put ("P"); VT100.Set_Attribute (VT100.Reset);
-      Put ("]ause  [");
-      VT100.Set_Attribute (VT100.Revers); Put ("M"); VT100.Set_Attribute (VT100.Reset);
-      Put ("]ode");
-      Put_Line (Pad ("", Natural'Max (0, Line_W - 2 - 35)) & V);
+       Put ("]uit  [");
+       VT100.Set_Attribute (VT100.Revers); Put ("R"); VT100.Set_Attribute (VT100.Reset);
+       Put ("]eset  [");
+       VT100.Set_Attribute (VT100.Revers); Put ("P"); VT100.Set_Attribute (VT100.Reset);
+       Put ("]ause  [");
+       VT100.Set_Attribute (VT100.Revers); Put ("M"); VT100.Set_Attribute (VT100.Reset);
+       Put ("]ode  [");
+       VT100.Set_Attribute (VT100.Revers); Put ("C"); VT100.Set_Attribute (VT100.Reset);
+       Put ("]lock");
+       Put_Line (Pad ("", Natural'Max (0, Line_W - 2 - 42)) & V);
       Put_Line (BL & (1 .. Line_W - 2 => '=') & BR);
       Flush;
    end Draw;
@@ -398,7 +406,17 @@ procedure Demo_Life is
                 Sync_Matrix_From_Yjs (S.N3);
              end if;
              VT100.Clear_Screen;
-         when others => null;
+          when 'c' | 'C' =>
+             case S.Clk_Strategy is
+                when CRDT.Clocks.Clock_Lamport =>
+                   S.Clk_Strategy := CRDT.Clocks.Clock_Vector;
+                when CRDT.Clocks.Clock_Vector =>
+                   S.Clk_Strategy := CRDT.Clocks.Clock_Matrix;
+                when CRDT.Clocks.Clock_Matrix =>
+                   S.Clk_Strategy := CRDT.Clocks.Clock_Lamport;
+             end case;
+             VT100.Clear_Screen;
+          when others => null;
       end case;
    end Handle_Input;
 

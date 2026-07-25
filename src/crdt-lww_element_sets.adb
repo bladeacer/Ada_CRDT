@@ -1,4 +1,5 @@
 with Ada.Streams;
+with CRDT.Clocks;
 with CRDT.Core.LEB128;
 with CRDT.Serialization;
 
@@ -115,14 +116,14 @@ is
    --  Write/Read --
    ---------------
 
-   procedure Write_LWW_Element_Set
-     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
-      Item   : LWW_Element_Set) with SPARK_Mode => Off
-   is
-   begin
-      CRDT.Core.LEB128.Encode (Stream, CRDT.Core.Protocol_Version);
-      CRDT.Core.LEB128.Encode (Stream, Item.Add_Size);
-      CRDT.Core.LEB128.Encode (Stream, Item.Remove_Size);
+    procedure Write_LWW_Element_Set
+      (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
+       Item   : LWW_Element_Set) with SPARK_Mode => Off
+    is
+    begin
+       CRDT.Core.LEB128.Encode (Stream, 2);
+       CRDT.Core.LEB128.Encode (Stream, Item.Add_Size);
+       CRDT.Core.LEB128.Encode (Stream, Item.Remove_Size);
       for I in 1 .. Item.Add_Size loop
          Element_Type'Write (Stream, Item.Add_Array (I).Element);
          CRDT.Core.LEB128.Encode (Stream, Item.Add_Array (I).Time.Stamp);
@@ -135,15 +136,16 @@ is
       end loop;
    end Write_LWW_Element_Set;
 
-   procedure Read_LWW_Element_Set
-     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
-      Item   : out LWW_Element_Set) with SPARK_Mode => Off
-   is
-      Kind        : CRDT.Serialization.Protocol_Kind;
-      Add_Size    : Natural;
-      Remove_Size : Natural;
-   begin
-      CRDT.Serialization.Read_Header (Stream, Kind, Add_Size, Remove_Size);
+    procedure Read_LWW_Element_Set
+      (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
+       Item   : out LWW_Element_Set) with SPARK_Mode => Off
+    is
+       Kind        : CRDT.Serialization.Protocol_Kind;
+       Add_Size    : Natural;
+       Remove_Size : Natural;
+       Ignore_CK   : CRDT.Clocks.Clock_Kind;
+    begin
+       CRDT.Serialization.Read_Header (Stream, Kind, Add_Size, Remove_Size, Ignore_CK);
       if Add_Size > Item.Capacity or else Remove_Size > Item.Capacity then
          raise Constraint_Error with
            "LWW_Element_Set stream has more entries than Capacity";

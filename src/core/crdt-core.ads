@@ -168,6 +168,6 @@ is
 
    --  Wire protocol version for all serialized CRDT state.
    --  Increment when making breaking changes to the binary format.
-   Protocol_Version : constant Natural := 2;
+   Protocol_Version : constant Natural := 3;
 
 end CRDT.Core;

@@ -634,7 +634,7 @@ def render_package(title, desc, blocks, annotations, has_private, private_items,
         public_count = len(blocks)
         private_count = len(private_items)
         if public_count == 0:
-            lines.append("> **Note:** This package has no public items — all items are in the `private` section.")
+            lines.append("> **Note:** This package has no public items  --  all items are in the `private` section.")
             lines.append("")
         else:
             lines.append(f"> **Note:** {public_count} public item(s) shown below; {private_count} private internal item(s) are in the `private` section.")

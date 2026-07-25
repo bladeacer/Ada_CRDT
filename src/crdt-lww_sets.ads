@@ -1,4 +1,5 @@
 with Ada.Streams;
+with CRDT.Clocks;
 with CRDT.Core;
 with CRDT.Core.LEB128;
 
@@ -17,6 +18,7 @@ generic
    type Element_Type is private;
    Max_Set_Size : Positive;
    type Clock_Time is private;
+   Clk_Kind : CRDT.Clocks.Clock_Kind;
    with function "<" (L, R : Clock_Time) return Boolean is <>;
    with function "=" (L, R : Clock_Time) return Boolean is <>;
    with function ">" (L, R : Clock_Time) return Boolean is <>;
