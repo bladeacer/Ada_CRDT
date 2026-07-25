@@ -1,5 +1,9 @@
 [![crdt Alire crate badge](https://img.shields.io/endpoint?url=https://alire.ada.dev/badges/crdt.json)](https://alire.ada.dev/crates/crdt)
 
+![Ada CRDTs logo](./ada_logo.png)
+
+> Logo [under public domain](#credits), we are not affiliated with AdaCore.
+
 # CRDT
 
 CRDT (Conflict-Free Replicated Data Types) library for Ada/SPARK.
@@ -320,6 +324,11 @@ Generics (Sequences, LWW, RGA) are instantiation-dependent; runtime assertions
 
 ## Credits
 
+Logo:
+
+- [Ada Logo Editor](https://ada-lang-io.github.io/ada-logo-editor/): The Ada Horizon logo
+and Aileron Bold font are both released under Creative Common Public Domain (CC0).
+
 Technology Stack:
 
 - [SPARK / Ada 2012](https://www.adacore.com/languages/spark) (AdaCore): formal verification
@@ -339,4 +348,4 @@ counters, [Riak](https://riak.com) CRDTs
 
 ## License
 
-MIT.
+MIT License.
