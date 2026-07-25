@@ -178,6 +178,7 @@ release:
 		version="$(VERSION)"; \
 		sed -i 's/^version = ".*"/version = "'$$version'"/' alire.toml; \
 		sed -i 's/^version = ".*"/version = "'$$version'"/' alire-dev.toml; \
+		sed -i 's/crdt = \"^[^\"]*\"/crdt = \"^'$$version'\"/' demo/alire.toml; \
 	else \
 		version=$$(sed -n 's/^version = "\(.*\)"/\1/p' alire.toml); \
 	fi; \

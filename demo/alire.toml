@@ -3,7 +3,7 @@ description = "Conway's Game of Life CRDT Demo"
 version = "0.1.0-dev"
 
 [[depends-on]]
-crdt = "*"
+crdt = "^1.7.0"
 
 [[pins]]
 crdt = { path = ".." }
