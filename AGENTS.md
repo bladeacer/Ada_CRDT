@@ -78,10 +78,11 @@ Ada_CRDT/
 | Target | What it does | How it works |
 |--------|-------------|--------------|
 | `build` | Compile library + tests | `alr build` (filters out `.sframe` linker noise) |
-| `run` / `test` | Build + run test suite | `alr run` (all 10290+ tests) |
+| `run` / `test` | Build + run test suite (fuzz, convergence, GoL included) | `alr run` (all tests across 9 categories) |
 | `prove` | SPARK formal verification | `alr gnatprove` |
+| `verify-report` | Auto-generate VERIFICATION.md from gnatprove.out + test_result.md | Parses proof stats and test counts, writes deterministic report |
 | `doc` / `api-docs` | Generate Markdown API docs | `gnatdoc` -> RST -> `tools/rst2md.py` -> `docs/api-docs/` |
-| `compliance` | Verify DO-178C traceability | Scans source HLR tags, validates HLR.md coverage |
+| `compliance` | DO-178C traceability + Quick Reference link validation + auto-generate report | Scans source HLR tags, validates HLR.md coverage, checks README links, runs verify-report |
 | `ascii-check` | Enforce ASCII-only charset across source files | `LC_ALL=C grep` for bytes > 0x7E |
 | `release` | Tag + publish new version | Updates metadata, commits, tags, pushes |
 | `publish` | Publish to Alire community index | Archives source, pushes to community index |
@@ -103,6 +104,18 @@ Ada_CRDT/
 - `-gnatwa` -- All warnings
 - `-gnatwF` -- Warnings on unreferenced formal parameters
 - `-gnatwsh` -- Warnings on suspicious contract
+
+### System Dependencies
+
+| Dependency | Required for | Notes |
+|------------|-------------|-------|
+| Alire (`alr`) | All builds | Ada package manager, manages GNAT toolchain |
+| GNAT/SPARK toolchain | Build, proof | Installed automatically by Alire (FSF GNAT v15.2.1) |
+| `gnatprove` | `make prove` | Alire dev dependency (`alire-dev.toml`) |
+| `gnatdoc_bin` | `make doc` | Alire dev dependency (`alire-dev.toml`) |
+| Python 3 | `make doc` | Runs `tools/rst2md.py` and `tools/gen-coverage.py` |
+| `sha256sum` | `make verify-report` | Content hashing for deterministic output (part of coreutils) |
+| POSIX tools (sed, awk, grep) | Various Makefile targets | Standard on any Linux system |
 
 ## Safety and Memory Safety
 
