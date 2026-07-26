@@ -95,7 +95,7 @@ Ada_CRDT/
 - Primary build tool: `alr build` / `alr run` / `alr gnatprove`
 - Dependencies managed in `alire.toml` (currently: `gnatprove`, `gnatdoc_bin`, `gnatformat_bin`)
 - GNAT toolchain managed automatically by Alire
-- Version: defined in `alire.toml` (currently 1.7.0), mirrors in `index/ad/crdt/` and `alire/releases/`
+- Version: defined in `alire.toml` (currently 1.7.1), mirrors in `index/ad/crdt/` and `alire/releases/`
 
 ### Compiler Flags (from `crdt.gpr`)
 

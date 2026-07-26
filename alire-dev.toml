@@ -13,7 +13,7 @@
 # Only alire.toml is published to the community index.
 name = "crdt"
 description = "CRDT library for Ada/SPARK"
-version = "1.7.0"
+version = "1.7.1"
 
 authors = ["bladeacer"]
 maintainers = ["bladeacer <wg.nick.exe@gmail.com>"]

@@ -1,4 +1,4 @@
-.PHONY: help all build run test prove doc api-docs compliance verify-report ascii-check fmt clean release publish demo
+.PHONY: help all build run test prove doc api-docs compliance verify-report ascii-check fmt bump-version clean release publish demo
 
 .DEFAULT_GOAL := help
 
@@ -16,6 +16,7 @@ help:
 	@echo '  compliance    HLR traceability check + auto-generate verification report'
 	@echo '  ascii-check   Enforce ASCII-only charset across all source files'
 	@echo '  fmt           Format all Ada sources with gnatformat (requires make dev-setup)'
+	@echo '  bump-version  Bump version across alire.toml, alire-dev.toml, demo, releases, index (VERSION=x.y.z)'
 	@echo '  release       Tag, update index+releases, push. Use VERSION=x.y.z'
 	@echo '  publish       Publish to Alire community index (run after make release)'
 	@echo '  test-publish  Dry-run showing what make publish would do'
@@ -409,6 +410,50 @@ prod-setup:
 	@echo "Restoring clean publishing manifest..."; \
 	git checkout alire.toml; \
 	echo "alire.toml restored to clean publishing version."
+
+bump-version:
+	@if [ -z "$(VERSION)" ]; then \
+		echo "Usage: make bump-version VERSION=x.y.z"; \
+		exit 1; \
+	fi; \
+	version="$(VERSION)"; \
+	if ! echo "$$version" | grep -q '^[0-9]\+\.[0-9]\+\.[0-9]\+$$'; then \
+		echo "Error: version must be in x.y.z format (got: $$version)"; \
+		exit 1; \
+	fi; \
+	echo "Bumping version to $$version..."; \
+	\
+	sed -i 's/^version = ".*"/version = "'$$version'"/' alire.toml; \
+	echo "  alire.toml: version = \"$$version\""; \
+	sed -i 's/^version = ".*"/version = "'$$version'"/' alire-dev.toml; \
+	echo "  alire-dev.toml: version = \"$$version\""; \
+	sed -i 's/crdt = \"^[^\"]*\"/crdt = \"^'$$version'\"/' demo/alire.toml; \
+	echo "  demo/alire.toml: crdt = \"^$$version\""; \
+	sed -i 's/(currently [0-9]\+\.[0-9]\+\.[0-9]\+)/(currently '"$$version"')/' AGENTS.md; \
+	echo "  AGENTS.md: version reference updated"; \
+	\
+	release_file="alire/releases/crdt-$$version.toml"; \
+	if [ ! -f "$$release_file" ]; then \
+		sed 's/^version = ".*"/version = "'$$version'"/' alire/releases/crdt-0.0.0.toml > "$$release_file"; \
+		echo "  $$release_file: created"; \
+	else \
+		sed -i 's/^version = ".*"/version = "'$$version'"/' "$$release_file"; \
+		echo "  $$release_file: updated"; \
+	fi; \
+	\
+	index_file="index/ad/crdt/crdt-$$version.toml"; \
+	if [ ! -f "$$index_file" ]; then \
+		sed 's/^version = ".*"/version = "'$$version'"/' index/ad/crdt/crdt-0.1.0-dev.toml > "$$index_file"; \
+		echo "  $$index_file: created"; \
+	else \
+		sed -i 's/^version = ".*"/version = "'$$version'"/' "$$index_file"; \
+		echo "  $$index_file: updated"; \
+	fi; \
+	\
+	echo "Done. Remember to:"; \
+	echo "  - Create docs/changelogs/crdt-$$version.md (if not done)"; \
+	echo "  - Update docs/changelogs/index.md"; \
+	echo "  - Commit: git commit -am \"Release $$version\" && git tag -a v$$version -m \"Release $$version\""
 
 release:
 	@if [ -n "$(VERSION)" ]; then \
