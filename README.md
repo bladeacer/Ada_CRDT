@@ -333,8 +333,12 @@ and Aileron Bold font are both released under Creative Common Public Domain (CC0
 
 Technology Stack:
 
-- [SPARK / Ada 2012](https://www.adacore.com/languages/spark) (AdaCore): formal verification
-- [Alire](https://alire.ada.dev): Ada/SPARK package manager
+- [SPARK / Ada 2012](https://www.adacore.com/languages/spark): (AdaCore) language and dialect of choice
+- [gnatprove](https://docs.adacore.com/spark2014-docs/html/ug/index.html): (AdaCore) formal verification of source code
+- [Alire](https://alire.ada.dev): (AdaCore) Ada/SPARK package manager
+- [gnatformat](https://github.com/AdaCore/gnatformat): (AdaCore) code formatter for Ada
+- [gnatdoc](https://github.com/AdaCore/gnatdoc): (AdaCore) API documentation generator, interfaces docstrings
+with our Python script
 - [VT100](https://github.com/darkestkhan/vt100): Minimal Ada VT100 API library
 
 Inspired by:
