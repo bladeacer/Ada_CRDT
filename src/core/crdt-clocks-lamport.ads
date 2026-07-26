@@ -14,8 +14,9 @@ with CRDT.Core;
 --
 --  Requirements traceability:
 --  - HLR-CORE-CLOCKS: Clock strategy interface
-package CRDT.Clocks.Lamport with
-  SPARK_Mode
+
+package CRDT.Clocks.Lamport
+  with SPARK_Mode
 is
 
    --  Clock timestamp: logical counter + replica ID.
@@ -49,15 +50,11 @@ is
    --  Serialise a clock timestamp to a stream (LEB128-encoded Stamp + Node).
    --  @param Stream  Output stream.
    --  @param Item    Clock timestamp to write.
-   procedure Write_Clock
-     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
-      Item   : Clock_Time);
+   procedure Write_Clock (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : Clock_Time);
 
    --  Deserialise a clock timestamp from a stream.
    --  @param Stream  Input stream.
    --  @param Item    Decoded clock timestamp.
-   procedure Read_Clock
-     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
-      Item   : out Clock_Time);
+   procedure Read_Clock (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : out Clock_Time);
 
 end CRDT.Clocks.Lamport;

@@ -2,7 +2,7 @@
 --  Tracks increments (P) and decrements (N) for each replica independently.
 --  Fixed memory: 3 replicas = 3 slots regardless of millions of ops.
 --  Value = sum(P) - sum(N).
---  
+--
 --  Requirements traceability:
 --  - HLR-CNTR-VALUE: Query net counter value across all replicas
 --  - HLR-CNTR-OP: Increment/decrement with per-replica tracking
@@ -11,8 +11,8 @@
 with Ada.Streams;
 with CRDT.Core;
 
-package CRDT.Pn_Counters with
-  SPARK_Mode
+package CRDT.Pn_Counters
+  with SPARK_Mode
 is
 
    --  Natural range for counter operations.
@@ -20,14 +20,13 @@ is
 
    --  Bounded PN-Counter with pre-allocated actor slots.
    --  @field Max_Actors  Maximum number of distinct replicas.
-   type PN_Counter (Max_Actors : Positive) is private with
-     Default_Initial_Condition;
+   type PN_Counter (Max_Actors : Positive) is private with Default_Initial_Condition;
 
    --  Return the number of actor entries currently tracked.
    --  @param C  The counter to query.
    --  @return   Entry count, always <= Max_Actors.
-   function Entry_Count (C : PN_Counter) return Natural with
-     Post => Entry_Count'Result <= C.Max_Actors;
+   function Entry_Count (C : PN_Counter) return Natural
+   with Post => Entry_Count'Result <= C.Max_Actors;
 
    --  Current value of the counter (may be negative).
    --  @param C  The counter to query.
@@ -40,15 +39,13 @@ is
    --  @param C   The counter.
    --  @param By  Amount to increment.
    --  @return    Always True.
-   function Can_Increment (C : PN_Counter; By : Counter_Range := 1)
-                               return Boolean;
+   function Can_Increment (C : PN_Counter; By : Counter_Range := 1) return Boolean;
 
    --  Check if decrement is possible (always True for unbounded counters).
    --  @param C   The counter.
    --  @param By  Amount to decrement.
    --  @return    Always True.
-   function Can_Decrement (C : PN_Counter; By : Counter_Range := 1)
-                               return Boolean;
+   function Can_Decrement (C : PN_Counter; By : Counter_Range := 1) return Boolean;
    pragma Warnings (On, "unused variable");
 
    --  Increment the counter by By for the given Actor (replica).
@@ -57,50 +54,36 @@ is
    --  @param C      The counter to modify.
    --  @param By     Amount to increment (default 1).
    --  @param Actor  Replica performing the increment.
-   procedure Increment (C     : in out PN_Counter;
-                         By    : Counter_Range := 1;
-                         Actor : Core.Replica_Id) with
-     Pre  => Can_Increment (C, By),
-     Post => Entry_Count (C) <= C.Max_Actors,
-     Depends => (C => (C, By, Actor));
+   procedure Increment (C : in out PN_Counter; By : Counter_Range := 1; Actor : Core.Replica_Id)
+   with Pre => Can_Increment (C, By), Post => Entry_Count (C) <= C.Max_Actors, Depends => (C => (C, By, Actor));
 
    --  Decrement the counter by By for the given Actor (replica).
    --  @param C      The counter to modify.
    --  @param By     Amount to decrement (default 1).
    --  @param Actor  Replica performing the decrement.
-   procedure Decrement (C     : in out PN_Counter;
-                         By    : Counter_Range := 1;
-                         Actor : Core.Replica_Id) with
-     Pre  => Can_Decrement (C, By),
-     Post => Entry_Count (C) <= C.Max_Actors,
-     Depends => (C => (C, By, Actor));
+   procedure Decrement (C : in out PN_Counter; By : Counter_Range := 1; Actor : Core.Replica_Id)
+   with Pre => Can_Decrement (C, By), Post => Entry_Count (C) <= C.Max_Actors, Depends => (C => (C, By, Actor));
 
    --  Merge another counter's state into this one.
    --  For each actor: takes the element-wise max of P and N.
    --  Actors present in Source but not in Target are added.
    --  @param Target  Counter to merge into.
    --  @param Source  Counter to merge from.
-   procedure Merge (Target : in out PN_Counter;
-                     Source : PN_Counter) with
-     Post => Entry_Count (Target) <= Target.Max_Actors,
-     Depends => (Target => (Target, Source));
+   procedure Merge (Target : in out PN_Counter; Source : PN_Counter)
+   with Post => Entry_Count (Target) <= Target.Max_Actors, Depends => (Target => (Target, Source));
 
    --  Serialize counter to stream (V2: LEB128-encoded).
    --  @param Stream  Output stream to write to.
    --  @param Item    Counter to serialize.
-   procedure Write_PN_Counter
-     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
-      Item   : PN_Counter);
+   procedure Write_PN_Counter (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : PN_Counter);
 
    --  Deserialize counter from stream (auto-detects V1 vs V2).
    --  @param Stream  Input stream to read from.
    --  @param Item    Counter to populate from stream data.
-   procedure Read_PN_Counter
-     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
-      Item   : out PN_Counter);
+   procedure Read_PN_Counter (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : out PN_Counter);
 
    for PN_Counter'Write use Write_PN_Counter;
-   for PN_Counter'Read  use Read_PN_Counter;
+   for PN_Counter'Read use Read_PN_Counter;
 
 private
 
@@ -120,17 +103,16 @@ private
    type PN_Counter (Max_Actors : Positive) is record
       Entries : Actor_Array (1 .. Max_Actors);
       Count   : Natural := 0;
-   end record with
-     Type_Invariant => Count <= Max_Actors;
+   end record
+   with Type_Invariant => Count <= Max_Actors;
 
-   function Can_Increment (C : PN_Counter; By : Counter_Range := 1)
-                                return Boolean is
-     (C.Count < C.Max_Actors);
+   function Can_Increment (C : PN_Counter; By : Counter_Range := 1) return Boolean
+   is (C.Count < C.Max_Actors);
 
-   function Can_Decrement (C : PN_Counter; By : Counter_Range := 1)
-                                return Boolean is
-     (C.Count < C.Max_Actors);
+   function Can_Decrement (C : PN_Counter; By : Counter_Range := 1) return Boolean
+   is (C.Count < C.Max_Actors);
 
-   function Entry_Count (C : PN_Counter) return Natural is (C.Count);
+   function Entry_Count (C : PN_Counter) return Natural
+   is (C.Count);
 
 end CRDT.Pn_Counters;

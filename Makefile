@@ -1,4 +1,4 @@
-.PHONY: help all build run test prove doc api-docs compliance verify-report ascii-check clean release publish demo
+.PHONY: help all build run test prove doc api-docs compliance verify-report ascii-check fmt clean release publish demo
 
 .DEFAULT_GOAL := help
 
@@ -15,6 +15,7 @@ help:
 	@echo '  doc           Generate Markdown API docs (docs/api-docs/)'
 	@echo '  compliance    HLR traceability check + auto-generate verification report'
 	@echo '  ascii-check   Enforce ASCII-only charset across all source files'
+	@echo '  fmt           Format all Ada sources with gnatformat (requires make dev-setup)'
 	@echo '  release       Tag, update index+releases, push. Use VERSION=x.y.z'
 	@echo '  publish       Publish to Alire community index (run after make release)'
 	@echo '  test-publish  Dry-run showing what make publish would do'
@@ -340,6 +341,22 @@ ascii-check:
 		exit 1; \
 	fi
 
+fmt:
+	@echo "=== Formatting Ada sources with gnatformat ==="; \
+	if ! grep -q 'gnatformat_bin' alire.toml 2>/dev/null; then \
+		cp alire.toml alire.toml.fmtbak; \
+		cp alire-dev.toml alire.toml; \
+		restore=1; \
+	else \
+		restore=0; \
+	fi; \
+	alr exec -- gnatformat -P crdt.gpr -U; \
+	status=$$?; \
+	if [ "$$restore" -eq 1 ]; then \
+		mv alire.toml.fmtbak alire.toml; \
+	fi; \
+	exit $$status
+
 doc: api-docs
 
 api-docs:
@@ -384,10 +401,9 @@ api-docs:
 	echo "All changelog links OK"
 
 dev-setup:
-	@echo "Setting up development environment with dev dependencies..."; \
-	cp alire-dev.toml alire.toml; \
-	echo "alire.toml now has development dependencies (gnatprove, gnatdoc_bin)."; \
-	echo "Run 'make prod-setup' to restore the clean publishing manifest."
+	@echo "Development dependencies (gnatprove, gnatdoc_bin, gnatformat_bin) are"
+	@echo "declared in 'alire-dev.toml'. Run 'make fmt' or 'make prove' to"
+	@echo "use them -- alire.toml is temporarily swapped and restored automatically."
 
 prod-setup:
 	@echo "Restoring clean publishing manifest..."; \

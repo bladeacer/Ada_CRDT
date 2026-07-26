@@ -15,11 +15,10 @@ with CRDT.Core;
 --
 --  Requirements traceability:
 --  - HLR-CORE-CLOCKS: Clock strategy interface
+
 generic
    Max_Replicas : Positive;
-package CRDT.Clocks.Vector with
-  SPARK_Mode
-is
+package CRDT.Clocks.Vector with SPARK_Mode is
 
    --  Per-replica event count array. Index = replica slot.
    subtype Clock_Time is CRDT.Core.VTime (1 .. Max_Replicas);
@@ -61,15 +60,11 @@ is
    --  Serialise a vector clock (all replica counters, LEB128-encoded).
    --  @param Stream  Output stream.
    --  @param Item    Clock to write.
-   procedure Write_Clock
-     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
-      Item   : Clock_Time);
+   procedure Write_Clock (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : Clock_Time);
 
    --  Deserialise a vector clock from a stream.
    --  @param Stream  Input stream.
    --  @param Item    Decoded clock.
-   procedure Read_Clock
-     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
-      Item   : out Clock_Time);
+   procedure Read_Clock (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : out Clock_Time);
 
 end CRDT.Clocks.Vector;

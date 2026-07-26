@@ -1,5 +1,5 @@
-package body CRDT.Rgas with
-  SPARK_Mode
+package body CRDT.Rgas
+  with SPARK_Mode
 is
 
    function Size (RS : RGAs) return Natural is

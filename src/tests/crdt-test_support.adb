@@ -41,10 +41,7 @@ package body CRDT.Test_Support is
    -- Print_Summary_Table --
    ------------------------
 
-   procedure Print_Summary_Table
-     (To   : Ada.Text_IO.File_Type;
-      Cats : Category_Array)
-   is
+   procedure Print_Summary_Table (To : Ada.Text_IO.File_Type; Cats : Category_Array) is
       Cat_W  : constant := 42;
       Tsts_W : constant := 7;
       Stat_W : constant := 8;
@@ -79,13 +76,11 @@ package body CRDT.Test_Support is
 
    begin
       Ada.Text_IO.New_Line (To);
-      Ada.Text_IO.Put_Line (To, "  | " & Ljust ("Category", Cat_W - 2) & " | " & Ljust ("Tests", Tsts_W - 2)
-                            & " | " & Ljust ("Status", Stat_W - 2) & " |");
+      Ada.Text_IO.Put_Line (To, "  | " & Ljust ("Category", Cat_W - 2) & " | " & Ljust ("Tests", Tsts_W - 2) & " | " & Ljust ("Status", Stat_W - 2) & " |");
       Ada.Text_IO.Put_Line (To, "  |" & (1 .. Cat_W => '-') & "|" & (1 .. Tsts_W => '-') & "|" & (1 .. Stat_W => '-') & "|");
 
       for C of Cats loop
-         Row (To_String (C.Name), C.R.Passed + C.R.Failed,
-              (if Length (C.Tag) > 0 then To_String (C.Tag) else ""));
+         Row (To_String (C.Name), C.R.Passed + C.R.Failed, (if Length (C.Tag) > 0 then To_String (C.Tag) else ""));
       end loop;
 
       Ada.Text_IO.Put_Line (To, "  |" & (1 .. Cat_W => '-') & "|" & (1 .. Tsts_W => '-') & "|" & (1 .. Stat_W => '-') & "|");

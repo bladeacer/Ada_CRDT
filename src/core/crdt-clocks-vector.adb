@@ -1,22 +1,18 @@
 with Ada.Streams;
 with CRDT.Core.LEB128;
 
-package body CRDT.Clocks.Vector with
-  SPARK_Mode
+package body CRDT.Clocks.Vector
+  with SPARK_Mode
 is
 
    function "<" (Left, Right : Clock_Time) return Boolean is
-      Result : constant Boolean :=
-        CRDT.Core.VTime_Less (CRDT.Core.VTime (Left),
-                              CRDT.Core.VTime (Right));
+      Result : constant Boolean := CRDT.Core.VTime_Less (CRDT.Core.VTime (Left), CRDT.Core.VTime (Right));
    begin
       return Result;
    end "<";
 
    function "=" (Left, Right : Clock_Time) return Boolean is
-      Result : constant Boolean :=
-        CRDT.Core.VTime_Eq (CRDT.Core.VTime (Left),
-                            CRDT.Core.VTime (Right));
+      Result : constant Boolean := CRDT.Core.VTime_Eq (CRDT.Core.VTime (Left), CRDT.Core.VTime (Right));
    begin
       return Result;
    end "=";
@@ -43,20 +39,14 @@ is
       CRDT.Core.VTime_Merge (Target, CRDT.Core.VTime (Source));
    end Merge;
 
-   procedure Write_Clock
-     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
-      Item   : Clock_Time) with SPARK_Mode => Off
-   is
+   procedure Write_Clock (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : Clock_Time) with SPARK_Mode => Off is
    begin
       for I in Clock_Time'Range loop
          CRDT.Core.LEB128.Encode (Stream, Item (I));
       end loop;
    end Write_Clock;
 
-   procedure Read_Clock
-     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
-      Item   : out Clock_Time) with SPARK_Mode => Off
-   is
+   procedure Read_Clock (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : out Clock_Time) with SPARK_Mode => Off is
    begin
       for I in Clock_Time'Range loop
          CRDT.Core.LEB128.Decode (Stream, Item (I));

@@ -2,6 +2,9 @@ name = "crdt_demo"
 description = "Conway's Game of Life CRDT Demo"
 version = "0.1.0-dev"
 
+#  Use local development build (pin to parent directory).
+#  Version constraint ensures compatibility with the last published release
+#  when the pin is removed (e.g., during CI or publishing).
 [[depends-on]]
 crdt = "^1.7.0"
 

@@ -10,8 +10,8 @@
 --  - HLR-SYNC-ACK: Acknowledge + compact processed operations
 with CRDT.Core;
 
-package CRDT.Sync.Op_Based with
-  SPARK_Mode
+package CRDT.Sync.Op_Based
+  with SPARK_Mode
 is
 
    --  Kind of operation for discriminated record.
@@ -26,16 +26,18 @@ is
    --  @field Amount   Increment/decrement amount.
    --  @field Actor    Target replica for counter ops.
    type Operation (Kind : Op_Kind := Op_Insert) is record
-      Seq     : Natural;
-      Node    : Core.Replica_Id;
+      Seq  : Natural;
+      Node : Core.Replica_Id;
       case Kind is
          when Op_Insert =>
             Position : Positive;
+
          when Op_Delete =>
             Del_Position : Positive;
+
          when Op_Increment | Op_Decrement =>
-            Amount    : Natural;
-            Actor     : Core.Replica_Id;
+            Amount : Natural;
+            Actor  : Core.Replica_Id;
       end case;
    end record;
 
@@ -45,22 +47,21 @@ is
    --  Return the total entry count (including GC'd).
    --  @param Log  Operation log to query.
    --  @return Total number of entries written.
-   function Log_Count (Log : Op_Log) return Natural with
-     Post => Log_Count'Result <= Log.Capacity;
+   function Log_Count (Log : Op_Log) return Natural
+   with Post => Log_Count'Result <= Log.Capacity;
 
    --  Return the GC watermark.
    --  @param Log  Operation log to query.
    --  @return Number of acknowledged (GC'd) entries.
-   function Log_GC (Log : Op_Log) return Natural with
-     Post => Log_GC'Result <= Log.Capacity;
+   function Log_GC (Log : Op_Log) return Natural
+   with Post => Log_GC'Result <= Log.Capacity;
 
    --  Append an operation to the log.
    --  Does nothing if the log is full.
    --  @param Log  Operation log to append to.
    --  @param Op   Operation to record.
-   procedure Append (Log : in out Op_Log; Op : Operation) with
-     Post => Log_Count (Log) <= Log.Capacity,
-     Depends => (Log => (Log, Op));
+   procedure Append (Log : in out Op_Log; Op : Operation)
+   with Post => Log_Count (Log) <= Log.Capacity, Depends => (Log => (Log, Op));
 
    --  Number of unacknowledged operations.
    --  @param Log  Operation log to query.
@@ -76,16 +77,13 @@ is
    --  Mark operations up to Seq as acknowledged (ready for GC).
    --  @param Log       Operation log to modify.
    --  @param Up_To_Seq  Acknowledge all operations with Seq <= this.
-   procedure Acknowledge (Log : in out Op_Log; Up_To_Seq : Natural) with
-     Post => Log_GC (Log) <= Log_Count (Log),
-     Depends => (Log => (Log, Up_To_Seq));
+   procedure Acknowledge (Log : in out Op_Log; Up_To_Seq : Natural)
+   with Post => Log_GC (Log) <= Log_Count (Log), Depends => (Log => (Log, Up_To_Seq));
 
    --  Compact the log, physically removing acknowledged operations.
    --  @param Log  Operation log to compact.
-   procedure Compact (Log : in out Op_Log) with
-     Post => Log_GC (Log) = 0
-             and then Log_Count (Log) <= Log.Capacity,
-     Depends => (Log => Log);
+   procedure Compact (Log : in out Op_Log)
+   with Post => Log_GC (Log) = 0 and then Log_Count (Log) <= Log.Capacity, Depends => (Log => Log);
 
 private
 
@@ -95,11 +93,13 @@ private
       Ops   : Op_Array (1 .. Capacity);
       Count : Natural := 0;
       GC    : Natural := 0;
-   end record with
-     Type_Invariant => GC <= Count and then Count <= Capacity;
+   end record
+   with Type_Invariant => GC <= Count and then Count <= Capacity;
 
    --  Expression functions for SPARK visibility.
-   function Log_Count (Log : Op_Log) return Natural is (Log.Count);
-   function Log_GC (Log : Op_Log) return Natural is (Log.GC);
+   function Log_Count (Log : Op_Log) return Natural
+   is (Log.Count);
+   function Log_GC (Log : Op_Log) return Natural
+   is (Log.GC);
 
 end CRDT.Sync.Op_Based;

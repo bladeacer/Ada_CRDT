@@ -10,17 +10,13 @@ package body CRDT.Serialization is
 
    --  Decode a LEB128 Natural given a starter byte, reading
    --  continuation bytes from the stream as needed.
-   procedure Decode_LEB128_From
-     (Stream : not null access Root_Stream_Type'Class;
-      B0     : Stream_Element;
-      Value  : out Natural)
-   is
+   procedure Decode_LEB128_From (Stream : not null access Root_Stream_Type'Class; B0 : Stream_Element; Value : out Natural) is
       V     : Natural := 0;
       Shift : Natural := 0;
       B     : Stream_Element := B0;
    begin
       loop
-         V := V + Natural (B and 127) * (2 ** Shift);
+         V := V + Natural (B and 127) * (2**Shift);
          Shift := Shift + 7;
          exit when (B and 128) = 0;
          Stream_Element'Read (Stream, B);
@@ -29,9 +25,7 @@ package body CRDT.Serialization is
    end Decode_LEB128_From;
 
    --  Decode a LEB128 Natural from the stream (no starter byte).
-   procedure Decode_LEB128_Stream
-     (Stream : not null access Root_Stream_Type'Class;
-      Value  : out Natural) is
+   procedure Decode_LEB128_Stream (Stream : not null access Root_Stream_Type'Class; Value : out Natural) is
       B : Stream_Element;
    begin
       Stream_Element'Read (Stream, B);
@@ -39,8 +33,7 @@ package body CRDT.Serialization is
    end Decode_LEB128_Stream;
 
    --  Try to read one byte; return False on End_Error.
-   function Try_Read (Stream : not null access Root_Stream_Type'Class;
-                      B      : out Stream_Element) return Boolean is
+   function Try_Read (Stream : not null access Root_Stream_Type'Class; B : out Stream_Element) return Boolean is
    begin
       Stream_Element'Read (Stream, B);
       return True;
@@ -53,13 +46,7 @@ package body CRDT.Serialization is
    --  Read_Header --
    -----------------
 
-   procedure Read_Header
-     (Stream    : not null access Ada.Streams.Root_Stream_Type'Class;
-      Kind      : out Protocol_Kind;
-      Total     : out Natural;
-      Count     : out Natural;
-      Clock_Kind : out CRDT.Clocks.Clock_Kind)
-   is
+   procedure Read_Header (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Kind : out Protocol_Kind; Total : out Natural; Count : out Natural; Clock_Kind : out CRDT.Clocks.Clock_Kind) is
       B1, B2, B3, B4 : Stream_Element;
       CK             : Stream_Element;
    begin
@@ -72,20 +59,20 @@ package body CRDT.Serialization is
          --  V3: protocol version 3, clock kind byte, then LEB128 Total/Count.
          Kind := Proto_V3;
          if not Try_Read (Stream, CK) then
-            raise Constraint_Error with
-              "Serialization.Read_Header: V3 header missing clock kind";
+            raise Constraint_Error with "Serialization.Read_Header: V3 header missing clock kind";
          end if;
          case CK is
-            when 1 =>
+            when 1      =>
                Clock_Kind := CRDT.Clocks.Clock_Lamport;
-            when 2 =>
+
+            when 2      =>
                Clock_Kind := CRDT.Clocks.Clock_Vector;
-            when 3 =>
+
+            when 3      =>
                Clock_Kind := CRDT.Clocks.Clock_Matrix;
+
             when others =>
-               raise Constraint_Error with
-                 "Serialization.Read_Header: unknown clock kind: "
-                 & Natural'Image (Natural (CK));
+               raise Constraint_Error with "Serialization.Read_Header: unknown clock kind: " & Natural'Image (Natural (CK));
          end case;
          Decode_LEB128_Stream (Stream, Total);
          Decode_LEB128_Stream (Stream, Count);
@@ -93,8 +80,7 @@ package body CRDT.Serialization is
       end if;
 
       if B1 /= 2 then
-         raise Constraint_Error with
-           "Serialization.Read_Header: unsupported protocol version";
+         raise Constraint_Error with "Serialization.Read_Header: unsupported protocol version";
       end if;
 
       --  V2: backwards compatible, default to Lamport clock.
@@ -150,15 +136,12 @@ package body CRDT.Serialization is
    --  Read_Natural --
    ------------------
 
-   procedure Read_Natural
-     (Kind   : Protocol_Kind;
-      Stream : not null access Ada.Streams.Root_Stream_Type'Class;
-      Value  : out Natural)
-   is
+   procedure Read_Natural (Kind : Protocol_Kind; Stream : not null access Ada.Streams.Root_Stream_Type'Class; Value : out Natural) is
    begin
       case Kind is
-         when Proto_V1 =>
+         when Proto_V1            =>
             Natural'Read (Stream, Value);
+
          when Proto_V2 | Proto_V3 =>
             Core.LEB128.Decode (Stream, Value);
       end case;
@@ -168,20 +151,17 @@ package body CRDT.Serialization is
    -- Write_Header_V3 --
    --------------------
 
-   procedure Write_Header_V3
-     (Stream   : not null access Ada.Streams.Root_Stream_Type'Class;
-      Total    : Natural;
-      Count    : Natural;
-      Clk_Kind : CRDT.Clocks.Clock_Kind)
-   is
+   procedure Write_Header_V3 (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Total : Natural; Count : Natural; Clk_Kind : CRDT.Clocks.Clock_Kind) is
       CK_Byte : Stream_Element;
    begin
       case Clk_Kind is
          when CRDT.Clocks.Clock_Lamport =>
             CK_Byte := 1;
-         when CRDT.Clocks.Clock_Vector =>
+
+         when CRDT.Clocks.Clock_Vector  =>
             CK_Byte := 2;
-         when CRDT.Clocks.Clock_Matrix =>
+
+         when CRDT.Clocks.Clock_Matrix  =>
             CK_Byte := 3;
       end case;
       Core.LEB128.Encode (Stream, 3);
@@ -200,8 +180,7 @@ package body CRDT.Serialization is
       Kind       : out Protocol_Kind;
       Total      : out Natural;
       Count      : out Natural;
-      Clock_Kind : out CRDT.Clocks.Clock_Kind)
-   is
+      Clock_Kind : out CRDT.Clocks.Clock_Kind) is
    begin
       Read_Header (Source, Kind, Total, Count, Clock_Kind);
       Write_Header_V3 (Dest, Total, Count, Clock_Kind);
@@ -212,11 +191,7 @@ package body CRDT.Serialization is
    --------------------
 
    procedure Migrate_Header
-     (Source : not null access Ada.Streams.Root_Stream_Type'Class;
-      Dest   : not null access Ada.Streams.Root_Stream_Type'Class;
-      Kind   : out Protocol_Kind;
-      Total  : out Natural;
-      Count  : out Natural)
+     (Source : not null access Ada.Streams.Root_Stream_Type'Class; Dest : not null access Ada.Streams.Root_Stream_Type'Class; Kind : out Protocol_Kind; Total : out Natural; Count : out Natural)
    is
       Ignore_Clock : CRDT.Clocks.Clock_Kind;
    begin

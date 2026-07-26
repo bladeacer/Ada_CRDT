@@ -1,12 +1,10 @@
-package body CRDT.Sync.State_Based.Clocked with
-  SPARK_Mode => On
+package body CRDT.Sync.State_Based.Clocked
+  with SPARK_Mode => On
 is
 
    function Create (Config : Sync_Config) return Replica_State is
    begin
-      return Replica_State'
-        (Max_Replicas => Config.Max_Replicas,
-         Clocks       => (others => <>));
+      return Replica_State'(Max_Replicas => Config.Max_Replicas, Clocks => (others => <>));
    end Create;
 
    procedure Merge (Local : in out Replica_State; Remote : Replica_State) is
@@ -16,8 +14,7 @@ is
       end loop;
    end Merge;
 
-   function Compute_Delta (Local : Replica_State;
-                            Remote_SV : Clock_Time) return Natural is
+   function Compute_Delta (Local : Replica_State; Remote_SV : Clock_Time) return Natural is
       pragma Unreferenced (Local, Remote_SV);
    begin
       return 0;

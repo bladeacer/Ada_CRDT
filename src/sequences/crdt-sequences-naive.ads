@@ -10,10 +10,8 @@ with CRDT.Core;
 
 generic
    type Element_Type is private;
-   Max_Items   : Positive;
-package CRDT.Sequences.Naive with
-  SPARK_Mode
-is
+   Max_Items : Positive;
+package CRDT.Sequences.Naive with SPARK_Mode is
 
    --  Unique identifier for a node in the sequence.
    --  @field Replica  Replica that created this node.
@@ -71,7 +69,8 @@ is
    --  Alias for Size.
    --  @param R  The sequence to examine.
    --  @return Number of non-deleted elements.
-   function Length (R : RGA) return Natural is (Size (R));
+   function Length (R : RGA) return Natural
+   is (Size (R));
 
    --  Get element at physical position (1-indexed).
    --  @param R    The sequence.
@@ -84,26 +83,19 @@ is
    --  @param Pos    1-based insertion position.
    --  @param Id     Unique node identifier for this element.
    --  @param Value  Element to insert.
-   procedure Insert (R     : in out RGA;
-                     Pos   : Positive;
-                     Id    : Node_Id;
-                     Value : Element_Type);
+   procedure Insert (R : in out RGA; Pos : Positive; Id : Node_Id; Value : Element_Type);
 
    --  Insert multiple contiguous elements as a single Item block.
    --  @param R       The sequence to modify.
    --  @param Pos     1-based insertion position.
    --  @param Id      Unique node identifier (used for first element).
    --  @param Values  Array of elements to insert contiguously.
-   procedure Insert_Bulk (R      : in out RGA;
-                           Pos    : Positive;
-                           Id     : Node_Id;
-                           Values : Element_Array);
+   procedure Insert_Bulk (R : in out RGA; Pos : Positive; Id : Node_Id; Values : Element_Array);
 
    --  Tombstone-delete element at physical position.
    --  @param R    The sequence to modify.
    --  @param Pos  1-based position of element to delete.
-   procedure Delete (R   : in out RGA;
-                     Pos : Positive);
+   procedure Delete (R : in out RGA; Pos : Positive);
 
    --  Tombstone-delete the item with the given Node_Id.
    --  @param R   The sequence to modify.
@@ -114,8 +106,7 @@ is
    --  preserving causal order by Node_Id.
    --  @param Target  The sequence to merge into.
    --  @param Source  The sequence to merge from.
-   procedure Merge (Target : in out RGA;
-                     Source : RGA);
+   procedure Merge (Target : in out RGA; Source : RGA);
 
    --  Structural equality: same Node_Id, content, and deletion status.
    --  @param Left   Left sequence operand.
@@ -130,16 +121,12 @@ is
    --  Serialize the RGA to a stream.
    --  @param Stream  Output stream.
    --  @param Item    RGA to serialize.
-   procedure Write_RGA
-     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
-      Item   : RGA);
+   procedure Write_RGA (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : RGA);
 
    --  Deserialize the RGA from a stream.
    --  @param Stream  Input stream.
    --  @param Item    Deserialized RGA.
-   procedure Read_RGA
-     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
-      Item   : out RGA);
+   procedure Read_RGA (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : out RGA);
 
 private
 
@@ -158,14 +145,14 @@ private
    end record;
 
    type RGA (Capacity : Positive) is record
-      Items   : Item_Array (1 .. Capacity);
-      Head    : Natural := 0;
-      Count   : Natural := 0;
-      Free    : Natural := 0;
-      Total   : Natural := 0;
+      Items : Item_Array (1 .. Capacity);
+      Head  : Natural := 0;
+      Count : Natural := 0;
+      Free  : Natural := 0;
+      Total : Natural := 0;
    end record;
 
    for RGA'Write use Write_RGA;
-   for RGA'Read  use Read_RGA;
+   for RGA'Read use Read_RGA;
 
 end CRDT.Sequences.Naive;

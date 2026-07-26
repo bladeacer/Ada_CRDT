@@ -5,7 +5,7 @@ with CRDT.Clocks.Lamport;
 with CRDT.Clocks.Vector;
 with CRDT.Clocks.Matrix;
 with CRDT.Lww_Sets;
-with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Text_IO;       use Ada.Text_IO;
 
 package body Test_Clocks is
 
@@ -111,8 +111,7 @@ package body Test_Clocks is
          declare
             M : Clock_Time := Max (A, B);
          begin
-            RunR.Check (M (1, 1) = 1 and then M (1, 2) = 1,
-                       "Max(A,B)[1,1]=1 and [1,2]=1");
+            RunR.Check (M (1, 1) = 1 and then M (1, 2) = 1, "Max(A,B)[1,1]=1 and [1,2]=1");
          end;
 
          declare
@@ -130,8 +129,7 @@ package body Test_Clocks is
             T2 : Clock_Time := ((1, 3, 0), (0, 0, 0), (0, 0, 0));
          begin
             Merge (T1, T2);
-            RunR.Check (T1 (1, 1) = 2 and then T1 (1, 2) = 3,
-                       "Merge: T1[1,1]=2 <-> T2[1,1]=1 => keep 2; T1[1,2]=0 <-> T2[1,2]=3 => keep 3");
+            RunR.Check (T1 (1, 1) = 2 and then T1 (1, 2) = 3, "Merge: T1[1,1]=2 <-> T2[1,1]=1 => keep 2; T1[1,2]=0 <-> T2[1,2]=3 => keep 3");
          end;
 
          Put_Line ("[Clocks.Matrix] done.");
@@ -148,33 +146,32 @@ package body Test_Clocks is
          package VClock is new CRDT.Clocks.Vector (Max_R);
          use VClock;
 
-          package LWW is new CRDT.Lww_Sets
-            (Element_Type => Integer,
-             Max_Set_Size => Max_Sz,
-             Clock_Time   => Clock_Time,
-             Clk_Kind     => CRDT.Clocks.Clock_Vector,
-             "<"          => "<",
-             "="          => "=",
-             ">"          => ">",
-             Max          => Max,
-             Write_Clock  => Write_Clock,
-             Read_Clock   => Read_Clock);
+         package LWW is new
+           CRDT.Lww_Sets
+             (Element_Type => Integer,
+              Max_Set_Size => Max_Sz,
+              Clock_Time   => Clock_Time,
+              Clk_Kind     => CRDT.Clocks.Clock_Vector,
+              "<"          => "<",
+              "="          => "=",
+              ">"          => ">",
+              Max          => Max,
+              Write_Clock  => Write_Clock,
+              Read_Clock   => Read_Clock);
 
-          S : LWW.LWW_Clocked_Set (Max_Sz);
-       begin
-          New_Line;
-          RunR.Check (not LWW.Contains (S, 42), "Empty: Contains(42) = False");
+         S : LWW.LWW_Clocked_Set (Max_Sz);
+      begin
+         New_Line;
+         RunR.Check (not LWW.Contains (S, 42), "Empty: Contains(42) = False");
 
          LWW.Add (S, 42, (1, 0, 0, 0));
          RunR.Check (LWW.Contains (S, 42), "Add(42, vec=(1,0,0,0)): Contains = True");
 
          LWW.Remove (S, 42, (2, 0, 0, 0));
-         RunR.Check (not LWW.Contains (S, 42),
-                    "Remove(42, vec=(2,0,0,0)) > add vec -> not Contains");
+         RunR.Check (not LWW.Contains (S, 42), "Remove(42, vec=(2,0,0,0)) > add vec -> not Contains");
 
          LWW.Add (S, 42, (3, 0, 0, 0));
-         RunR.Check (LWW.Contains (S, 42),
-                    "Re-add(42, vec=(3,0,0,0)) > remove vec -> Contains = True");
+         RunR.Check (LWW.Contains (S, 42), "Re-add(42, vec=(3,0,0,0)) > remove vec -> Contains = True");
 
          LWW.Add (S, 7, (1, 1, 0, 0));
          RunR.Check (LWW.Contains (S, 7), "Add(7, vec=(1,1,0,0)): Contains = True");
@@ -184,8 +181,7 @@ package body Test_Clocks is
          begin
             LWW.Add (S2, 42, (5, 0, 0, 0));
             LWW.Merge (S, S2);
-            RunR.Check (LWW.Contains (S, 42),
-                       "Merge: S2 has 42@vec=(5,0,0,0) > S's 42@(3,0,0,0) -> Contains");
+            RunR.Check (LWW.Contains (S, 42), "Merge: S2 has 42@vec=(5,0,0,0) > S's 42@(3,0,0,0) -> Contains");
          end;
 
          Put_Line ("[Lww_Sets.Vector] done.");
@@ -198,17 +194,18 @@ package body Test_Clocks is
       procedure Test_Lww_Sets_Lamport is
          Max_Sz : constant Positive := 10;
 
-          package LWW is new CRDT.Lww_Sets
-            (Element_Type => Integer,
-             Max_Set_Size => Max_Sz,
-             Clock_Time   => CRDT.Clocks.Lamport.Clock_Time,
-             Clk_Kind     => CRDT.Clocks.Clock_Lamport,
-             "<"          => CRDT.Clocks.Lamport."<",
-             "="          => CRDT.Clocks.Lamport."=",
-             ">"          => CRDT.Clocks.Lamport.">",
-             Max          => CRDT.Clocks.Lamport.Max,
-             Write_Clock  => CRDT.Clocks.Lamport.Write_Clock,
-             Read_Clock   => CRDT.Clocks.Lamport.Read_Clock);
+         package LWW is new
+           CRDT.Lww_Sets
+             (Element_Type => Integer,
+              Max_Set_Size => Max_Sz,
+              Clock_Time   => CRDT.Clocks.Lamport.Clock_Time,
+              Clk_Kind     => CRDT.Clocks.Clock_Lamport,
+              "<"          => CRDT.Clocks.Lamport."<",
+              "="          => CRDT.Clocks.Lamport."=",
+              ">"          => CRDT.Clocks.Lamport.">",
+              Max          => CRDT.Clocks.Lamport.Max,
+              Write_Clock  => CRDT.Clocks.Lamport.Write_Clock,
+              Read_Clock   => CRDT.Clocks.Lamport.Read_Clock);
 
          S : LWW.LWW_Clocked_Set (Max_Sz);
       begin
@@ -221,12 +218,10 @@ package body Test_Clocks is
          RunR.Check (LWW.Contains (S, 42), "Add(42, lam=(100,1)): Contains = True");
 
          LWW.Remove (S, 42, (200, 1));
-         RunR.Check (not LWW.Contains (S, 42),
-                    "Remove(42, lam=(200,1)) > add -> not Contains");
+         RunR.Check (not LWW.Contains (S, 42), "Remove(42, lam=(200,1)) > add -> not Contains");
 
          LWW.Add (S, 42, (300, 1));
-         RunR.Check (LWW.Contains (S, 42),
-                    "Re-add(42, lam=(300,1)) > remove -> Contains");
+         RunR.Check (LWW.Contains (S, 42), "Re-add(42, lam=(300,1)) > remove -> Contains");
 
          Put_Line ("[Lww_Sets.Lamport] done.");
       end Test_Lww_Sets_Lamport;
@@ -242,17 +237,18 @@ package body Test_Clocks is
          package MClock is new CRDT.Clocks.Matrix (Max_R);
          use MClock;
 
-          package LWW is new CRDT.Lww_Sets
-            (Element_Type => Integer,
-             Max_Set_Size => Max_Sz,
-             Clock_Time   => Clock_Time,
-             Clk_Kind     => CRDT.Clocks.Clock_Matrix,
-             "<"          => "<",
-             "="          => "=",
-             ">"          => ">",
-             Max          => Max,
-             Write_Clock  => Write_Clock,
-             Read_Clock   => Read_Clock);
+         package LWW is new
+           CRDT.Lww_Sets
+             (Element_Type => Integer,
+              Max_Set_Size => Max_Sz,
+              Clock_Time   => Clock_Time,
+              Clk_Kind     => CRDT.Clocks.Clock_Matrix,
+              "<"          => "<",
+              "="          => "=",
+              ">"          => ">",
+              Max          => Max,
+              Write_Clock  => Write_Clock,
+              Read_Clock   => Read_Clock);
 
          S : LWW.LWW_Clocked_Set (Max_Sz);
       begin
@@ -265,12 +261,10 @@ package body Test_Clocks is
          RunR.Check (LWW.Contains (S, 42), "Add(42, mat=...): Contains = True");
 
          LWW.Remove (S, 42, ((2, 0, 0), (0, 0, 0), (0, 0, 0)));
-         RunR.Check (not LWW.Contains (S, 42),
-                    "Remove with larger matrix -> not Contains");
+         RunR.Check (not LWW.Contains (S, 42), "Remove with larger matrix -> not Contains");
 
          LWW.Add (S, 42, ((3, 0, 0), (0, 0, 0), (0, 0, 0)));
-         RunR.Check (LWW.Contains (S, 42),
-                    "Re-add with larger matrix -> Contains");
+         RunR.Check (LWW.Contains (S, 42), "Re-add with larger matrix -> Contains");
 
          Put_Line ("[Lww_Sets.Matrix] done.");
       end Test_Lww_Sets_Matrix;

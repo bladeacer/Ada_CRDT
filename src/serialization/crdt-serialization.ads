@@ -13,8 +13,8 @@
 with Ada.Streams;
 with CRDT.Clocks;
 
-package CRDT.Serialization with
-  SPARK_Mode
+package CRDT.Serialization
+  with SPARK_Mode
 is
 
    type Protocol_Kind is (Proto_V1, Proto_V2, Proto_V3);
@@ -33,24 +33,16 @@ is
    --  @param Count      Entry/item count from header.
    --  @param Clock_Kind Clock strategy used for serialization (V3 only;
    --                    Lamport for V1/V2).
-   procedure Read_Header
-      (Stream    : not null access Ada.Streams.Root_Stream_Type'Class;
-       Kind      : out Protocol_Kind;
-       Total     : out Natural;
-       Count     : out Natural;
-       Clock_Kind : out CRDT.Clocks.Clock_Kind) with
-     SPARK_Mode => Off;
+   procedure Read_Header (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Kind : out Protocol_Kind; Total : out Natural; Count : out Natural; Clock_Kind : out CRDT.Clocks.Clock_Kind)
+   with SPARK_Mode => Off;
 
    --  Read a single Natural from the stream using the detected
    --  protocol version's encoding (Natural'Read for V1, LEB128 for V2/V3).
    --  @param Kind   Protocol version to use for decoding.
    --  @param Stream Input stream to read from.
    --  @param Value  Decoded natural value.
-   procedure Read_Natural
-      (Kind   : Protocol_Kind;
-       Stream : not null access Ada.Streams.Root_Stream_Type'Class;
-       Value  : out Natural) with
-     SPARK_Mode => Off;
+   procedure Read_Natural (Kind : Protocol_Kind; Stream : not null access Ada.Streams.Root_Stream_Type'Class; Value : out Natural)
+   with SPARK_Mode => Off;
 
    --  Write a V3-encoded header (protocol version 3 + clock kind byte +
    --  LEB128 Total + LEB128 Count).
@@ -58,12 +50,8 @@ is
    --  @param Total      Total element count.
    --  @param Count      Entry/item count.
    --  @param Clk_Kind   Clock strategy identifier for this payload.
-   procedure Write_Header_V3
-      (Stream   : not null access Ada.Streams.Root_Stream_Type'Class;
-       Total    : Natural;
-       Count    : Natural;
-       Clk_Kind : CRDT.Clocks.Clock_Kind) with
-     SPARK_Mode => Off;
+   procedure Write_Header_V3 (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Total : Natural; Count : Natural; Clk_Kind : CRDT.Clocks.Clock_Kind)
+   with SPARK_Mode => Off;
 
    --  Migrate a header from any protocol version to V3.
    --  Reads the version-agnostic header from Source and writes a
@@ -81,13 +69,13 @@ is
    --  @param Clock_Kind Clock kind written to Dest (from source for V3,
    --                    caller-specified clock kind for V1/V2).
    procedure Migrate_Header_To_V3
-      (Source     : not null access Ada.Streams.Root_Stream_Type'Class;
-       Dest       : not null access Ada.Streams.Root_Stream_Type'Class;
-       Kind       : out Protocol_Kind;
-       Total      : out Natural;
-       Count      : out Natural;
-       Clock_Kind : out CRDT.Clocks.Clock_Kind) with
-     SPARK_Mode => Off;
+     (Source     : not null access Ada.Streams.Root_Stream_Type'Class;
+      Dest       : not null access Ada.Streams.Root_Stream_Type'Class;
+      Kind       : out Protocol_Kind;
+      Total      : out Natural;
+      Count      : out Natural;
+      Clock_Kind : out CRDT.Clocks.Clock_Kind)
+   with SPARK_Mode => Off;
 
    --  Migrate a header from any protocol version to V2.
    --  Reads the version-agnostic header from Source and writes a
@@ -101,11 +89,7 @@ is
    --  @param Total   Total element count from source header.
    --  @param Count   Entry/item count from source header.
    procedure Migrate_Header
-      (Source : not null access Ada.Streams.Root_Stream_Type'Class;
-       Dest   : not null access Ada.Streams.Root_Stream_Type'Class;
-       Kind   : out Protocol_Kind;
-       Total  : out Natural;
-       Count  : out Natural) with
-     SPARK_Mode => Off;
+     (Source : not null access Ada.Streams.Root_Stream_Type'Class; Dest : not null access Ada.Streams.Root_Stream_Type'Class; Kind : out Protocol_Kind; Total : out Natural; Count : out Natural)
+   with SPARK_Mode => Off;
 
 end CRDT.Serialization;

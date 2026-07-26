@@ -18,9 +18,7 @@ package CRDT.Test_Support is
 
    type Category_Array is array (Positive range <>) of Category_Entry;
 
-   procedure Print_Summary_Table
-     (To   : Ada.Text_IO.File_Type;
-      Cats : Category_Array);
+   procedure Print_Summary_Table (To : Ada.Text_IO.File_Type; Cats : Category_Array);
 
 private
 

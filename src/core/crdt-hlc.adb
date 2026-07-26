@@ -1,7 +1,7 @@
 with Ada.Calendar;
 
-package body CRDT.HLC with
-  SPARK_Mode => On
+package body CRDT.HLC
+  with SPARK_Mode => On
 is
 
    use Ada.Calendar;
@@ -28,9 +28,7 @@ is
 
    function "=" (Left, Right : HLC_Time) return Boolean is
    begin
-       return Left.Wall = Right.Wall
-         and then Left.Log = Right.Log
-         and then Left.Node = Right.Node;
+      return Left.Wall = Right.Wall and then Left.Log = Right.Log and then Left.Node = Right.Node;
    end "=";
 
    function ">" (Left, Right : HLC_Time) return Boolean is
@@ -42,22 +40,16 @@ is
    --  Create   --
    ---------------
 
-   function Create (Node : Core.Replica_Id) return Instance with
-     SPARK_Mode => Off
-   is
+   function Create (Node : Core.Replica_Id) return Instance with SPARK_Mode => Off is
    begin
-      return Instance'(Wall => Clock,
-                       Node => Node,
-                       Log  => 0);
+      return Instance'(Wall => Clock, Node => Node, Log => 0);
    end Create;
 
    ---------------
    --  Tick     --
    ---------------
 
-   procedure Tick (Clock : in out Instance) with
-     SPARK_Mode => Off
-   is
+   procedure Tick (Clock : in out Instance) with SPARK_Mode => Off is
       Now_Time : constant Ada.Calendar.Time := Ada.Calendar.Clock;
    begin
       if Now_Time > Clock.Wall then
@@ -72,9 +64,7 @@ is
    --  Recv     --
    ---------------
 
-   procedure Recv (Clock : in out Instance; Remote : HLC_Time) with
-     SPARK_Mode => Off
-   is
+   procedure Recv (Clock : in out Instance; Remote : HLC_Time) with SPARK_Mode => Off is
       Now_Time : constant Ada.Calendar.Time := Ada.Calendar.Clock;
    begin
       if Now_Time > Clock.Wall and then Now_Time > Remote.Wall then

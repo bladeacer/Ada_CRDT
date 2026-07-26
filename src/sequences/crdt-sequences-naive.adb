@@ -3,18 +3,17 @@ with CRDT.Clocks;
 with CRDT.Core.LEB128;
 with CRDT.Serialization;
 
-package body CRDT.Sequences.Naive with
-  SPARK_Mode => Off
+package body CRDT.Sequences.Naive
+  with SPARK_Mode => Off
 is
 
    use type Core.Replica_Id;
 
-   function Id_Less (Left, Right : Node_Id) return Boolean is
-     (Left.Seq < Right.Seq or else
-        (Left.Seq = Right.Seq and then Left.Replica < Right.Replica));
+   function Id_Less (Left, Right : Node_Id) return Boolean
+   is (Left.Seq < Right.Seq or else (Left.Seq = Right.Seq and then Left.Replica < Right.Replica));
 
-   function Id_Eq (Left, Right : Node_Id) return Boolean is
-     (Left.Replica = Right.Replica and then Left.Seq = Right.Seq);
+   function Id_Eq (Left, Right : Node_Id) return Boolean
+   is (Left.Replica = Right.Replica and then Left.Seq = Right.Seq);
 
    function Alloc_Item (R : in out RGA) return Natural is
       Idx : Natural;
@@ -114,7 +113,7 @@ is
    end Append_Item;
 
    function Find_Pos (R : RGA; Pos : Positive) return Natural is
-      P : Natural := Pos;
+      P   : Natural := Pos;
       Cur : Natural := R.Head;
    begin
       while Cur /= 0 loop
@@ -165,9 +164,11 @@ is
    end Element;
 
    -- Public ops
-   function Count (R : RGA) return Natural is (R.Count);
+   function Count (R : RGA) return Natural
+   is (R.Count);
 
-   function Size (R : RGA) return Natural is (R.Total);
+   function Size (R : RGA) return Natural
+   is (R.Total);
 
    function Get (R : RGA; Pos : Positive) return Element_Type is
       Idx : constant Natural := Find_Pos (R, Pos);
@@ -192,7 +193,7 @@ is
       end if;
 
       declare
-         Before : constant Natural := Find_Pos (R, Pos);
+         Before  : constant Natural := Find_Pos (R, Pos);
          New_Idx : constant Natural := New_Item (R, Id, Value);
       begin
          if New_Idx > 0 then
@@ -208,9 +209,7 @@ is
    procedure Insert_Bulk (R : in out RGA; Pos : Positive; Id : Node_Id; Values : Element_Array) is
    begin
       for I in Values'Range loop
-         Insert (R, Pos + (I - Values'First),
-                 (Replica => Id.Replica, Seq => Id.Seq + (I - Values'First)),
-                 Values (I));
+         Insert (R, Pos + (I - Values'First), (Replica => Id.Replica, Seq => Id.Seq + (I - Values'First)), Values (I));
       end loop;
    end Insert_Bulk;
 
@@ -230,60 +229,59 @@ is
       end if;
    end Delete_Node;
 
-    procedure Merge (Target : in out RGA; Source : RGA) is
-       type Src_Ref is record
-          Idx : Natural;
-          Id  : Node_Id;
-       end record;
-       type Src_Array is array (Positive range <>) of Src_Ref;
+   procedure Merge (Target : in out RGA; Source : RGA) is
+      type Src_Ref is record
+         Idx : Natural;
+         Id  : Node_Id;
+      end record;
+      type Src_Array is array (Positive range <>) of Src_Ref;
 
-       Srcs     : Src_Array (1 .. Max_Items);
-       Src_Last : Natural := 0;
-       S_Idx    : Natural := Source.Head;
-    begin
-       while S_Idx /= 0 loop
-          if Find_Node (Target, Source.Items (S_Idx).Id) = 0 then
-             Src_Last := Src_Last + 1;
-             Srcs (Src_Last) := (Idx => S_Idx, Id => Source.Items (S_Idx).Id);
-          end if;
-          S_Idx := Source.Items (S_Idx).Next;
-       end loop;
+      Srcs     : Src_Array (1 .. Max_Items);
+      Src_Last : Natural := 0;
+      S_Idx    : Natural := Source.Head;
+   begin
+      while S_Idx /= 0 loop
+         if Find_Node (Target, Source.Items (S_Idx).Id) = 0 then
+            Src_Last := Src_Last + 1;
+            Srcs (Src_Last) := (Idx => S_Idx, Id => Source.Items (S_Idx).Id);
+         end if;
+         S_Idx := Source.Items (S_Idx).Next;
+      end loop;
 
-       for I in 1 .. Src_Last loop
-          for J in reverse I + 1 .. Src_Last loop
-             if Id_Less (Srcs (J).Id, Srcs (J - 1).Id) then
-                declare
-                   Tmp : constant Src_Ref := Srcs (J);
-                begin
-                   Srcs (J) := Srcs (J - 1);
-                   Srcs (J - 1) := Tmp;
-                end;
-             end if;
-          end loop;
-       end loop;
+      for I in 1 .. Src_Last loop
+         for J in reverse I + 1 .. Src_Last loop
+            if Id_Less (Srcs (J).Id, Srcs (J - 1).Id) then
+               declare
+                  Tmp : constant Src_Ref := Srcs (J);
+               begin
+                  Srcs (J) := Srcs (J - 1);
+                  Srcs (J - 1) := Tmp;
+               end;
+            end if;
+         end loop;
+      end loop;
 
-       for I in 1 .. Src_Last loop
-          declare
-             New_Idx : constant Natural :=
-               Copy_Item (Target, Source.Items (Srcs (I).Idx));
-             T_Idx   : Natural := Target.Head;
-             Ins     : Boolean := False;
-          begin
-             if New_Idx > 0 then
-                while T_Idx /= 0 and not Ins loop
-                   if Id_Less (Srcs (I).Id, Target.Items (T_Idx).Id) then
-                      Link_Before (Target, T_Idx, New_Idx);
-                      Ins := True;
-                   end if;
-                   T_Idx := Target.Items (T_Idx).Next;
-                end loop;
-                if not Ins then
-                   Append_Item (Target, New_Idx);
-                end if;
-             end if;
-          end;
-       end loop;
-    end Merge;
+      for I in 1 .. Src_Last loop
+         declare
+            New_Idx : constant Natural := Copy_Item (Target, Source.Items (Srcs (I).Idx));
+            T_Idx   : Natural := Target.Head;
+            Ins     : Boolean := False;
+         begin
+            if New_Idx > 0 then
+               while T_Idx /= 0 and not Ins loop
+                  if Id_Less (Srcs (I).Id, Target.Items (T_Idx).Id) then
+                     Link_Before (Target, T_Idx, New_Idx);
+                     Ins := True;
+                  end if;
+                  T_Idx := Target.Items (T_Idx).Next;
+               end loop;
+               if not Ins then
+                  Append_Item (Target, New_Idx);
+               end if;
+            end if;
+         end;
+      end loop;
+   end Merge;
 
    function "=" (Left, Right : RGA) return Boolean is
       L_Idx : Natural := Left.Head;
@@ -296,10 +294,7 @@ is
          if L_Idx = 0 or R_Idx = 0 then
             return False;
          end if;
-         if Left.Items (L_Idx).Id /= Right.Items (R_Idx).Id
-           or else Left.Items (L_Idx).Value /= Right.Items (R_Idx).Value
-           or else Left.Items (L_Idx).Deleted /= Right.Items (R_Idx).Deleted
-         then
+         if Left.Items (L_Idx).Id /= Right.Items (R_Idx).Id or else Left.Items (L_Idx).Value /= Right.Items (R_Idx).Value or else Left.Items (L_Idx).Deleted /= Right.Items (R_Idx).Deleted then
             return False;
          end if;
          L_Idx := Left.Items (L_Idx).Next;
@@ -330,10 +325,7 @@ is
    end Compact;
 
    -- Serialization
-   procedure Write_RGA
-     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
-      Item   : RGA)
-   is
+   procedure Write_RGA (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : RGA) is
       use Ada.Streams;
    begin
       Core.LEB128.Encode (Stream, 2);
@@ -351,39 +343,34 @@ is
       end;
    end Write_RGA;
 
-   procedure Read_RGA
-     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
-      Item   : out RGA)
-    is
-       use Ada.Streams;
-       use CRDT.Serialization;
-       Kind      : Protocol_Kind;
-       Total     : Natural;
-       Num_Items : Natural;
-       Id        : Node_Id;
-       Deleted   : Boolean;
-       Val       : Element_Type;
-       Prev_Idx  : Natural := 0;
-       New_Idx   : Natural;
-       Ignore_CK : CRDT.Clocks.Clock_Kind;
-    begin
-       Read_Header (Stream, Kind, Total, Num_Items, Ignore_CK);
+   procedure Read_RGA (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : out RGA) is
+      use Ada.Streams;
+      use CRDT.Serialization;
+      Kind      : Protocol_Kind;
+      Total     : Natural;
+      Num_Items : Natural;
+      Id        : Node_Id;
+      Deleted   : Boolean;
+      Val       : Element_Type;
+      Prev_Idx  : Natural := 0;
+      New_Idx   : Natural;
+      Ignore_CK : CRDT.Clocks.Clock_Kind;
+   begin
+      Read_Header (Stream, Kind, Total, Num_Items, Ignore_CK);
 
-       if Num_Items > Item.Capacity then
-          raise Constraint_Error with
-            "Naive Read_RGA: item count" & Natural'Image (Num_Items) &
-            " exceeds capacity" & Natural'Image (Item.Capacity);
-       end if;
+      if Num_Items > Item.Capacity then
+         raise Constraint_Error with "Naive Read_RGA: item count" & Natural'Image (Num_Items) & " exceeds capacity" & Natural'Image (Item.Capacity);
+      end if;
 
-       Item.Total := Total;
-       Item.Head := 0;
-       Item.Count := 0;
-       Item.Free := 0;
+      Item.Total := Total;
+      Item.Head := 0;
+      Item.Count := 0;
+      Item.Free := 0;
 
-       for J in 1 .. Num_Items loop
-          Node_Id'Read (Stream, Id);
-          Boolean'Read (Stream, Deleted);
-          Element_Type'Read (Stream, Val);
+      for J in 1 .. Num_Items loop
+         Node_Id'Read (Stream, Id);
+         Boolean'Read (Stream, Deleted);
+         Element_Type'Read (Stream, Val);
          New_Idx := Alloc_Item (Item);
          if New_Idx > 0 then
             Item.Count := J;

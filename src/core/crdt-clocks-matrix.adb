@@ -1,8 +1,8 @@
 with Ada.Streams;
 with CRDT.Core.LEB128;
 
-package body CRDT.Clocks.Matrix with
-  SPARK_Mode
+package body CRDT.Clocks.Matrix
+  with SPARK_Mode
 is
 
    function "<" (Left, Right : Clock_Time) return Boolean is
@@ -50,9 +50,7 @@ is
       return Result;
    end Max;
 
-   procedure Increment (T    : in out Clock_Time;
-                        Row  : Positive;
-                        Col  : Positive) is
+   procedure Increment (T : in out Clock_Time; Row : Positive; Col : Positive) is
    begin
       T (Row, Col) := T (Row, Col) + 1;
    end Increment;
@@ -68,10 +66,7 @@ is
       end loop;
    end Merge;
 
-   procedure Write_Clock
-     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
-      Item   : Clock_Time) with SPARK_Mode => Off
-   is
+   procedure Write_Clock (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : Clock_Time) with SPARK_Mode => Off is
    begin
       for R in Clock_Time'Range (1) loop
          for C in Clock_Time'Range (2) loop
@@ -80,10 +75,7 @@ is
       end loop;
    end Write_Clock;
 
-   procedure Read_Clock
-     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
-      Item   : out Clock_Time) with SPARK_Mode => Off
-   is
+   procedure Read_Clock (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : out Clock_Time) with SPARK_Mode => Off is
    begin
       for R in Clock_Time'Range (1) loop
          for C in Clock_Time'Range (2) loop

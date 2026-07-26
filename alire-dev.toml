@@ -1,12 +1,13 @@
-# Development manifest for local SPARK proof and doc generation.
+# Development manifest for local SPARK proof, doc generation, and formatting.
 # Copy this over alire.toml during development:
 #   make dev-setup
 # Restore the clean publishing manifest with:
 #   make prod-setup
 #
-# This manifest includes gnatprove and gnatdoc_bin which are required
-# for `make prove` and `make doc` but MUST NOT appear in the published
-# Alire community index (they are build tools, not library dependencies).
+# This manifest includes gnatprove, gnatdoc_bin, and gnatformat_bin which are
+# required for `make prove`, `make doc`, and `make fmt` but MUST NOT appear in
+# the published Alire community index (they are build tools, not library
+# dependencies).
 #
 # The clean alire.toml is what gets committed and published.
 # Only alire.toml is published to the community index.
@@ -26,3 +27,4 @@ executables = ["test_crdt"]
 [[depends-on]]
 gnatprove = "^15.1.0"
 gnatdoc_bin = "^26.0.0"
+gnatformat_bin = "^26.0.0"

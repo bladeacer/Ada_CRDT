@@ -3,8 +3,9 @@
 --
 --  Requirements traceability:
 --  - HLR-CORE-CLOCKS: Clock strategy interface and selection
-package CRDT.Clocks with
-  SPARK_Mode
+
+package CRDT.Clocks
+  with SPARK_Mode
 is
 
    --  Identifies which clock strategy serialized data uses.

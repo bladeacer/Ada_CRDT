@@ -6,14 +6,12 @@ package body CRDT.Protected is
 
    protected body Shared_PN_Counter is
 
-      procedure Increment (By    : Natural := 1;
-                           Actor : Core.Replica_Id) is
+      procedure Increment (By : Natural := 1; Actor : Core.Replica_Id) is
       begin
          Pn_Counters.Increment (C, By, Actor);
       end Increment;
 
-      procedure Decrement (By    : Natural := 1;
-                           Actor : Core.Replica_Id) is
+      procedure Decrement (By : Natural := 1; Actor : Core.Replica_Id) is
       begin
          Pn_Counters.Decrement (C, By, Actor);
       end Decrement;
@@ -43,14 +41,12 @@ package body CRDT.Protected is
 
       protected body Shared_Set is
 
-         procedure Add (E  : Element_Type;
-                        TS : Core.Lamport_Time) is
+         procedure Add (E : Element_Type; TS : Core.Lamport_Time) is
          begin
             LWW_Pkg.Add (S, E, TS);
          end Add;
 
-         procedure Remove (E  : Element_Type;
-                           TS : Core.Lamport_Time) is
+         procedure Remove (E : Element_Type; TS : Core.Lamport_Time) is
          begin
             LWW_Pkg.Remove (S, E, TS);
          end Remove;
@@ -82,16 +78,12 @@ package body CRDT.Protected is
 
       protected body Shared_RGA_Obj is
 
-         procedure Insert (Pos   : Positive;
-                           Id    : RGA_Pkg.Node_Id;
-                           Value : Element_Type) is
+         procedure Insert (Pos : Positive; Id : RGA_Pkg.Node_Id; Value : Element_Type) is
          begin
             RGA_Pkg.Insert (R, Pos, Id, Value);
          end Insert;
 
-         procedure Insert_Bulk (Pos    : Positive;
-                                Id     : RGA_Pkg.Node_Id;
-                                Values : RGA_Pkg.Element_Array) is
+         procedure Insert_Bulk (Pos : Positive; Id : RGA_Pkg.Node_Id; Values : RGA_Pkg.Element_Array) is
          begin
             RGA_Pkg.Insert_Bulk (R, Pos, Id, Values);
          end Insert_Bulk;

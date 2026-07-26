@@ -26,6 +26,17 @@ project crdt is
         ("-E");
    end Binder;
 
+   package Format is
+      for Indentation ("Ada") use "3";
+      for Indentation_Kind ("Ada") use "spaces";
+      for Indentation_Continuation ("Ada") use "2";
+      for Keyword_Casing ("Ada") use "lower";
+      for Identifier_Casing ("Ada") use "keep";
+      for Layout ("Ada") use "default";
+      for Width ("Ada") use "200";
+      for End_Of_Line ("Ada") use "lf";
+   end Format;
+
    --  Linker package intentionally left empty: the .sframe warning from
    --  ld 2.44 is cosmetic (no effect on Ada/DWARF exception handling) and
    --  has no suppression flag in this toolchain ld version.

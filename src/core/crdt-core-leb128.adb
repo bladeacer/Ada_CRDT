@@ -1,5 +1,5 @@
-package body CRDT.Core.LEB128 with
-  SPARK_Mode
+package body CRDT.Core.LEB128
+  with SPARK_Mode
 is
 
    use Ada.Streams;
@@ -8,11 +8,7 @@ is
    --  Encode (buffer) --
    --------------------
 
-   procedure Encode
-     (Buffer : in out Byte_Array;
-      Index  : in out Stream_Element_Offset;
-      Value  : Natural)
-   is
+   procedure Encode (Buffer : in out Byte_Array; Index : in out Stream_Element_Offset; Value : Natural) is
       V : Natural := Value;
       T : Byte_Array (1 .. Max_LEB128_Bytes) := (others => 0);
       N : Stream_Element_Offset;
@@ -47,11 +43,7 @@ is
    --  Decode (buffer) --
    --------------------
 
-   procedure Decode
-     (Buffer : Byte_Array;
-      Index  : in out Stream_Element_Offset;
-      Value  : out Natural)
-   is
+   procedure Decode (Buffer : Byte_Array; Index : in out Stream_Element_Offset; Value : out Natural) is
       V  : Long_Long_Integer;
       N  : Stream_Element_Offset;
       B  : Stream_Element;
@@ -109,12 +101,8 @@ is
    --  Encode (stream) --
    --------------------
 
-   procedure Encode
-     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
-      Value  : Natural)
-   with SPARK_Mode => Off
-   is
-      Buf    : Byte_Array (1 .. Max_LEB128_Bytes);
+   procedure Encode (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Value : Natural) with SPARK_Mode => Off is
+      Buf     : Byte_Array (1 .. Max_LEB128_Bytes);
       Buf_Idx : Stream_Element_Offset := 1;
    begin
       Encode (Buf, Buf_Idx, Value);
@@ -127,14 +115,10 @@ is
    --  Decode (stream) --
    --------------------
 
-   procedure Decode
-     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
-      Value  : out Natural)
-   with SPARK_Mode => Off
-   is
-      Buf    : Byte_Array (1 .. Max_LEB128_Bytes);
+   procedure Decode (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Value : out Natural) with SPARK_Mode => Off is
+      Buf     : Byte_Array (1 .. Max_LEB128_Bytes);
       Buf_Idx : Stream_Element_Offset := 1;
-      B      : Stream_Element;
+      B       : Stream_Element;
    begin
       loop
          Stream_Element'Read (Stream, B);

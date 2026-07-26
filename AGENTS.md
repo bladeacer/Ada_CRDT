@@ -84,6 +84,7 @@ Ada_CRDT/
 | `doc` / `api-docs` | Generate Markdown API docs | `gnatdoc` -> RST -> `tools/rst2md.py` -> `docs/api-docs/` |
 | `compliance` | DO-178C traceability + Quick Reference link validation + auto-generate report | Scans source HLR tags, validates HLR.md coverage, checks README links, runs verify-report |
 | `ascii-check` | Enforce ASCII-only charset across source files | `LC_ALL=C grep` for bytes > 0x7E |
+| `fmt` | Format all Ada sources with gnatformat | `alr exec -- gnatformat -P crdt.gpr -U` (requires `make dev-setup` first) |
 | `release` | Tag + publish new version | Updates metadata, commits, tags, pushes |
 | `publish` | Publish to Alire community index | Archives source, pushes to community index |
 | `demo` | Build + run Game of Life demo | `cd demo && alr build && ./demo_life` |
@@ -92,7 +93,7 @@ Ada_CRDT/
 ### Alire (Ada Package Manager)
 
 - Primary build tool: `alr build` / `alr run` / `alr gnatprove`
-- Dependencies managed in `alire.toml` (currently: `gnatprove`, `gnatdoc_bin`)
+- Dependencies managed in `alire.toml` (currently: `gnatprove`, `gnatdoc_bin`, `gnatformat_bin`)
 - GNAT toolchain managed automatically by Alire
 - Version: defined in `alire.toml` (currently 1.7.0), mirrors in `index/ad/crdt/` and `alire/releases/`
 
@@ -112,6 +113,7 @@ Ada_CRDT/
 | Alire (`alr`) | All builds | Ada package manager, manages GNAT toolchain |
 | GNAT/SPARK toolchain | Build, proof | Installed automatically by Alire (FSF GNAT v15.2.1) |
 | `gnatprove` | `make prove` | Alire dev dependency (`alire-dev.toml`) |
+| `gnatformat_bin` | `make fmt` | Alire dev dependency (`alire-dev.toml`); run `make dev-setup` first |
 | `gnatdoc_bin` | `make doc` | Alire dev dependency (`alire-dev.toml`) |
 | Python 3 | `make doc` | Runs `tools/rst2md.py` and `tools/gen-coverage.py` |
 | `sha256sum` | `make verify-report` | Content hashing for deterministic output (part of coreutils) |
@@ -331,8 +333,8 @@ Two manifest files manage build tool dependencies:
 
 - **`alire.toml`** -- clean publishing manifest. No dev-only dependencies. This
   is what gets published to the Alire community index.
-- **`alire-dev.toml`** -- full development manifest with `gnatprove` and
-  `gnatdoc_bin` dependencies. Used for local SPARK proof and doc generation.
+- **`alire-dev.toml`** -- full development manifest with `gnatprove`, `gnatdoc_bin`, and
+  `gnatformat_bin` dependencies. Used for local SPARK proof, doc generation, and formatting.
 
 To switch between them:
 
@@ -354,7 +356,7 @@ To switch between them:
 1. Checks working tree is clean
 2. Runs `alr publish` (auto-detects GitHub, publishes from clean `alire.toml`)
 
-Dev-only dependencies (`gnatprove`, `gnatdoc_bin`) are in `alire-dev.toml` only,
+Dev-only dependencies (`gnatprove`, `gnatdoc_bin`, `gnatformat_bin`) are in `alire-dev.toml` only,
 so they never appear in the published index.
 
 ### ASCII Charset Enforcement

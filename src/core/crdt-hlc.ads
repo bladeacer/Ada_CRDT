@@ -14,8 +14,8 @@
 with Ada.Calendar;
 with CRDT.Core;
 
-package CRDT.HLC with
-  SPARK_Mode
+package CRDT.HLC
+  with SPARK_Mode
 is
 
    use Ada.Calendar;
@@ -53,31 +53,25 @@ is
    --  @param Left   Left HLC timestamp.
    --  @param Right  Right HLC timestamp.
    --  @return True if Left causally precedes Right.
-   function "<" (Left, Right : HLC_Time) return Boolean with
-     Post => ("<"'Result =
-               (if Left.Wall < Right.Wall then True
-                elsif Left.Wall > Right.Wall then False
-                elsif Left.Log < Right.Log then True
-                elsif Left.Log > Right.Log then False
-                else Left.Node < Right.Node));
+   function "<" (Left, Right : HLC_Time) return Boolean
+   with
+     Post =>
+       ("<"'Result
+        = (if Left.Wall < Right.Wall then True elsif Left.Wall > Right.Wall then False elsif Left.Log < Right.Log then True elsif Left.Log > Right.Log then False else Left.Node < Right.Node));
 
    --  HLC equality: all three fields must match.
    --  @param Left   Left HLC timestamp.
    --  @param Right  Right HLC timestamp.
    --  @return True if timestamps are identical.
-   function "=" (Left, Right : HLC_Time) return Boolean with
-     Post => ("="'Result =
-               (Left.Wall = Right.Wall
-                and then Left.Log = Right.Log
-                and then Left.Node = Right.Node));
+   function "=" (Left, Right : HLC_Time) return Boolean
+   with Post => ("="'Result = (Left.Wall = Right.Wall and then Left.Log = Right.Log and then Left.Node = Right.Node));
 
    --  HLC greater-than: inverse of "<".
    --  @param Left   Left HLC timestamp.
    --  @param Right  Right HLC timestamp.
    --  @return True if Left causally follows Right.
-   function ">" (Left, Right : HLC_Time) return Boolean with
-     Post => (">"'Result = (not (Left < Right)
-                            and then not (Left = Right)));
+   function ">" (Left, Right : HLC_Time) return Boolean
+   with Post => (">"'Result = (not (Left < Right) and then not (Left = Right)));
 
 private
 
@@ -88,9 +82,7 @@ private
    end record;
 
    --  Expression function for efficient Now access.
-   function Now (Clock : Instance) return HLC_Time is
-     (HLC_Time'(Wall => Clock.Wall,
-                 Node => Clock.Node,
-                 Log  => Clock.Log));
+   function Now (Clock : Instance) return HLC_Time
+   is (HLC_Time'(Wall => Clock.Wall, Node => Clock.Node, Log => Clock.Log));
 
 end CRDT.HLC;

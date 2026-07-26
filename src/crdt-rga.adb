@@ -2,8 +2,8 @@ with CRDT.Clocks;
 with CRDT.Core.LEB128;
 with CRDT.Serialization;
 
-package body CRDT.Rga with
-  SPARK_Mode => Off
+package body CRDT.Rga
+  with SPARK_Mode => Off
 is
 
    use type Core.Replica_Id;
@@ -12,12 +12,11 @@ is
    --  Id utilities  --
    --------------------
 
-   function Id_Less (Left, Right : Node_Id) return Boolean is
-     (Left.Seq < Right.Seq or else
-        (Left.Seq = Right.Seq and then Left.Replica < Right.Replica));
+   function Id_Less (Left, Right : Node_Id) return Boolean
+   is (Left.Seq < Right.Seq or else (Left.Seq = Right.Seq and then Left.Replica < Right.Replica));
 
-   function Id_Eq (Left, Right : Node_Id) return Boolean is
-     (Left.Replica = Right.Replica and then Left.Seq = Right.Seq);
+   function Id_Eq (Left, Right : Node_Id) return Boolean
+   is (Left.Replica = Right.Replica and then Left.Seq = Right.Seq);
 
    --------------------
    --  Item helpers  --
@@ -47,11 +46,7 @@ is
       R.Free := Idx;
    end Free_Item;
 
-   function New_Item (R    : in out RGA;
-                      Id   : Node_Id;
-                      Val  : Element_Type;
-                      Size : Natural := 1) return Natural
-   is
+   function New_Item (R : in out RGA; Id : Node_Id; Val : Element_Type; Size : Natural := 1) return Natural is
       Idx : constant Natural := Alloc_Item (R);
    begin
       if Idx > 0 then
@@ -98,9 +93,7 @@ is
       Cur : Natural := R.Head;
    begin
       while Cur /= 0 loop
-         if R.Items (Cur).Id.Replica = Id.Replica
-           and then R.Items (Cur).Id.Seq = Id.Seq
-         then
+         if R.Items (Cur).Id.Replica = Id.Replica and then R.Items (Cur).Id.Seq = Id.Seq then
             return Cur;
          end if;
          Cur := R.Items (Cur).Next;
@@ -142,13 +135,8 @@ is
       end if;
    end Append_Item;
 
-   procedure Find_Physical_Pos
-     (R        : RGA;
-      Pos      : Positive;
-      Item_Idx : out Natural;
-      Offset   : out Positive)
-   is
-      P : Natural := Pos;
+   procedure Find_Physical_Pos (R : RGA; Pos : Positive; Item_Idx : out Natural; Offset : out Positive) is
+      P   : Natural := Pos;
       Cur : Natural := R.Head;
    begin
       while Cur /= 0 loop
@@ -164,13 +152,9 @@ is
       Offset := (if P = 0 then 1 else P);
    end Find_Physical_Pos;
 
-   procedure Split_At (R          : in out RGA;
-                       Idx        : Natural;
-                       Offset     : Positive;
-                       Right_Idx  : out Natural)
-   is
-      Orig   : RGA_Item renames R.Items (Idx);
-      Rlen   : constant Natural := Orig.Len - Offset + 1;
+   procedure Split_At (R : in out RGA; Idx : Natural; Offset : Positive; Right_Idx : out Natural) is
+      Orig : RGA_Item renames R.Items (Idx);
+      Rlen : constant Natural := Orig.Len - Offset + 1;
    begin
       Right_Idx := 0;
       if Offset > Orig.Len then
@@ -185,8 +169,7 @@ is
       declare
          Right : RGA_Item renames R.Items (Right_Idx);
       begin
-         Right.Id := (Orig.Id.Replica,
-                      Orig.Id.Seq + Offset - 1);
+         Right.Id := (Orig.Id.Replica, Orig.Id.Seq + Offset - 1);
          Right.Len := Rlen;
          for I in 1 .. Rlen loop
             Right.Content (I) := Orig.Content (Offset + I - 1);
@@ -224,18 +207,12 @@ is
       return R.Items (Item_Idx).Content (Offset);
    end Get;
 
-   procedure Insert (R     : in out RGA;
-                     Pos   : Positive;
-                     Id    : Node_Id;
-                     Value : Element_Type) is
+   procedure Insert (R : in out RGA; Pos : Positive; Id : Node_Id; Value : Element_Type) is
    begin
       Insert_Bulk (R, Pos, Id, (1 => Value));
    end Insert;
 
-   procedure Insert_Bulk (R      : in out RGA;
-                          Pos    : Positive;
-                          Id     : Node_Id;
-                          Values : Element_Array) is
+   procedure Insert_Bulk (R : in out RGA; Pos : Positive; Id : Node_Id; Values : Element_Array) is
       VLen     : constant Natural := Values'Length;
       Item_Idx : Natural;
       Offset   : Positive;
@@ -246,8 +223,7 @@ is
       end if;
 
       if VLen > Max_Stride then
-         raise Constraint_Error with
-           "Insert_Bulk: values length exceeds Max_Stride";
+         raise Constraint_Error with "Insert_Bulk: values length exceeds Max_Stride";
       end if;
 
       if R.Head = 0 then
@@ -357,8 +333,7 @@ is
 
       for I in 1 .. Src_Last loop
          declare
-            New_Idx : constant Natural :=
-              Copy_Item (Target, Source.Items (Srcs (I).Idx));
+            New_Idx : constant Natural := Copy_Item (Target, Source.Items (Srcs (I).Idx));
             T_Idx   : Natural := Target.Head;
             Ins     : Boolean := False;
          begin
@@ -389,16 +364,11 @@ is
          if L_Idx = 0 or R_Idx = 0 then
             return False;
          end if;
-         if Left.Items (L_Idx).Id /= Right.Items (R_Idx).Id
-           or else Left.Items (L_Idx).Len /= Right.Items (R_Idx).Len
-           or else Left.Items (L_Idx).Deleted /= Right.Items (R_Idx).Deleted
-         then
+         if Left.Items (L_Idx).Id /= Right.Items (R_Idx).Id or else Left.Items (L_Idx).Len /= Right.Items (R_Idx).Len or else Left.Items (L_Idx).Deleted /= Right.Items (R_Idx).Deleted then
             return False;
          end if;
          for I in 1 .. Left.Items (L_Idx).Len loop
-            if Left.Items (L_Idx).Content (I) /=
-               Right.Items (R_Idx).Content (I)
-            then
+            if Left.Items (L_Idx).Content (I) /= Right.Items (R_Idx).Content (I) then
                return False;
             end if;
          end loop;
@@ -411,30 +381,22 @@ is
    --  State Vector        --
    --------------------------
 
-   procedure Compute_State_Vector
-     (R     : RGA;
-      SV    : out Replica_Max_Seq_Array;
-      Count : out Natural)
-   is
-      Cur : Natural := R.Head;
-      Idx : Natural := 1;
+   procedure Compute_State_Vector (R : RGA; SV : out Replica_Max_Seq_Array; Count : out Natural) is
+      Cur    : Natural := R.Head;
+      Idx    : Natural := 1;
       Max_SV : Natural;
    begin
       Count := 0;
       while Cur /= 0 and Idx <= SV'Length loop
          Max_SV := R.Items (Cur).Id.Seq + R.Items (Cur).Len - 1;
-         SV (Idx) := (Replica => R.Items (Cur).Id.Replica,
-                      Max_Seq => Max_SV);
+         SV (Idx) := (Replica => R.Items (Cur).Id.Replica, Max_Seq => Max_SV);
          Count := Count + 1;
          Cur := R.Items (Cur).Next;
          Idx := Idx + 1;
       end loop;
    end Compute_State_Vector;
 
-   function Is_Newer (Item     : RGA_Item;
-                      Remote_SV : Replica_Max_Seq_Array;
-                      SV_Count  : Natural) return Boolean
-   is
+   function Is_Newer (Item : RGA_Item; Remote_SV : Replica_Max_Seq_Array; SV_Count : Natural) return Boolean is
    begin
       for I in 1 .. SV_Count loop
          if Remote_SV (I).Replica = Item.Id.Replica then
@@ -444,29 +406,19 @@ is
       return True;
    end Is_Newer;
 
-   procedure Sync_Delta
-     (Target    : in out RGA;
-      Source    : RGA;
-      Remote_SV : Replica_Max_Seq_Array;
-      SV_Count  : Natural)
-   is
+   procedure Sync_Delta (Target : in out RGA; Source : RGA; Remote_SV : Replica_Max_Seq_Array; SV_Count : Natural) is
       S_Idx : Natural := Source.Head;
    begin
       while S_Idx /= 0 loop
-         if Is_Newer (Source.Items (S_Idx), Remote_SV, SV_Count)
-           and then Find_Node (Target, Source.Items (S_Idx).Id) = 0
-         then
+         if Is_Newer (Source.Items (S_Idx), Remote_SV, SV_Count) and then Find_Node (Target, Source.Items (S_Idx).Id) = 0 then
             declare
                T_Idx   : Natural := Target.Head;
                Ins     : Boolean := False;
-               New_Idx : constant Natural :=
-                 Copy_Item (Target, Source.Items (S_Idx));
+               New_Idx : constant Natural := Copy_Item (Target, Source.Items (S_Idx));
             begin
                if New_Idx > 0 then
                   while T_Idx /= 0 and not Ins loop
-                     if Id_Less (Source.Items (S_Idx).Id,
-                                Target.Items (T_Idx).Id)
-                     then
+                     if Id_Less (Source.Items (S_Idx).Id, Target.Items (T_Idx).Id) then
                         Link_Before (Target, T_Idx, New_Idx);
                         Ins := True;
                      end if;
@@ -511,10 +463,7 @@ is
    --  Serialization       --
    --------------------------
 
-   procedure Write_RGA
-     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
-      Item   : RGA)
-   is
+   procedure Write_RGA (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : RGA) is
       use Ada.Streams;
    begin
       Core.LEB128.Encode (Stream, 2);
@@ -535,59 +484,52 @@ is
       end;
    end Write_RGA;
 
-    procedure Read_RGA
-      (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
-       Item   : out RGA)
-    is
-       use Ada.Streams;
-       use CRDT.Serialization;
-       Kind      : Protocol_Kind;
-       Total     : Natural;
-       Num_Items : Natural;
-       Id        : Node_Id;
-       Len       : Natural;
-       Deleted   : Boolean;
-       Prev_Idx  : Natural := 0;
-       New_Idx   : Natural;
-       Ignore_CK : CRDT.Clocks.Clock_Kind;
-    begin
-       Read_Header (Stream, Kind, Total, Num_Items, Ignore_CK);
+   procedure Read_RGA (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : out RGA) is
+      use Ada.Streams;
+      use CRDT.Serialization;
+      Kind      : Protocol_Kind;
+      Total     : Natural;
+      Num_Items : Natural;
+      Id        : Node_Id;
+      Len       : Natural;
+      Deleted   : Boolean;
+      Prev_Idx  : Natural := 0;
+      New_Idx   : Natural;
+      Ignore_CK : CRDT.Clocks.Clock_Kind;
+   begin
+      Read_Header (Stream, Kind, Total, Num_Items, Ignore_CK);
 
-        if Num_Items > Item.Item_Capacity then
-           raise Constraint_Error with
-             "RGA Read_RGA: item count" & Natural'Image (Num_Items) &
-             " exceeds capacity" & Natural'Image (Item.Item_Capacity);
-        end if;
+      if Num_Items > Item.Item_Capacity then
+         raise Constraint_Error with "RGA Read_RGA: item count" & Natural'Image (Num_Items) & " exceeds capacity" & Natural'Image (Item.Item_Capacity);
+      end if;
 
-        Item.Total := Total;
-        Item.Head := 0;
-        Item.Count := 0;
-        Item.Free := 0;
+      Item.Total := Total;
+      Item.Head := 0;
+      Item.Count := 0;
+      Item.Free := 0;
 
-        for J in 1 .. Num_Items loop
-           Node_Id'Read (Stream, Id);
-           Read_Natural (Kind, Stream, Len);
+      for J in 1 .. Num_Items loop
+         Node_Id'Read (Stream, Id);
+         Read_Natural (Kind, Stream, Len);
 
-          if Len > Max_Stride then
-             raise Constraint_Error with
-               "RGA Read_RGA: item len" & Natural'Image (Len) &
-               " exceeds Max_Stride" & Natural'Image (Max_Stride);
-          end if;
+         if Len > Max_Stride then
+            raise Constraint_Error with "RGA Read_RGA: item len" & Natural'Image (Len) & " exceeds Max_Stride" & Natural'Image (Max_Stride);
+         end if;
 
-          Boolean'Read (Stream, Deleted);
+         Boolean'Read (Stream, Deleted);
 
-          New_Idx := Alloc_Item (Item);
-          if New_Idx > 0 then
-             Item.Count := J;
-          end if;
+         New_Idx := Alloc_Item (Item);
+         if New_Idx > 0 then
+            Item.Count := J;
+         end if;
 
-          if New_Idx > 0 then
-             Item.Items (New_Idx).Id := Id;
-             Item.Items (New_Idx).Len := Len;
-             Item.Items (New_Idx).Deleted := Deleted;
-             for I in 1 .. Len loop
-                Element_Type'Read (Stream, Item.Items (New_Idx).Content (I));
-             end loop;
+         if New_Idx > 0 then
+            Item.Items (New_Idx).Id := Id;
+            Item.Items (New_Idx).Len := Len;
+            Item.Items (New_Idx).Deleted := Deleted;
+            for I in 1 .. Len loop
+               Element_Type'Read (Stream, Item.Items (New_Idx).Content (I));
+            end loop;
             if Prev_Idx = 0 then
                Item.Head := New_Idx;
             else

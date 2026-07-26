@@ -15,15 +15,13 @@ with Ada.Streams;
 --  Requirements traceability:
 --  - HLR-CORE-CLOCKS: Clock strategy interface
 --  - HLR-CORE-CLOCKS-MATRIX: Matrix clock operations
+
 generic
    Max_Replicas : Positive;
-package CRDT.Clocks.Matrix with
-  SPARK_Mode
-is
+package CRDT.Clocks.Matrix with SPARK_Mode is
 
    --  2D array: row = observer, column = observed replica.
-   type Clock_Time is array (1 .. Max_Replicas, 1 .. Max_Replicas) of Natural
-     with Default_Component_Value => 0;
+   type Clock_Time is array (1 .. Max_Replicas, 1 .. Max_Replicas) of Natural with Default_Component_Value => 0;
 
    --  Matrix less-than: all entries <= and at least one <.
    --  @param Left   Left clock.
@@ -53,9 +51,7 @@ is
    --  @param T    Matrix to modify.
    --  @param Row  Observer replica slot.
    --  @param Col  Observed replica slot.
-   procedure Increment (T    : in out Clock_Time;
-                        Row  : Positive;
-                        Col  : Positive);
+   procedure Increment (T : in out Clock_Time; Row : Positive; Col : Positive);
 
    --  Element-wise max merge of Source into Target.
    --  @param Target  Matrix to update.
@@ -65,15 +61,11 @@ is
    --  Serialise a matrix clock (all rows/cols, LEB128-encoded).
    --  @param Stream  Output stream.
    --  @param Item    Matrix to write.
-   procedure Write_Clock
-     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
-      Item   : Clock_Time);
+   procedure Write_Clock (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : Clock_Time);
 
    --  Deserialise a matrix clock from a stream.
    --  @param Stream  Input stream.
    --  @param Item    Decoded matrix.
-   procedure Read_Clock
-     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
-      Item   : out Clock_Time);
+   procedure Read_Clock (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : out Clock_Time);
 
 end CRDT.Clocks.Matrix;

@@ -10,7 +10,8 @@
 --    Cursor-based and for-of iteration
 --    Protocol-versioned serialization
 --    State vector delta sync
-package CRDT.Sequences with
-  SPARK_Mode
+
+package CRDT.Sequences
+  with SPARK_Mode
 is
 end CRDT.Sequences;

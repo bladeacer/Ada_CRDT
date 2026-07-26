@@ -5,11 +5,11 @@
 --
 --  All types in CRDT natively use bounded storage; this package
 --  provides convenient renamings and documentation.
-   with CRDT.Core;
-   with CRDT.Pn_Counters;
-   with CRDT.Lww_Element_Sets;
+with CRDT.Core;
+with CRDT.Pn_Counters;
+with CRDT.Lww_Element_Sets;
 
-   pragma SPARK_Mode;
+pragma SPARK_Mode;
 with CRDT.Rga;
 
 package CRDT.Bounded is
@@ -24,8 +24,7 @@ package CRDT.Bounded is
       type Element_Type is private;
       Max_Set_Size : Positive;
    package Bounded_LWW_Set is
-      package LWW_Pkg is new CRDT.Lww_Element_Sets
-        (Element_Type, Max_Set_Size);
+      package LWW_Pkg is new CRDT.Lww_Element_Sets (Element_Type, Max_Set_Size);
       subtype Set is LWW_Pkg.LWW_Element_Set (Max_Set_Size);
    end Bounded_LWW_Set;
 
@@ -36,12 +35,11 @@ package CRDT.Bounded is
    --  @formal Max_Replicas  Maximum distinct replicas for delta sync.
    generic
       type Element_Type is private;
-      Max_Items    : Positive;
-      Max_Stride   : Positive := 64;
+      Max_Items : Positive;
+      Max_Stride : Positive := 64;
       Max_Replicas : Positive := 32;
    package Bounded_RGA is
-      package RGA_Pkg is new CRDT.Rga
-        (Element_Type, Max_Items, Max_Stride, Max_Replicas);
+      package RGA_Pkg is new CRDT.Rga (Element_Type, Max_Items, Max_Stride, Max_Replicas);
       subtype Sequence is RGA_Pkg.RGA (Max_Items);
    end Bounded_RGA;
 

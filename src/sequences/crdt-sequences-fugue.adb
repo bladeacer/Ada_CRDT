@@ -3,8 +3,8 @@ with CRDT.Clocks;
 with CRDT.Core.LEB128;
 with CRDT.Serialization;
 
-package body CRDT.Sequences.Fugue with
-  SPARK_Mode => Off
+package body CRDT.Sequences.Fugue
+  with SPARK_Mode => Off
 is
 
    use type Core.Replica_Id;
@@ -20,9 +20,8 @@ is
       return Left.Replica < Right.Replica;
    end Id_Less;
 
-   function Id_Eq (Left, Right : Node_Id) return Boolean is
-     (Left.Replica = Right.Replica and then Left.Seq = Right.Seq
-      and then Left.Depth = Right.Depth);
+   function Id_Eq (Left, Right : Node_Id) return Boolean
+   is (Left.Replica = Right.Replica and then Left.Seq = Right.Seq and then Left.Depth = Right.Depth);
 
    function Alloc_Item (R : in out RGA) return Natural is
       Idx : Natural;
@@ -146,8 +145,10 @@ is
    end Element;
 
    -- Public ops
-   function Count (R : RGA) return Natural is (R.Count);
-   function Size (R : RGA) return Natural is (R.Total);
+   function Count (R : RGA) return Natural
+   is (R.Count);
+   function Size (R : RGA) return Natural
+   is (R.Total);
 
    function Get (R : RGA; Pos : Positive) return Element_Type is
       Idx : constant Natural := Inorder_Pos (R, Pos);
@@ -202,10 +203,7 @@ is
    begin
       for I in Values'Range loop
          declare
-            Bulk_Id : constant Node_Id :=
-              (Replica => Id.Replica,
-               Seq     => Id.Seq + (I - Values'First),
-               Depth   => Id.Depth);
+            Bulk_Id : constant Node_Id := (Replica => Id.Replica, Seq => Id.Seq + (I - Values'First), Depth => Id.Depth);
          begin
             Insert (R, Pos + (I - Values'First), Bulk_Id, Values (I));
          end;
@@ -280,10 +278,7 @@ is
          if L_Idx = 0 or R_Idx = 0 then
             return False;
          end if;
-         if Left.Items (L_Idx).Id /= Right.Items (R_Idx).Id
-           or else Left.Items (L_Idx).Value /= Right.Items (R_Idx).Value
-           or else Left.Items (L_Idx).Deleted /= Right.Items (R_Idx).Deleted
-         then
+         if Left.Items (L_Idx).Id /= Right.Items (R_Idx).Id or else Left.Items (L_Idx).Value /= Right.Items (R_Idx).Value or else Left.Items (L_Idx).Deleted /= Right.Items (R_Idx).Deleted then
             return False;
          end if;
          L_Idx := Inorder_Next (Left, L_Idx);
@@ -298,10 +293,7 @@ is
       null;
    end Compact;
 
-   procedure Write_RGA
-     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
-      Item   : RGA)
-   is
+   procedure Write_RGA (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : RGA) is
       use Ada.Streams;
       Cur : Natural := Inorder_First (Item, Item.Root);
    begin
@@ -316,32 +308,27 @@ is
       end loop;
    end Write_RGA;
 
-   procedure Read_RGA
-     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
-      Item   : out RGA)
-    is
-       use Ada.Streams;
-       use CRDT.Serialization;
-       Kind      : Protocol_Kind;
-       Total     : Natural;
-       Num_Items : Natural;
-       Id        : Node_Id;
-       Deleted   : Boolean;
-       Val       : Element_Type;
-       Ignore_CK : CRDT.Clocks.Clock_Kind;
-    begin
-       Read_Header (Stream, Kind, Total, Num_Items, Ignore_CK);
+   procedure Read_RGA (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : out RGA) is
+      use Ada.Streams;
+      use CRDT.Serialization;
+      Kind      : Protocol_Kind;
+      Total     : Natural;
+      Num_Items : Natural;
+      Id        : Node_Id;
+      Deleted   : Boolean;
+      Val       : Element_Type;
+      Ignore_CK : CRDT.Clocks.Clock_Kind;
+   begin
+      Read_Header (Stream, Kind, Total, Num_Items, Ignore_CK);
 
-       if Num_Items > Item.Capacity then
-          raise Constraint_Error with
-            "Fugue Read_RGA: item count" & Natural'Image (Num_Items) &
-            " exceeds capacity" & Natural'Image (Item.Capacity);
-       end if;
+      if Num_Items > Item.Capacity then
+         raise Constraint_Error with "Fugue Read_RGA: item count" & Natural'Image (Num_Items) & " exceeds capacity" & Natural'Image (Item.Capacity);
+      end if;
 
-       Item.Total := Total;
-       Item.Root := 0;
-       Item.Count := 0;
-       Item.Free := 0;
+      Item.Total := Total;
+      Item.Root := 0;
+      Item.Count := 0;
+      Item.Free := 0;
 
       for J in 1 .. Num_Items loop
          Node_Id'Read (Stream, Id);
