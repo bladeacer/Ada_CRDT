@@ -13,6 +13,14 @@ with CRDT.Clocks;
 --  Requirements traceability:
 --  - HLR-SYNC-STATE: State-based sync with vector clocks
 --  - HLR-SYNC-DELTA: Delta computation for partial state exchange
+--
+--  @formal Clock_Time  Timestamp type from a clock strategy.
+--  @formal "<"         Clock less-than comparison.
+--  @formal "="         Clock equality comparison.
+--  @formal ">"         Clock greater-than comparison.
+--  @formal Max         Element-wise maximum for merge.
+--  @formal Write_Clock Serialise a clock timestamp.
+--  @formal Read_Clock  Deserialise a clock timestamp.
 
 generic
    type Clock_Time is private;

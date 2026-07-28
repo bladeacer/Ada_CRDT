@@ -81,7 +81,9 @@ private
       Log  : Natural := 0;
    end record;
 
-   --  Expression function for efficient Now access.
+   --  Expression function for efficient Now access. See public spec for docs.
+   --  @param Clock  HLC instance to query.
+   --  @return  Current HLC timestamp.
    function Now (Clock : Instance) return HLC_Time
    is (HLC_Time'(Wall => Clock.Wall, Node => Clock.Node, Log => Clock.Log));
 

@@ -109,9 +109,16 @@ private
    function Can_Increment (C : PN_Counter; By : Counter_Range := 1) return Boolean
    is (C.Count < C.Max_Actors);
 
+   --  Expression function for SPARK visibility. See public spec for docs.
+   --  @param C   The counter.
+   --  @param By  Amount to decrement.
+   --  @return    Always True.
    function Can_Decrement (C : PN_Counter; By : Counter_Range := 1) return Boolean
    is (C.Count < C.Max_Actors);
 
+   --  Expression function for SPARK visibility. See public spec for docs.
+   --  @param C  The counter to query.
+   --  @return   Entry count, always <= Max_Actors.
    function Entry_Count (C : PN_Counter) return Natural
    is (C.Count);
 

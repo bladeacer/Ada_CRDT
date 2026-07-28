@@ -125,18 +125,34 @@ private
    --  removed between minor versions. Do not depend on them from
    --  external code unless you understand the implications.
 
+   --  Maximum of two Lamport timestamps.
+   --  @param Left   Left timestamp.
+   --  @param Right  Right timestamp.
+   --  @return The greater of the two timestamps.
    function Lamport_Max (Left, Right : Lamport_Time) return Lamport_Time
    with Post => (if Left > Right then Lamport_Max'Result = Left else Lamport_Max'Result = Right);
 
+   --  HLC strict less-than: compares Wall, then Log, then Node.
+   --  @param Left   Left HLC timestamp.
+   --  @param Right  Right HLC timestamp.
+   --  @return True if Left causally precedes Right.
    function HLC_Less (Left, Right : HLC_Time) return Boolean
    with
      Post =>
        (HLC_Less'Result
         = (if Left.Wall < Right.Wall then True elsif Left.Wall > Right.Wall then False elsif Left.Log < Right.Log then True elsif Left.Log > Right.Log then False else Left.Node < Right.Node));
 
+   --  HLC equality: all three fields must match.
+   --  @param Left   Left HLC timestamp.
+   --  @param Right  Right HLC timestamp.
+   --  @return True if timestamps are identical.
    function HLC_Eq (Left, Right : HLC_Time) return Boolean
    with Post => (HLC_Eq'Result = (Left.Wall = Right.Wall and then Left.Log = Right.Log and then Left.Node = Right.Node));
 
+   --  Maximum of two HLC timestamps using HLC_Less ordering.
+   --  @param Left   Left HLC timestamp.
+   --  @param Right  Right HLC timestamp.
+   --  @return The greater of the two timestamps.
    function HLC_Max (Left, Right : HLC_Time) return HLC_Time
    with Post => (if HLC_Less (Left, Right) then HLC_Max'Result = Right else HLC_Max'Result = Left);
 

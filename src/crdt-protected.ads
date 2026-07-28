@@ -112,8 +112,9 @@ is
          --  @param Source  Sequence to merge from.
          procedure Merge (Source : RGA_Pkg.RGA);
 
-         --  Compact tombstones.
-         procedure Compact;
+          --  Compact tombstones, reclaiming storage slots.
+          --  @field Shared_RGA_Obj  The thread-safe RGA to compact.
+          procedure Compact;
 
          --  Get element at position.
          --  @param Pos  1-based position.

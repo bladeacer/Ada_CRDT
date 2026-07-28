@@ -1,4 +1,8 @@
 [![crdt Alire crate badge](https://img.shields.io/endpoint?url=https://alire.ada.dev/badges/crdt.json)](https://alire.ada.dev/crates/crdt)
+![SPARK](docs/badges/spark.svg)
+![Tests](docs/badges/tests.svg)
+![DO-178C](docs/badges/do178c.svg)
+![docs](docs/badges/docs.svg)
 
 ![Ada CRDTs logo](./ada_logo.png)
 
@@ -351,6 +355,10 @@ counters, [Riak](https://riak.com) CRDTs
 - [Automerge](https://github.com/automerge/automerge)
 (Martin Kleppmann et al.): JSON CRDT
 - [Fugue](https://arxiv.org/abs/2305.00583): tree-based interleaving prevention
+
+Badges:
+
+- [adacovex](https://github.com/bladeacer/adacovex): Ada/SPARK code/proof coverage, SPARK level, DO-178C HAL status tool 
 
 ## License
 

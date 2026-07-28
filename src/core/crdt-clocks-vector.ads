@@ -15,6 +15,8 @@ with CRDT.Core;
 --
 --  Requirements traceability:
 --  - HLR-CORE-CLOCKS: Clock strategy interface
+--
+--  @formal Max_Replicas  Number of replica slots in the vector clock.
 
 generic
    Max_Replicas : Positive;

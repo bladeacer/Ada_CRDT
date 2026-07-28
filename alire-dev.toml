@@ -13,7 +13,7 @@
 # Only alire.toml is published to the community index.
 name = "crdt"
 description = "CRDT library for Ada/SPARK"
-long_description = """
+long-description = """
 CRDT (Conflict-Free Replicated Data Types) library for Ada/SPARK with SPARK
 Gold formal verification and DO-178C DAL-C targeting.
 

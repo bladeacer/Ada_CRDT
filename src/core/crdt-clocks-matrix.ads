@@ -15,6 +15,8 @@ with Ada.Streams;
 --  Requirements traceability:
 --  - HLR-CORE-CLOCKS: Clock strategy interface
 --  - HLR-CORE-CLOCKS-MATRIX: Matrix clock operations
+--
+--  @formal Max_Replicas  Number of replica slots in the matrix clock.
 
 generic
    Max_Replicas : Positive;

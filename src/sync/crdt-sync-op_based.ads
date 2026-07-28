@@ -96,9 +96,14 @@ private
    end record
    with Type_Invariant => GC <= Count and then Count <= Capacity;
 
-   --  Expression functions for SPARK visibility.
+   --  Expression function for SPARK visibility. See public spec for docs.
+   --  @param Log  Operation log to query.
+   --  @return Total number of entries written.
    function Log_Count (Log : Op_Log) return Natural
    is (Log.Count);
+   --  Expression function for SPARK visibility. See public spec for docs.
+   --  @param Log  Operation log to query.
+   --  @return Number of acknowledged (GC'd) entries.
    function Log_GC (Log : Op_Log) return Natural
    is (Log.GC);
 

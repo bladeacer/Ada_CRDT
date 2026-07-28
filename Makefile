@@ -1,4 +1,4 @@
-.PHONY: help all build run test prove doc api-docs compliance verify-report ascii-check fmt bump-version clean release publish demo
+.PHONY: help all build run test prove doc api-docs badges compliance verify-report ascii-check fmt bump-version clean release publish demo
 
 .DEFAULT_GOAL := help
 
@@ -13,6 +13,7 @@ help:
 	@echo '  prove         Run SPARK proofs (alr gnatprove)'
 	@echo '  verify-report Auto-generate VERIFICATION.md from gnatprove.out + test results'
 	@echo '  doc           Generate Markdown API docs (docs/api-docs/)'
+	@echo '  badges        Regenerate SVG badges via adacovex (docs/badges/)'
 	@echo '  compliance    HLR traceability check + auto-generate verification report'
 	@echo '  ascii-check   Enforce ASCII-only charset across all source files'
 	@echo '  fmt           Format all Ada sources with gnatformat (requires make dev-setup)'
@@ -240,6 +241,16 @@ verify-report:
 	fi; \
 	\
 	echo "=== Verification report complete ==="
+
+badges:
+	@echo "=== Generating adacovex badges ==="; \
+	if [ -x "../adacovex/bin/adacovex_main" ]; then \
+		cd ../adacovex && ./bin/adacovex_main --target=../Ada_CRDT --dal=C --emit-svg=../Ada_CRDT/docs/badges/; \
+	else \
+		echo "adacovex binary not found at ../adacovex/bin/adacovex_main"; \
+		echo "Build it first: cd ../adacovex && alr build"; \
+		exit 1; \
+	fi
 
 compliance: verify-report
 	@echo ""; \
