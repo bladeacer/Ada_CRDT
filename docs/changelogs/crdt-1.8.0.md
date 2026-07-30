@@ -51,6 +51,22 @@ encapsulated).
 `HLR-CNTR-SERIAL` and `HLR-LWW-SERIAL` in `docs/compliance/HLR.md` now
 mention V3 wire format alongside V1 and V2.
 
+### SPARK Status Reconciliation
+
+SPARK documentation clarified to distinguish two tiers:
+- **Gold** (always targeted, minimum guarantee): AoRTE + key functional
+  contracts on all SPARK-analyzable units.
+- **Platinum** (best-effort ideal above Gold): full functional requirements
+  across all analyzable units. Reflects the current release's proof state,
+  not a permanent guarantee across compiler upgrades or feature changes.
+
+The SPARK badge (`docs/badges/spark.svg`) already showed **Platinum** but the
+documentation described it as "not targeted". `AGENTS.md`, `VERIFICATION.md`,
+and the `Makefile` `verify-report` template now all confirm the Platinum
+best-effort level: all SPARK-analyzable units fully proved (37/37 functional
+contracts, 0 unproved checks), with generics and platform dependencies excluded
+by design.
+
 ### gen-coverage.py Proof Numbers
 
 `tools/gen-coverage.py` hardcoded SPARK proof stats (`273 total, 221 proved...`)

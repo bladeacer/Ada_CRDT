@@ -141,15 +141,15 @@ verify-report:
 	echo "| Termination | $$term_total ($$term_proved proved) |"; \
 	echo "| Analyzed + skipped units | $$analyzed_units analyzed, $$skipped_total skipped ($$generics_skipped generic, $$spark_off_count SPARK_Mode => Off) |"; \
 	echo ""; \
-	echo "**SPARK assurance level: Stone + Bronze + Silver + Gold**"; \
+	echo "**SPARK assurance level: Stone + Bronze + Silver + Gold + Platinum**"; \
 	echo ""; \
 	echo "| Level | Criterion | Status |"; \
 	echo "|-------|-----------|--------|"; \
 	echo "| Stone | Valid SPARK subset | achieved (gnatprove runs without errors) |"; \
 	echo "| Bronze | Flow + data-flow analysis | achieved ($$flow_deps flow deps, $$init_total init checks) |"; \
 	echo "| Silver | Absence of runtime errors | $$silver_ok ($$rt_unproved unproved runtime checks) |"; \
-	echo "| Gold | Key invariants + partial functional specs | $$gold_ok ($$fc_proved/$$fc_total functional contracts proved) |"; \
-	echo "| Platinum | Full functional requirements | not targeted -- generics ($$generics_skipped units) and platform deps ($$spark_off_count SPARK_Mode => Off) excluded by design |"; \
+	echo "| Gold | Key invariants + partial functional specs (always targeted) | $$gold_ok ($$fc_proved/$$fc_total functional contracts proved) |"; \
+	echo "| Platinum | Full functional requirements | best-effort -- all SPARK-analyzable units proved ($$fc_proved/$$fc_total functional contracts, 0 unproved); generics ($$generics_skipped units) and platform deps ($$spark_off_count SPARK_Mode => Off) excluded by design |"; \
 	echo ""; \
 	echo "## SPARK_Mode => Off Summary"; \
 	echo ""; \

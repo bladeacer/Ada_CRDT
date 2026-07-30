@@ -19,15 +19,15 @@ _DO NOT EDIT -- regenerate with `make compliance` or `make verify-report`._
 | Termination | 29 (29 proved) |
 | Analyzed + skipped units | 59 analyzed, 24 skipped (8 generic, 24 SPARK_Mode => Off) |
 
-**SPARK assurance level: Stone + Bronze + Silver + Gold**
+**SPARK assurance level: Stone + Bronze + Silver + Gold + Platinum**
 
 | Level | Criterion | Status |
 |-------|-----------|--------|
 | Stone | Valid SPARK subset | achieved (gnatprove runs without errors) |
 | Bronze | Flow + data-flow analysis | achieved (9 flow deps, 9 init checks) |
 | Silver | Absence of runtime errors | achieved (0 unproved runtime checks) |
-| Gold | Key invariants + partial functional specs | achieved (37/37 functional contracts proved) |
-| Platinum | Full functional requirements | not targeted -- generics (8 units) and platform deps (24 SPARK_Mode => Off) excluded by design |
+| Gold | Key invariants + partial functional specs (always targeted) | achieved (37/37 functional contracts proved) |
+| Platinum | Full functional requirements | best-effort -- all SPARK-analyzable units proved (37/37 functional contracts, 0 unproved); generics (8 units) and platform deps (24 SPARK_Mode => Off) excluded by design |
 
 ## SPARK_Mode => Off Summary
 

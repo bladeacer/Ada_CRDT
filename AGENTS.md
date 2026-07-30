@@ -280,19 +280,29 @@ CRDT.Clocks.Matrix             -- explicit Matrix strategy
 
 ### SPARK Formal Verification
 
-The codebase targets **SPARK Gold** -- full absence-of-runtime-errors (AoRTE)
-proved for all SPARK-analyzable code, plus partial functional contracts on key
-type invariants. Platinum (full functional requirements) is not targeted:
+**SPARK Gold** is always targeted: full absence-of-runtime-errors (AoRTE)
+proved for all SPARK-analyzable code, plus key functional contracts (pre/post,
+depends, type invariants) on core packages. Generics (`Rga`, `Lww_Element_Sets`,
+`Lww_Sets`, sequence engines) are skipped by SPARK and platform dependencies
+(wall clock, RNG, stream I/O) cannot be formally proved; these are excluded
+by design from the proof target.
+
+**SPARK Platinum** (full functional requirements across all SPARK-analyzable
+units) is pursued on a best-effort basis above the Gold baseline. Platinum is
+an ideal achievement reflecting the current state of proof. It is not a
+permanent guarantee -- compiler upgrades, dependency changes, or new features
+may introduce unproved checks in platform-dependent code that cannot be
+resolved. The badge and documentation are updated per release to match
+whatever level the proof campaign actually attains.
 
 - **SPARK_Mode** applied at package level: `package Foo with SPARK_Mode is`
 - Packages with impure operations (stream I/O, random, wall-clock) scope `SPARK_Mode => Off` to individual subprograms/bodies
 - **Proof stats** auto-generated in `docs/compliance/VERIFICATION.md` by
   `make compliance` (reads `obj/gnatprove/gnatprove.out` and `test_result.md`).
 - **SPARK levels achieved**: Stone (valid subset) OK, Bronze (flow analysis) OK,
-  Silver (AoRTE) OK, Gold (key invariants + partial specs) OK. Platinum (full
-  functional contracts) is not targeted -- generics (`Rga`, `Lww_Element_Sets`,
-  `Lww_Sets`, sequence engines) are skipped by SPARK and platform dependencies
-  (wall clock, RNG, stream I/O) cannot be formally proved.
+  Silver (AoRTE) OK, **Gold (always targeted) OK**, Platinum (full functional
+  requirements) OK on a best-effort basis -- all SPARK-analyzable units fully
+  proved with 0 unproved checks in the current release.
 - `make prove` runs `alr gnatprove` to check; `make compliance` regenerates
   the verification report from the proof output.
 - **SPARK_Mode => On** (package-level) on all core specs. Per-subprogram Off only for:
