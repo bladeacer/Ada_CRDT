@@ -15,9 +15,15 @@ is
    end Merge;
 
    function Compute_Delta (Local : Replica_State; Remote_SV : Clock_Time) return Natural is
-      pragma Unreferenced (Local, Remote_SV);
+      Result : Natural := 0;
    begin
-      return 0;
+      for I in 1 .. Local.Max_Replicas loop
+         if Local.Clocks (I) > Remote_SV then
+            Result := Result + 1;
+         end if;
+         pragma Loop_Invariant (Result <= I);
+      end loop;
+      return Result;
    end Compute_Delta;
 
    function Is_Ahead (SV : Clock_Time; TS : Clock_Time) return Boolean is

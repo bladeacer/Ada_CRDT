@@ -52,10 +52,11 @@ package CRDT.Sync.State_Based.Clocked with SPARK_Mode is
    procedure Merge (Local : in out Replica_State; Remote : Replica_State)
    with Depends => (Local => (Local, Remote));
 
-   --  Compute delta: how many items the remote is missing (stub).
+   --  Compute delta: how many local clocks are ahead of the remote's clock.
+   --  Counts entries in Local.Clocks that exceed Remote_SV.
    --  @param Local      Local replica state.
-   --  @param Remote_SV  Remote state vector (Clock_Time per replica).
-   --  @return  Count of items the remote peer is behind (always 0 currently).
+   --  @param Remote_SV  Remote clock timestamp.
+   --  @return  Count of replicas where local clock is ahead of remote.
    function Compute_Delta (Local : Replica_State; Remote_SV : Clock_Time) return Natural;
 
    --  Check if a state vector has advanced past a given clock timestamp.

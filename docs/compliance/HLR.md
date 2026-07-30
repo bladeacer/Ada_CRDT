@@ -100,8 +100,8 @@ Merge two PN-Counter states by element-wise max of per-replica entries.
 ---
 
 ## HLR-CNTR-SERIAL  --  PN-Counter Serialisation
-Round-trip PN-Counter through V1 (Natural'Read/Write) and V2 (LEB128)
-wire formats with auto-detection on read.
+Round-trip PN-Counter through V1 (Natural'Read/Write), V2 (LEB128),
+and V3 (clock-kind-prefixed LEB128) wire formats with auto-detection on read.
 
 **Source:** `src/crdt-pn_counters.ads`
 
@@ -150,8 +150,8 @@ For each entry keep the version with the highest Lamport timestamp.
 ---
 
 ## HLR-LWW-SERIAL  --  LWW Set Serialisation
-Round-trip LWW Element Set through V1 (Natural'Read/Write) and V2
-(LEB128) wire formats with auto-detection on read.
+Round-trip LWW Element Set through V1 (Natural'Read/Write), V2 (LEB128),
+and V3 (clock-kind-prefixed LEB128) wire formats with auto-detection on read.
 
 **Source:** `src/crdt-lww_element_sets.ads`
 
@@ -201,7 +201,7 @@ state vector against the current replica's log length.
 ---
 
 ## HLR-PROTO-HEADER  --  Protocol Header Read
-Read and auto-detect V1 vs V2 wire format from the first 4 header bytes.
+Read and auto-detect V1, V2, and V3 wire format from the first header bytes.
 Extract Total and Count fields using the correct decoder.
 
 **Source:** `src/serialization/crdt-serialization.ads`

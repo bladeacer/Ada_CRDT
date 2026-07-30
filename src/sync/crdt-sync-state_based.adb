@@ -15,9 +15,18 @@ is
    end Merge;
 
    function Compute_Delta (Local : Replica_State; Remote_SV : Core.VTime) return Natural is
-      pragma Unreferenced (Local, Remote_SV);
+      Result : Natural := 0;
    begin
-      return 0;
+      if Local.SV'Length /= Remote_SV'Length or else Remote_SV'First /= Local.SV'First then
+         return 0;
+      end if;
+      for I in Local.SV'Range loop
+         if Local.SV (I) > Remote_SV (I) then
+            Result := Result + 1;
+         end if;
+         pragma Loop_Invariant (Result <= (I - Local.SV'First + 1));
+      end loop;
+      return Result;
    end Compute_Delta;
 
    function Is_Ahead (SV : Core.VTime; TS : Core.Lamport_Time) return Boolean is

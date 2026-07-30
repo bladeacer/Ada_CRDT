@@ -9,8 +9,7 @@ with CRDT.Core;
 with CRDT.Pn_Counters;
 with CRDT.Lww_Element_Sets;
 
-pragma SPARK_Mode;
-with CRDT.Rga;
+with CRDT.Rga with SPARK_Mode;
 
 package CRDT.Bounded is
 

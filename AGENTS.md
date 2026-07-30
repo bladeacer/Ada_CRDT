@@ -95,7 +95,7 @@ Ada_CRDT/
 - Primary build tool: `alr build` / `alr run` / `alr gnatprove`
 - Dependencies managed in `alire.toml` (currently: `gnatprove`, `gnatdoc_bin`, `gnatformat_bin`)
 - GNAT toolchain managed automatically by Alire
-- Version: defined in `alire.toml` (currently 1.7.1), mirrors in `index/ad/crdt/` and `alire/releases/`
+- Version: defined in `alire.toml` (currently 1.8.0), mirrors in `index/ad/crdt/` and `alire/releases/`
 
 ### Compiler Flags (from `crdt.gpr`)
 
@@ -196,8 +196,7 @@ Specific guarantees:
 - New features are additive (new packages, new generic formal parameters with defaults)
 - Existing generics (`Lww_Element_Sets`, `Rga`, `Rgas`, `Protected`, `Bounded`) keep their exact signatures
 - Clock strategies default to Vector (introduced in 1.7.0) -- Lamport remains available
-- Wire protocol is versioned (`Protocol_Version` constant). V1 readers can read V2 data.
-  V2 readers can read V3 data (Lamport fields + clock type extension).
+- Wire protocol is versioned (`Protocol_Version` constant). V2 readers can read V1 data (backward compatible).
   V3 readers can read all V1, V2, and V3 data.
 - Breaking changes require a major version bump
 - Internal interfaces (see table above) are excluded from the guarantee

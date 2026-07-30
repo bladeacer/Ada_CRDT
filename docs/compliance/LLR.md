@@ -99,7 +99,7 @@ Proof: Loop Invariant, Postcondition, Functional Contract
 
 | Subprogram | Contract Summary |
 |---|---|
-| `Core.Protocol_Version` | Constant = 2 |
+| `Core.Protocol_Version` | Constant = 3 |
 | `Core.LEB128.Encode` | Encodes Nat as LEB128 bytes |
 | `Core.LEB128.Decode` | Decodes LEB128 bytes to Nat |
 
@@ -279,9 +279,11 @@ Proof: Postcondition
 **Parent HLR:** HLR-PROTO-HEADER
 
 | Subprogram | Contract Summary |
-|---|---|
-| `Serialization.Read_Header` | Detects V1/V2 from first 4 bytes |
-| `Serialization.Migrate_Header` | Reads source header, writes V2 header |
+|---|---|---|
+| `Serialization.Read_Header` | Detects V1/V2/V3 from first header bytes |
+| `Serialization.Write_Header_V3` | Writes V3 header (version + clock kind + LEB128 fields) |
+| `Serialization.Migrate_Header_To_V3` | Reads V1/V2/V3 header, writes V3 header |
+| `Serialization.Migrate_Header` | Reads source header (V1/V2), writes V2 header |
 
 Proof: Verified by round-trip tests
 
@@ -293,7 +295,7 @@ Proof: Verified by round-trip tests
 
 | Subprogram | Contract Summary |
 |---|---|
-| `Serialization.Read_Natural` | Dispatches to Natural'Read or LEB128 |
+| `Serialization.Read_Natural` | Dispatches to Natural'Read (V1) or LEB128 (V2/V3) |
 
 Proof: Verified by round-trip tests
 
