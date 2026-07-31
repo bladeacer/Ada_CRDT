@@ -19,7 +19,7 @@ with `alire-dev.toml` for the duration of the command, and restored on exit.
 
 ### Deterministic Verification Reports
 
-`make verify-report` now uses `sha256sum` of input artifacts (`gnatprove.out`
+`make verify-report` now uses `sha256sum` of input artifacts (`obj/gnatprove/gnatprove.out`
 + `test_result.md`) instead of `$(date)`, so repeated runs produce identical
 output as long as the inputs haven't changed.
 

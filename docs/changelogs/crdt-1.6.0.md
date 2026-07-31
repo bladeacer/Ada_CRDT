@@ -28,7 +28,7 @@ bounded for-loops, and unrolled decode path  --  **all 46 checks proved**
 Decode was restructured from a 5-iteration loop to explicit nested if-then-else
 to eliminate loop invariants. Encode uses a byte-by-byte copy loop with
 `'Succ`-based index advancement to avoid overflow checks on 64-bit arithmetic.
-See `crdt-core-leb128.adb` for details.
+See `src/core/crdt-core-leb128.adb` for details.
 
 Stream-based wrappers remain `SPARK_Mode => Off`. Buffer-based primitives are
 now fully provably safe, completing the serialization proof goals.

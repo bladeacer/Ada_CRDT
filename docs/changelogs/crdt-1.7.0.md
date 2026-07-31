@@ -61,7 +61,7 @@ with the 'C' key. Status bar displays the active strategy.
 ### SPARK Proof Expansion
 
 - **273 checks** (up from 269): 221 proved, 5 justified, 0 unproved.
-- `crdt-serialization.ads`, `crdt-serialization-legacy.ads`: package-level `SPARK_Mode => On` (was Off), per-subprogram Off for stream I/O.
+- `src/serialization/crdt-serialization.ads`, `src/serialization/crdt-serialization-legacy.ads`: package-level `SPARK_Mode => On` (was Off), per-subprogram Off for stream I/O.
 - Private helpers (`Lamport_Max`, `HLC_Less`, `HLC_Eq`, `HLC_Max`) moved to private section of `CRDT.Core`.
 
 ## Documentation and Tooling

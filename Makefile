@@ -265,6 +265,7 @@ compliance: verify-report
 	srcdir=src; \
 	\
 	hlr_file="docs/compliance/HLR.md"; \
+	psac_file="docs/compliance/PSAC.md"; \
 	llr_file="docs/compliance/LLR.md"; \
 	trace_file="docs/compliance/TRACE.md"; \
 	index_file="docs/compliance/index.md"; \
@@ -306,7 +307,7 @@ compliance: verify-report
 		errors=$$((errors + 1)); \
 	fi; \
 	\
-	for f in "$$llr_file" "$$trace_file" "$$index_file"; do \
+	for f in "$$psac_file" "$$llr_file" "$$trace_file" "$$index_file"; do \
 		if [ -f "$$f" ]; then echo "  $$f -- present"; \
 		else echo "  $$f -- MISSING"; errors=$$((errors + 1)); fi; \
 	done; \

@@ -36,13 +36,13 @@ the code has been `3` since 1.7.0. Updated to `Constant = 3`.
 
 ### SPARK_Mode Annotation
 
-`crdt-bounded.ads` used `pragma SPARK_Mode;` (bare pragma form) while every
+`src/core/crdt-bounded.ads` used `pragma SPARK_Mode;` (bare pragma form) while every
 other spec uses `with SPARK_Mode` (aspect form). Changed to the aspect form
 for consistency.
 
 ### Unused Import Removed
 
-Removed `with Ada.Calendar;` from `crdt-sync-state_based.ads` -- the package
+Removed `with Ada.Calendar;` from `src/sync/crdt-sync-state_based.ads` -- the package
 does not directly reference any `Ada.Calendar` entity (HLC internals are
 encapsulated).
 
@@ -61,7 +61,7 @@ SPARK documentation clarified to distinguish two tiers:
   not a permanent guarantee across compiler upgrades or feature changes.
 
 The SPARK badge (`docs/badges/spark.svg`) already showed **Platinum** but the
-documentation described it as "not targeted". `AGENTS.md`, `VERIFICATION.md`,
+documentation described it as "not targeted". `AGENTS.md`, `docs/compliance/VERIFICATION.md`,
 and the `Makefile` `verify-report` template now all confirm the Platinum
 best-effort level: all SPARK-analyzable units fully proved (37/37 functional
 contracts, 0 unproved checks), with generics and platform dependencies excluded

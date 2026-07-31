@@ -56,6 +56,7 @@ Ada_CRDT/
 |-- docs/
 |   |-- compliance/            # DO-178C artifacts
 |   |   |-- index.md           # Overview, DAL-C scope
+|   |   |-- PSAC.md            # Plan for Software Aspects of Certification (hand-written)
 |   |   |-- HLR.md             # High-Level Requirements (hand-written)
 |   |   |-- LLR.md             # Low-Level Requirements (hand-written)
 |   |   |-- TRACE.md           # Bidirectional traceability (auto-populated, manually verified)
@@ -150,11 +151,11 @@ Ada_CRDT/
   inconvenience but NOT injury or loss of life.
 - 24 High-Level Requirements (HLRs) tracked via `-- - HLR-XXXX` tags in `.ads`
   files. Validated by `make compliance` which checks:
-  - Every source HLR tag has a corresponding entry in `HLR.md`
-  - Every HLR in `HLR.md` has a matching source tag (no orphans)
-  - All compliance artifacts (`HLR.md`, `LLR.md`, `TRACE.md`, `index.md`) exist
+  - Every source HLR tag has a corresponding entry in `docs/compliance/HLR.md`
+  - Every HLR in `docs/compliance/HLR.md` has a matching source tag (no orphans)
+  - All compliance artifacts (`docs/compliance/PSAC.md`, `docs/compliance/HLR.md`, `docs/compliance/LLR.md`, `docs/compliance/TRACE.md`, `docs/compliance/index.md`) exist
 - DAL-C implications for this codebase:
-  - Requirements are stated (HLR.md) and refined (LLR.md) but DO NOT require
+  - Requirements are stated (`docs/compliance/HLR.md`) and refined (`docs/compliance/LLR.md`) but DO NOT require
     the full independence of DAL-A (separate verification team).
   - SPARK proof is accepted as verification evidence (replaces unit testing for
     proved subprograms).
@@ -209,7 +210,7 @@ fully documented with a migration guide.
 ### Naming
 
 - **Ada packages**: `CRDT.Sync.State_Based`, `CRDT.Clocks.Lamport` -- hierarchical, PascalCase
-- **Source files**: snake_case matching the child package: `crdt-sync-state_based.ads`
+- **Source files**: snake_case matching the child package: `src/sync/crdt-sync-state_based.ads`
 - **Types**: PascalCase: `Replica_Id`, `Lamport_Time`, `LWW_Element_Set`
 - **Subprograms**: PascalCase: `Add`, `Contains`, `Merge`, `Write_LWW_Element_Set`
 - **Functions should describe what they return**, procedures describe what they do
@@ -251,7 +252,7 @@ CRDT.Clocks.Matrix             -- explicit Matrix strategy
 - Each test module corresponds to a category (basic, clocks, rga_features, etc.)
 - Test modules follow the pattern: `procedure Run (RunR : in out Runner)`
 - Tests use `RunR.Check (Condition, "Message")` -- no external test framework
-- Main harness: `test_crdt.adb` orchestrates all test modules
+- Main harness: `src/tests/test_crdt.adb` orchestrates all test modules
 - Test results written to both stdout and `test_result.md`
 - **10290 tests** across 9 categories:
   - Basic: PN+LWW+RGA+RGAs (34 tests)
@@ -319,11 +320,12 @@ whatever level the proof campaign actually attains.
 ### DO-178C Artifacts
 
 Artifacts in `docs/compliance/`:
-- `HLR.md` -- High-Level Requirements with source file references
-- `LLR.md` -- Low-Level Requirements mapped to Ada subprograms
-- `TRACE.md` -- Bidirectional traceability matrix
-- `VERIFICATION.md` -- SPARK proof stats + test results
-- `index.md` -- Overview, DAL-C scope
+- `docs/compliance/PSAC.md` -- Plan for Software Aspects of Certification (DAL-C scope, lifecycle, verification strategy)
+- `docs/compliance/HLR.md` -- High-Level Requirements with source file references
+- `docs/compliance/LLR.md` -- Low-Level Requirements mapped to Ada subprograms
+- `docs/compliance/TRACE.md` -- Bidirectional traceability matrix
+- `docs/compliance/VERIFICATION.md` -- SPARK proof stats + test results
+- `docs/compliance/index.md` -- Overview, DAL-C scope
 - HLR tags in source: `--  - HLR-XXXX: description` (comments in `.ads` file headers)
 - New features must add corresponding HLRs/LLRs and HLR tags
 - `make compliance` must pass before release
