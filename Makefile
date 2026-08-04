@@ -40,7 +40,11 @@ run: build
 test: run
 
 prove:
-	alr gnatprove
+	@if [ ! -x "../adacovex/bin/adacovex" ]; then \
+		echo "Building adacovex first (binary not found)..."; \
+		$(MAKE) -C ../adacovex build || { echo "adacovex build failed"; exit 1; }; \
+	fi; \
+	SOURCE_DATE_EPOCH=$$(git show -s --format=%ct HEAD 2>/dev/null || echo 0) ../adacovex/bin/adacovex prove --target=. --no-svg
 
 # --- Auto-generate verification report from build artifacts ---
 # Single source of truth: obj/gnatprove/gnatprove.out (SPARK proof) and
@@ -250,13 +254,11 @@ verify-report:
 
 badges:
 	@echo "=== Generating adacovex badges ==="; \
-	if [ -x "../adacovex/bin/adacovex_main" ]; then \
-		cd ../adacovex && ./bin/adacovex_main --target=../Ada_CRDT --dal=C --emit-svg=../Ada_CRDT/docs/badges/; \
-	else \
-		echo "adacovex binary not found at ../adacovex/bin/adacovex_main"; \
-		echo "Build it first: cd ../adacovex && alr build"; \
-		exit 1; \
-	fi
+	if [ ! -x "../adacovex/bin/adacovex" ]; then \
+		echo "Building adacovex first (binary not found)..."; \
+		$(MAKE) -C ../adacovex build || { echo "adacovex build failed"; exit 1; }; \
+	fi; \
+	SOURCE_DATE_EPOCH=$$(git show -s --format=%ct HEAD 2>/dev/null || echo 0) ../adacovex/bin/adacovex --target=. --dal=C --emit-svg=docs/badges/;
 
 compliance: verify-report
 	@echo ""; \
