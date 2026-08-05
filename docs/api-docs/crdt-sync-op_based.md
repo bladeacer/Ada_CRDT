@@ -91,9 +91,9 @@ end record;
 
 | Parameter | Description |
 |-----------|-------------|
-| `Log` | Operation log to query. |
+| `Log` |  Operation log to query. |
 
-**Returns:** Total number of entries written.
+**Returns:**  Number of acknowledged (GC'd) entries.
 
 ### function Log_GC (Log : CRDT.Sync.Op_Based.Op_Log) return Standard.Natural `[Post]`
 

@@ -23,8 +23,7 @@ Requirements traceability:
 ### type Clock_Time
 
 ```ada
-type Clock_Time is array (1 .. Max_Replicas, 1 .. Max_Replicas) of Natural
-with Default_Component_Value => 0;
+type Clock_Time is array (1 .. Max_Replicas, 1 .. Max_Replicas) of Natural with Default_Component_Value => 0;
 ```
 
 ## Functions

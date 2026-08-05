@@ -19,8 +19,7 @@ Thread-safe protected-object wrappers for CRDT types. Multiple tasks can concurr
 #### procedure Increment
 
 ```ada
-      procedure Increment (By    : Natural := 1;
-                            Actor : Core.Replica_Id);
+      procedure Increment (By : Natural := 1; Actor : Core.Replica_Id);
 ```
 
 Increment the counter for the given actor.
@@ -33,8 +32,7 @@ Increment the counter for the given actor.
 #### procedure Decrement
 
 ```ada
-      procedure Decrement (By    : Natural := 1;
-                            Actor : Core.Replica_Id);
+      procedure Decrement (By : Natural := 1; Actor : Core.Replica_Id);
 ```
 
 Decrement the counter for the given actor.

@@ -34,8 +34,7 @@ type Replica_Id is new Positive;
 ### type VTime
 
 ```ada
-type VTime is array (Positive range <>) of Natural with
-Default_Component_Value => 0;
+type VTime is array (Positive range <>) of Natural with Default_Component_Value => 0;
 ```
 
 ## Functions

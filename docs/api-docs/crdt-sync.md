@@ -9,6 +9,5 @@ Sync layer interface for CRDT. Provides two transport strategies: * State_Based 
 ### type State_Vector
 
 ```ada
-type State_Vector is array (Positive range <>) of Natural with
-Default_Component_Value => 0;
+type State_Vector is array (Positive range <>) of Natural with Default_Component_Value => 0;
 ```

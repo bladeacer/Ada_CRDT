@@ -34,7 +34,7 @@ end record;
 | `Local` | Local replica state. |
 | `Remote_SV` | Remote state vector. |
 
-**Returns:** Count of items the remote peer is behind.
+**Returns:** Count of replicas where local is ahead of remote.
 
 ### function Create (Config : CRDT.Sync.State_Based.Sync_Config) return CRDT.Sync.State_Based.Replica_State
 

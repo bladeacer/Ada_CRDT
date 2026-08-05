@@ -22,8 +22,8 @@ subtype RGA_Entry is RGA_Pkg.RGA (Max_RGA_Size);
 
 ```ada
 type RGAs (Count : Positive) is record
-A    : RGA_Array (1 .. Count);
-Sz   : Natural := 0;
+A  : RGA_Array (1 .. Count);
+Sz : Natural := 0;
 end record;
 ```
 

@@ -40,11 +40,11 @@ end record;
 
 ```ada
 type RGA (Capacity : Positive) is record
-Items   : Item_Array (1 .. Capacity);
-Head    : Natural := 0;
-Count   : Natural := 0;
-Free    : Natural := 0;
-Total   : Natural := 0;
+Items : Item_Array (1 .. Capacity);
+Head  : Natural := 0;
+Count : Natural := 0;
+Free  : Natural := 0;
+Total : Natural := 0;
 end record;
 ```
 

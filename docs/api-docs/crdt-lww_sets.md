@@ -40,20 +40,26 @@ end record;
 
 | Parameter | Description |
 |-----------|-------------|
-| `S` |  |
+| `S` | The set to query. |
+
+**Returns:** Add entry count, always <= Capacity.
 
 ### function Contains (S : CRDT.Lww_Sets.LWW_Clocked_Set; E : CRDT.Lww_Sets.Element_Type) return Standard.Boolean
 
 | Parameter | Description |
 |-----------|-------------|
-| `E` |  |
-| `S` |  |
+| `E` | Element to look up. |
+| `S` | The set to query. |
+
+**Returns:** True if element is considered present.
 
 ### function Remove_Count (S : CRDT.Lww_Sets.LWW_Clocked_Set) return Standard.Natural `[Post]`
 
 | Parameter | Description |
 |-----------|-------------|
-| `S` |  |
+| `S` | The set to query. |
+
+**Returns:** Remove entry count, always <= Capacity.
 
 ## Procedures
 
@@ -61,44 +67,44 @@ end record;
 
 | Parameter | Description |
 |-----------|-------------|
-| `E` |  |
-| `S` |  |
-| `TS` |  |
+| `E` | Element to add. |
+| `S` | The set to modify. |
+| `TS` | Clock timestamp for this add operation. |
 
 ### procedure Clear (S : CRDT.Lww_Sets.LWW_Clocked_Set) `[Post]` `[Depends]`
 
 | Parameter | Description |
 |-----------|-------------|
-| `S` |  |
+| `S` | The set to clear. |
 
 ### procedure Merge (Target : CRDT.Lww_Sets.LWW_Clocked_Set; Source : CRDT.Lww_Sets.LWW_Clocked_Set) `[Post]` `[Depends]`
 
 | Parameter | Description |
 |-----------|-------------|
-| `Source` |  |
-| `Target` |  |
+| `Source` | The set to merge from. |
+| `Target` | The set to merge into. |
 
 ### procedure Read_LWW_Clocked_Set (Stream : Ada.Streams.Root_Stream_Type; Item : CRDT.Lww_Sets.LWW_Clocked_Set)
 
 | Parameter | Description |
 |-----------|-------------|
-| `Item` |  |
-| `Stream` |  |
+| `Item` | Set to populate from stream data. |
+| `Stream` | Input stream to read from. |
 
 ### procedure Remove (S : CRDT.Lww_Sets.LWW_Clocked_Set; E : CRDT.Lww_Sets.Element_Type; TS : CRDT.Lww_Sets.Clock_Time) `[Post]` `[Depends]`
 
 | Parameter | Description |
 |-----------|-------------|
-| `E` |  |
-| `S` |  |
-| `TS` |  |
+| `E` | Element to remove. |
+| `S` | The set to modify. |
+| `TS` | Clock timestamp for this remove operation. |
 
 ### procedure Write_LWW_Clocked_Set (Stream : Ada.Streams.Root_Stream_Type; Item : CRDT.Lww_Sets.LWW_Clocked_Set)
 
 | Parameter | Description |
 |-----------|-------------|
-| `Item` |  |
-| `Stream` |  |
+| `Item` | Set to serialize. |
+| `Stream` | Output stream to write to. |
 
 ---
 

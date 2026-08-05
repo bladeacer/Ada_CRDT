@@ -47,9 +47,9 @@ end record;
 | Parameter | Description |
 |-----------|-------------|
 | `Local` | Local replica state. |
-| `Remote_SV` | Remote state vector (Clock_Time per replica). |
+| `Remote_SV` | Remote clock timestamp. |
 
-**Returns:** Count of items the remote peer is behind (always 0 currently).
+**Returns:** Count of replicas where local clock is ahead of remote.
 
 ### function Create (Config : CRDT.Sync.State_Based.Clocked.Sync_Config) return CRDT.Sync.State_Based.Clocked.Replica_State
 

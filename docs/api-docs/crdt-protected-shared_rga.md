@@ -19,9 +19,7 @@ Thread-safe RGA (chunk-based Yjs engine).
 #### procedure Insert
 
 ```ada
-         procedure Insert (Pos   : Positive;
-                            Id    : RGA_Pkg.Node_Id;
-                            Value : Element_Type);
+         procedure Insert (Pos : Positive; Id : RGA_Pkg.Node_Id; Value : Element_Type);
 ```
 
 Insert element at position.
@@ -35,9 +33,7 @@ Insert element at position.
 #### procedure Insert_Bulk
 
 ```ada
-         procedure Insert_Bulk (Pos    : Positive;
-                                 Id     : RGA_Pkg.Node_Id;
-                                 Values : RGA_Pkg.Element_Array);
+         procedure Insert_Bulk (Pos : Positive; Id : RGA_Pkg.Node_Id; Values : RGA_Pkg.Element_Array);
 ```
 
 Insert multiple contiguous elements.
@@ -78,7 +74,7 @@ Merge another sequence's state into this one.
          procedure Compact;
 ```
 
-Compact tombstones.
+Compact tombstones, reclaiming storage slots. @field Shared_RGA_Obj  The thread-safe RGA to compact.
 
 #### function Get
 

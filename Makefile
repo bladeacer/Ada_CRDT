@@ -35,7 +35,7 @@ build:
 	rm -f $$tmpfile; exit $$result
 
 run: build
-	alr run
+	./test_crdt
 
 test: run
 

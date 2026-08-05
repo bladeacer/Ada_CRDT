@@ -19,8 +19,7 @@ Thread-safe LWW-Element-Set.
 #### procedure Add
 
 ```ada
-         procedure Add (E  : Element_Type;
-                         TS : Core.Lamport_Time);
+         procedure Add (E : Element_Type; TS : Core.Lamport_Time);
 ```
 
 Add an element with the given timestamp.
@@ -33,8 +32,7 @@ Add an element with the given timestamp.
 #### procedure Remove
 
 ```ada
-         procedure Remove (E  : Element_Type;
-                            TS : Core.Lamport_Time);
+         procedure Remove (E : Element_Type; TS : Core.Lamport_Time);
 ```
 
 Remove an element with the given timestamp.
