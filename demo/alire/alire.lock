@@ -8,7 +8,7 @@ crate = "crdt"
 fulfilment = "linked"
 pinned = false
 transitivity = "direct"
-versions = "^1.7.0"
+versions = "^1.8.0"
 [solution.state.link]
 lockfiled = true
 path = ".."

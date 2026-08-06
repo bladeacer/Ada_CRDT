@@ -537,4 +537,4 @@ demo:
 
 clean:
 	alr clean
-	rm -rf obj/ lib/ docs/
+	rm -rf obj/ lib/ docs/badges/ docs/api-docs/ docs/compliance/VERIFICATION.md docs/compliance/TRACE.md
