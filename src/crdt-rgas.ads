@@ -56,6 +56,9 @@ private
    end record
    with Type_Invariant => Sz <= Count;
 
+   --  Expression function for SPARK visibility. See public spec for docs.
+   --  @param RS  The collection of RGAs.
+   --  @return    Current count of appended entries.
    function Size (RS : RGAs) return Natural
    is (RS.Sz);
 

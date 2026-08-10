@@ -107,9 +107,15 @@ private
    end record
    with Type_Invariant => Add_Size <= Capacity and then Remove_Size <= Capacity;
 
+   --  Expression function for SPARK visibility. See public spec for docs.
+   --  @param S  The set to query.
+   --  @return   Add entry count, always <= Capacity.
    function Add_Count (S : LWW_Clocked_Set) return Natural
    is (S.Add_Size);
 
+   --  Expression function for SPARK visibility. See public spec for docs.
+   --  @param S  The set to query.
+   --  @return   Remove entry count, always <= Capacity.
    function Remove_Count (S : LWW_Clocked_Set) return Natural
    is (S.Remove_Size);
 

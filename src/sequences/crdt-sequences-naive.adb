@@ -15,7 +15,10 @@ is
    function Id_Eq (Left, Right : Node_Id) return Boolean
    is (Left.Replica = Right.Replica and then Left.Seq = Right.Seq);
 
-   procedure Alloc_Item (R : in out RGA; Idx : out Natural) with Post => Idx in 0 .. R.Capacity is
+   procedure Alloc_Item (R : in out RGA; Idx : out Natural)
+     with Pre => R.Free in 0 .. R.Capacity and then R.Count <= R.Capacity,
+          Post => Idx in 0 .. R.Capacity
+   is
    begin
       if R.Free /= 0 then
          Idx := R.Free;
@@ -39,6 +42,7 @@ is
 
    procedure New_Item (R : in out RGA; Id : Node_Id; Val : Element_Type; Idx : out Natural) with Post => Idx in 0 .. R.Capacity is
    begin
+      pragma Assert (R.Free in 0 .. R.Capacity);
       Alloc_Item (R, Idx);
       if Idx > 0 then
          R.Items (Idx).Id := Id;

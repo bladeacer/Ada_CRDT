@@ -106,6 +106,10 @@ private
    end record
    with Type_Invariant => Count <= Max_Actors;
 
+   --  Expression function for SPARK visibility. See public spec for docs.
+   --  @param C   The counter.
+   --  @param By  Amount to increment.
+   --  @return    Always True.
    function Can_Increment (C : PN_Counter; By : Counter_Range := 1) return Boolean
    is (C.Count < C.Max_Actors);
 
