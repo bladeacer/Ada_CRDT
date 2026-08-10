@@ -66,7 +66,7 @@ type Clock_Time is array (1 .. Max_Replicas, 1 .. Max_Replicas) of Natural with 
 
 ## Procedures
 
-### procedure Increment (T : CRDT.Clocks.Matrix.Clock_Time; Row : Standard.Positive; Col : Standard.Positive)
+### procedure Increment (T : CRDT.Clocks.Matrix.Clock_Time; Row : Standard.Positive; Col : Standard.Positive) `[Pre]`
 
 | Parameter | Description |
 |-----------|-------------|

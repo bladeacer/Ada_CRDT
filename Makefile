@@ -1,4 +1,4 @@
-.PHONY: help all build run test prove doc api-docs badges compliance verify-report ascii-check fmt bump-version clean release publish demo
+.PHONY: help all build run test prove coverage-gate doc api-docs badges compliance verify-report ascii-check fmt bump-version clean release publish demo
 
 .DEFAULT_GOAL := help
 
@@ -11,6 +11,7 @@ help:
 	@echo '  run           Build and run tests'
 	@echo '  test          Alias for run (fuzz tests included in suite)'
 	@echo '  prove         Run SPARK proofs (alr gnatprove)'
+	@echo '  coverage-gate Gate docstring coverage vs the last release tag (adacovex --coverage-delta)'
 	@echo '  verify-report Auto-generate VERIFICATION.md from gnatprove.out + test results'
 	@echo '  doc           Generate Markdown API docs (docs/api-docs/)'
 	@echo '  badges        Regenerate SVG badges via adacovex (docs/badges/)'
@@ -45,6 +46,19 @@ prove:
 		$(MAKE) -C ../adacovex build || { echo "adacovex build failed"; exit 1; }; \
 	fi; \
 	SOURCE_DATE_EPOCH=$$(git show -s --format=%ct HEAD 2>/dev/null || echo 0) ../adacovex/bin/adacovex prove --target=. --no-svg
+
+coverage-gate:
+	@if [ ! -x "../adacovex/bin/adacovex" ]; then \
+		echo "Building adacovex first (binary not found)..."; \
+		$(MAKE) -C ../adacovex build || { echo "adacovex build failed"; exit 1; }; \
+	fi; \
+	prev=$$(git tag --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$$' | head -1); \
+	if [ -z "$$prev" ]; then \
+		echo "  No release tag found; nothing to gate against."; \
+		exit 0; \
+	fi; \
+	echo "=== Coverage delta gate: current tree vs $$prev ==="; \
+	SOURCE_DATE_EPOCH=$$(git show -s --format=%ct HEAD 2>/dev/null || echo 0) ../adacovex/bin/adacovex --target=. --coverage-delta="$$prev"
 
 # --- Auto-generate verification report from build artifacts ---
 # Single source of truth: obj/gnatprove/gnatprove.out (SPARK proof) and

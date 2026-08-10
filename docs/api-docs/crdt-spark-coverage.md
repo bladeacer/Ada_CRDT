@@ -57,11 +57,7 @@ All core specs use `SPARK_Mode` (On) at package level. The following packages ha
 
 ### `src/core/crdt-hlc.adb`
 
-- Line 43: `function Create (Node : Core.Replica_Id) return Instance with SPARK_Mode => Off is`
-
-- Line 52: `procedure Tick (Clock : in out Instance) with SPARK_Mode => Off is`
-
-- Line 67: `procedure Recv (Clock : in out Instance; Remote : HLC_Time) with SPARK_Mode => Off is`
+- Line 98: `function Current_Time return Ada.Calendar.Time with SPARK_Mode => Off is`
 
 
 ### `src/crdt-lww_element_sets.adb`
@@ -73,9 +69,9 @@ All core specs use `SPARK_Mode` (On) at package level. The following packages ha
 
 ### `src/crdt-lww_sets.adb`
 
-- Line 102: `procedure Write_LWW_Clocked_Set (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : LWW_Clocked_Set) with SPARK_Mode => Off is`
+- Line 99: `procedure Write_LWW_Clocked_Set (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : LWW_Clocked_Set) with SPARK_Mode => Off is`
 
-- Line 115: `procedure Read_LWW_Clocked_Set (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : out LWW_Clocked_Set) with SPARK_Mode => Off is`
+- Line 112: `procedure Read_LWW_Clocked_Set (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : out LWW_Clocked_Set) with SPARK_Mode => Off is`
 
 
 ### `src/crdt-pn_counters.adb`
@@ -97,7 +93,10 @@ All core specs use `SPARK_Mode` (On) at package level. The following packages ha
 
 ### `src/sequences/crdt-sequences-naive.adb`
 
-- Line 7: `with SPARK_Mode => Off`
+- Line 347: `procedure Write_RGA (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : RGA) with SPARK_Mode => Off is`
+  - Justification: Serialization
+
+- Line 365: `procedure Read_RGA (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : out RGA) with SPARK_Mode => Off is`
 
 
 ### `src/sequences/crdt-sequences-yjs.adb`
@@ -123,15 +122,10 @@ All core specs use `SPARK_Mode` (On) at package level. The following packages ha
 - Line 93: `with SPARK_Mode => Off;`
 
 
-### `src/sync/crdt-sync-state_based.adb`
-
-- Line 5: `function Create (Config : Sync_Config) return Replica_State with SPARK_Mode => Off is`
-
-
 ## Public vs Private Interface Count
 
 - Public subprograms: **170**
-- Private subprograms: **15**
+- Private subprograms: **18**
 
 ### Per-package breakdown
 
@@ -161,14 +155,15 @@ All core specs use `SPARK_Mode` (On) at package level. The following packages ha
   - `src/sync/crdt-sync-state_based-clocked.ads`: 7 subprograms
   - `src/sync/crdt-sync-state_based.ads`: 4 subprograms
   - `src/sync/crdt-sync.ads`: 0 subprograms
+  - `src/tests/proof_instantiations.ads`: 0 subprograms
 
 #### Private
   - `src/crdt-lww_element_sets.ads`: 0 subprograms
-  - `src/crdt-lww_sets.ads`: 0 subprograms
+  - `src/crdt-lww_sets.ads`: 2 subprograms
   - `src/crdt-pn_counters.ads`: 5 subprograms
   - `src/crdt-protected.ads`: 0 subprograms
   - `src/crdt-rga.ads`: 0 subprograms
-  - `src/crdt-rgas.ads`: 0 subprograms
+  - `src/crdt-rgas.ads`: 1 subprograms
   - `src/crdt.ads`: 0 subprograms
   - `src/core/crdt-bounded.ads`: 0 subprograms
   - `src/core/crdt-clocks-lamport.ads`: 0 subprograms
@@ -188,6 +183,7 @@ All core specs use `SPARK_Mode` (On) at package level. The following packages ha
   - `src/sync/crdt-sync-state_based-clocked.ads`: 0 subprograms
   - `src/sync/crdt-sync-state_based.ads`: 0 subprograms
   - `src/sync/crdt-sync.ads`: 0 subprograms
+  - `src/tests/proof_instantiations.ads`: 0 subprograms
 
 ## Unproved Status
 

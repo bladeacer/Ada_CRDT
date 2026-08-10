@@ -2,7 +2,7 @@ package body CRDT.Sync.State_Based
   with SPARK_Mode => On
 is
 
-   function Create (Config : Sync_Config) return Replica_State with SPARK_Mode => Off is
+   function Create (Config : Sync_Config) return Replica_State is
    begin
       return Replica_State'(Max_Replicas => Config.Max_Replicas, HLC_Clock => CRDT.HLC.Create (Config.HLC_Node), SV => (others => 0));
    end Create;

@@ -53,7 +53,8 @@ package CRDT.Clocks.Matrix with SPARK_Mode is
    --  @param T    Matrix to modify.
    --  @param Row  Observer replica slot.
    --  @param Col  Observed replica slot.
-   procedure Increment (T : in out Clock_Time; Row : Positive; Col : Positive);
+   procedure Increment (T : in out Clock_Time; Row : Positive; Col : Positive)
+   with Pre => Row in Clock_Time'Range (1) and then Col in Clock_Time'Range (2) and then T (Row, Col) < Natural'Last;
 
    --  Element-wise max merge of Source into Target.
    --  @param Target  Matrix to update.

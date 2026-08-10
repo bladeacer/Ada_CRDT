@@ -70,7 +70,7 @@ end record;
 
 ## Procedures
 
-### procedure Merge (Local : CRDT.Sync.State_Based.Clocked.Replica_State; Remote : CRDT.Sync.State_Based.Clocked.Replica_State) `[Depends]`
+### procedure Merge (Local : CRDT.Sync.State_Based.Clocked.Replica_State; Remote : CRDT.Sync.State_Based.Clocked.Replica_State) `[Pre]` `[Depends]`
 
 | Parameter | Description |
 |-----------|-------------|

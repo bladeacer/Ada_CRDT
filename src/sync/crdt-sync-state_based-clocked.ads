@@ -47,10 +47,11 @@ package CRDT.Sync.State_Based.Clocked with SPARK_Mode is
    function Create (Config : Sync_Config) return Replica_State;
 
    --  Merge remote state into local state using element-wise Max.
+   --  Both states must use the same Max_Replicas configuration.
    --  @param Local   Local state to update.
    --  @param Remote  Remote state to merge from.
    procedure Merge (Local : in out Replica_State; Remote : Replica_State)
-   with Depends => (Local => (Local, Remote));
+   with Pre => Local.Max_Replicas = Remote.Max_Replicas, Depends => (Local => (Local, Remote));
 
    --  Compute delta: how many local clocks are ahead of the remote's clock.
    --  Counts entries in Local.Clocks that exceed Remote_SV.

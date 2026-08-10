@@ -65,7 +65,7 @@ subtype Clock_Time is CRDT.Core.VTime (1 .. Max_Replicas);
 
 ## Procedures
 
-### procedure Increment (T : CRDT.Clocks.Vector.Clock_Time; Idx : Standard.Positive)
+### procedure Increment (T : CRDT.Clocks.Vector.Clock_Time; Idx : Standard.Positive) `[Pre]`
 
 | Parameter | Description |
 |-----------|-------------|

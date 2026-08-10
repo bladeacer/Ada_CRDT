@@ -4,6 +4,15 @@
 [solution.context]
 solved = true
 [[solution.state]]
+crate = "covex"
+fulfilment = "linked"
+pinned = false
+transitivity = "direct"
+versions = "*"
+[solution.state.link]
+lockfiled = true
+path = "../adacovex"
+[[solution.state]]
 crate = "gnatdoc_bin"
 fulfilment = "solved"
 pinned = false

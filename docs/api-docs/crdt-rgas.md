@@ -2,7 +2,7 @@
 
 Container for managing multiple RGA instances. Provides Append to collect replicas and Merge_All to converge all into the first entry.
 
-> **Note:** 7 public item(s) shown below; 1 private internal item(s) are in the `private` section.
+> **Note:** 8 public item(s) shown below; 1 private internal item(s) are in the `private` section.
 
 ## Types
 
@@ -29,7 +29,7 @@ end record;
 
 ## Functions
 
-### function Get (RS : CRDT.Rgas.RGAs; Index : Standard.Positive) return CRDT.Rgas.RGA_Entry
+### function Get (RS : CRDT.Rgas.RGAs; Index : Standard.Positive) return CRDT.Rgas.RGA_Entry `[Pre]`
 
 | Parameter | Description |
 |-----------|-------------|
@@ -46,9 +46,17 @@ end record;
 
 **Returns:** Current count of appended entries.
 
+### function Size (RS : CRDT.Rgas.RGAs) return Standard.Natural
+
+| Parameter | Description |
+|-----------|-------------|
+| `RS` | The collection of RGAs. |
+
+**Returns:** Current count of appended entries.
+
 ## Procedures
 
-### procedure Append (RS : CRDT.Rgas.RGAs; R : CRDT.Rgas.RGA_Entry)
+### procedure Append (RS : CRDT.Rgas.RGAs; R : CRDT.Rgas.RGA_Entry) `[Pre]`
 
 | Parameter | Description |
 |-----------|-------------|

@@ -52,7 +52,8 @@ package CRDT.Clocks.Vector with SPARK_Mode is
    --  Increment the counter for a given replica slot.
    --  @param T    Clock to modify.
    --  @param Idx  Replica slot index to increment.
-   procedure Increment (T : in out Clock_Time; Idx : Positive);
+   procedure Increment (T : in out Clock_Time; Idx : Positive)
+   with Pre => Idx in Clock_Time'Range and then T (Idx) < Natural'Last;
 
    --  Element-wise max merge of Source into Target.
    --  @param Target  Clock to update.

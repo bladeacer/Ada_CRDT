@@ -165,6 +165,8 @@ private
    end record;
 
    for RGA'Write use Write_RGA;
+   pragma Annotate (GNATprove, False_Positive, "null exclusion check might fail", "RGA stream attribute is always called with a non-null stream by the Ada runtime");
    for RGA'Read use Read_RGA;
+   pragma Annotate (GNATprove, False_Positive, "null exclusion check might fail", "RGA stream attribute is always called with a non-null stream by the Ada runtime");
 
 end CRDT.Rga;

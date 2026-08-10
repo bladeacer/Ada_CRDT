@@ -1,13 +1,17 @@
-# Development manifest for local SPARK proof, doc generation, and formatting.
-# Copy this over alire.toml during development:
+# Development manifest for local SPARK proof, doc generation, formatting, and
+# adacovex tooling. Copy this over alire.toml during development:
 #   make dev-setup
 # Restore the clean publishing manifest with:
 #   make prod-setup
 #
-# This manifest includes gnatprove, gnatdoc_bin, and gnatformat_bin which are
-# required for `make prove`, `make doc`, and `make fmt` but MUST NOT appear in
-# the published Alire community index (they are build tools, not library
-# dependencies).
+# This manifest includes gnatprove, gnatdoc_bin, gnatformat_bin, and covex
+# (adacovex) which are required for `make prove`, `make doc`, `make fmt`, and
+# `make coverage-gate` but MUST NOT appear in the published Alire community
+# index (they are build tools, not library dependencies).
+#
+# covex is pinned to the sibling adacovex working tree (../adacovex) so the
+# local dev version (which implements --coverage-delta) is used. The pin is
+# dev-only; it never ships in the published alire.toml.
 #
 # The clean alire.toml is what gets committed and published.
 # Only alire.toml is published to the community index.
@@ -42,3 +46,7 @@ executables = ["test_crdt"]
 gnatprove = "^15.1.0"
 gnatdoc_bin = "^26.0.0"
 gnatformat_bin = "^26.0.0"
+covex = "*"
+
+[[pins]]
+covex = { path = "../adacovex" }

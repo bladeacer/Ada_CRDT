@@ -3,6 +3,7 @@
 ## Packages
 
 - [CRDT](crdt.md)
+- [Proof_Instantiations](proof_instantiations.md)
 - [CRDT.Bounded](crdt-bounded.md)
 - [CRDT.Clocks](crdt-clocks.md)
 - [CRDT.Core](crdt-core.md)

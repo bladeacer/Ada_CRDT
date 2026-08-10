@@ -1,5 +1,6 @@
 with CRDT.Test_Support; use CRDT.Test_Support;
 with Ada.Text_IO;       use Ada.Text_IO;
+with Proof_Instantiations;
 with Test_Basic;
 with Test_Clocks;
 with Test_Lattice;

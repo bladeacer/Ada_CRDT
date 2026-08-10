@@ -2,11 +2,6 @@ package body CRDT.Rgas
   with SPARK_Mode
 is
 
-   function Size (RS : RGAs) return Natural is
-   begin
-      return RS.Sz;
-   end Size;
-
    function Get (RS : RGAs; Index : Positive) return RGA_Entry is
    begin
       return RS.A (Index);
@@ -24,8 +19,11 @@ is
          return;
       end if;
       for I in 2 .. RS.Sz loop
-         RGA_Pkg.Merge (RS.A (1), RS.A (I));
-         pragma Loop_Invariant (I <= RS.Sz + 1);
+         declare
+            Src : constant RGA_Entry := RS.A (I);
+         begin
+            RGA_Pkg.Merge (RS.A (1), Src);
+         end;
       end loop;
    end Merge_All;
 

@@ -35,12 +35,14 @@ package CRDT.Rgas with SPARK_Mode is
    --  @param RS     The collection.
    --  @param Index  1-based index.
    --  @return RGA entry at that index.
-   function Get (RS : RGAs; Index : Positive) return RGA_Entry;
+   function Get (RS : RGAs; Index : Positive) return RGA_Entry
+   with Pre => Index <= RS.Count;
 
    --  Append an RGA to the collection.
    --  @param RS  The collection to append to.
    --  @param R   RGA entry to append.
-   procedure Append (RS : in out RGAs; R : RGA_Entry);
+   procedure Append (RS : in out RGAs; R : RGA_Entry)
+   with Pre => Size (RS) < RS.Count;
 
    --  Merge all RGAs into the first entry (index 1).
    --  @param RS  The collection whose entries are merged.
@@ -51,6 +53,10 @@ private
    type RGAs (Count : Positive) is record
       A  : RGA_Array (1 .. Count);
       Sz : Natural := 0;
-   end record;
+   end record
+   with Type_Invariant => Sz <= Count;
+
+   function Size (RS : RGAs) return Natural
+   is (RS.Sz);
 
 end CRDT.Rgas;

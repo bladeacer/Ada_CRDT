@@ -63,26 +63,26 @@ package CRDT.Lww_Sets with SPARK_Mode is
    --  @param E   Element to add.
    --  @param TS  Clock timestamp for this add operation.
    procedure Add (S : in out LWW_Clocked_Set; E : Element_Type; TS : Clock_Time)
-   with Post => Add_Count (S) <= S.Capacity, Depends => (S => (S, E, TS));
+   with Post => Add_Count (S) <= S.Capacity and then Remove_Count (S) <= S.Capacity, Depends => (S => (S, E, TS));
 
    --  Remove an element with the given clock timestamp.
    --  @param S   The set to modify.
    --  @param E   Element to remove.
    --  @param TS  Clock timestamp for this remove operation.
    procedure Remove (S : in out LWW_Clocked_Set; E : Element_Type; TS : Clock_Time)
-   with Post => Add_Count (S) <= S.Capacity, Depends => (S => (S, E, TS));
+   with Post => Add_Count (S) <= S.Capacity and then Remove_Count (S) <= S.Capacity, Depends => (S => (S, E, TS));
 
    --  Merge another set's add/remove entries into this set.
    --  For each entry, keeps the higher timestamp.
    --  @param Target  The set to merge into.
    --  @param Source  The set to merge from.
    procedure Merge (Target : in out LWW_Clocked_Set; Source : LWW_Clocked_Set)
-   with Post => Add_Count (Target) <= Target.Capacity, Depends => (Target => (Target, Source));
+   with Post => Add_Count (Target) <= Target.Capacity and then Remove_Count (Target) <= Target.Capacity, Depends => (Target => (Target, Source));
 
    --  Remove all entries, resetting to empty state.
    --  @param S  The set to clear.
    procedure Clear (S : in out LWW_Clocked_Set)
-   with Post => Add_Count (S) = 0 and then Remove_Count (S) = 0, Depends => (S => null);
+   with Post => Add_Count (S) = 0 and then Remove_Count (S) = 0, Depends => (S => S);
 
    --  Serialize the clocked set to a stream (V3: LEB128 + clock kind byte).
    --  @param Stream  Output stream to write to.
@@ -104,6 +104,13 @@ private
       Add_Size     : Natural := 0;
       Remove_Array : Timestamp_Array (1 .. Capacity);
       Remove_Size  : Natural := 0;
-   end record;
+   end record
+   with Type_Invariant => Add_Size <= Capacity and then Remove_Size <= Capacity;
+
+   function Add_Count (S : LWW_Clocked_Set) return Natural
+   is (S.Add_Size);
+
+   function Remove_Count (S : LWW_Clocked_Set) return Natural
+   is (S.Remove_Size);
 
 end CRDT.Lww_Sets;

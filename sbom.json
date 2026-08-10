@@ -3,9 +3,9 @@
   "specVersion": "1.5",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-08-06T13:11:14",
+    "timestamp": "2026-08-07T10:26:23",
     "tools": [
-      {"vendor": "bladeacer", "name": "adacovex", "version": "1.6.0"}
+      {"vendor": "bladeacer", "name": "adacovex", "version": "1.7.0"}
     ],
     "component": {
       "type": "application",
@@ -15,7 +15,7 @@
       "purl": "pkg:alire/crdt@1.8.0",
       "licenses": [{"license": {"id": "MIT"}}],
       "description": "CRDT library for Ada/SPARK",
-      "properties": [{"name": "adacovex:proof_level", "value": "Platinum"}, {"name": "adacovex:dal_target", "value": "DAL-C"}]
+      "properties": [{"name": "adacovex:proof_level", "value": "Gold"}, {"name": "adacovex:dal_target", "value": "DAL-C"}]
       }
   },
   "components": [

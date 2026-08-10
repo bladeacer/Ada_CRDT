@@ -4,7 +4,7 @@ Generic Last-Writer-Wins Element Set over any clock strategy.
 Stores (element, Clock_Time) pairs for add and remove sets.
 An element is present if its add-timestamp exceeds its remove-timestamp.
 
-> **Note:** 12 public item(s) shown below; 1 private internal item(s) are in the `private` section.
+> **Note:** 14 public item(s) shown below; 1 private internal item(s) are in the `private` section.
 
 ## Types
 
@@ -44,6 +44,14 @@ end record;
 
 **Returns:** Add entry count, always <= Capacity.
 
+### function Add_Count (S : CRDT.Lww_Sets.LWW_Clocked_Set) return Standard.Natural `[Post]`
+
+| Parameter | Description |
+|-----------|-------------|
+| `S` | The set to query. |
+
+**Returns:** Add entry count, always <= Capacity.
+
 ### function Contains (S : CRDT.Lww_Sets.LWW_Clocked_Set; E : CRDT.Lww_Sets.Element_Type) return Standard.Boolean
 
 | Parameter | Description |
@@ -52,6 +60,14 @@ end record;
 | `S` | The set to query. |
 
 **Returns:** True if element is considered present.
+
+### function Remove_Count (S : CRDT.Lww_Sets.LWW_Clocked_Set) return Standard.Natural `[Post]`
+
+| Parameter | Description |
+|-----------|-------------|
+| `S` | The set to query. |
+
+**Returns:** Remove entry count, always <= Capacity.
 
 ### function Remove_Count (S : CRDT.Lww_Sets.LWW_Clocked_Set) return Standard.Natural `[Post]`
 

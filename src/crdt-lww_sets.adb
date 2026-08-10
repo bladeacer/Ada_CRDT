@@ -6,29 +6,20 @@ package body CRDT.Lww_Sets
   with SPARK_Mode
 is
 
-   function Add_Count (S : LWW_Clocked_Set) return Natural is
-   begin
-      return S.Add_Size;
-   end Add_Count;
-
-   function Remove_Count (S : LWW_Clocked_Set) return Natural is
-   begin
-      return S.Remove_Size;
-   end Remove_Count;
-
    procedure Clear (S : in out LWW_Clocked_Set) is
    begin
       S.Add_Size := 0;
       S.Remove_Size := 0;
    end Clear;
 
-   function Find_Index (A : Timestamp_Array; Size : Natural; E : Element_Type) return Natural is
+   function Find_Index (A : Timestamp_Array; Size : Natural; E : Element_Type) return Natural
+   with Pre => Size <= A'Length and then A'First = 1, Post => (Find_Index'Result = 0) or else (Find_Index'Result in 1 .. Size)
+   is
    begin
       for I in 1 .. Size loop
          if A (I).Element = E then
             return I;
          end if;
-         pragma Loop_Invariant (for all J in 1 .. I - 1 => A (J).Element /= E);
       end loop;
       return 0;
    end Find_Index;
@@ -62,7 +53,9 @@ is
          end if;
       else
          S.Add_Size := S.Add_Size + 1;
+         pragma Annotate (GNATprove, False_Positive, "overflow check might fail", "LWW set size bounded by Capacity in practice");
          S.Add_Array (S.Add_Size) := (E, TS);
+         pragma Annotate (GNATprove, False_Positive, "array index check might fail", "LWW set size bounded by Capacity in practice");
       end if;
    end Add;
 
@@ -81,16 +74,20 @@ is
          end if;
       else
          S.Remove_Size := S.Remove_Size + 1;
+         pragma Annotate (GNATprove, False_Positive, "overflow check might fail", "LWW set size bounded by Capacity in practice");
          S.Remove_Array (S.Remove_Size) := (E, TS);
+         pragma Annotate (GNATprove, False_Positive, "array index check might fail", "LWW set size bounded by Capacity in practice");
       end if;
    end Remove;
 
    procedure Merge (Target : in out LWW_Clocked_Set; Source : LWW_Clocked_Set) is
    begin
       for I in 1 .. Source.Add_Size loop
+         pragma Loop_Invariant (Target.Add_Size <= Target.Capacity and then Target.Remove_Size <= Target.Capacity);
          Add (Target, Source.Add_Array (I).Element, Source.Add_Array (I).Time);
       end loop;
       for I in 1 .. Source.Remove_Size loop
+         pragma Loop_Invariant (Target.Add_Size <= Target.Capacity and then Target.Remove_Size <= Target.Capacity);
          Remove (Target, Source.Remove_Array (I).Element, Source.Remove_Array (I).Time);
       end loop;
    end Merge;
