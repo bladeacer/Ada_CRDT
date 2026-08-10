@@ -1,4 +1,4 @@
-.PHONY: help all build run test prove coverage-gate doc api-docs badges compliance verify-report ascii-check fmt bump-version clean release publish demo
+.PHONY: help all build run test prove coverage-gate doc api-docs badges compliance verify-report ascii-check fmt bump-version clean release publish demo covex
 
 .DEFAULT_GOAL := help
 
@@ -10,7 +10,8 @@ help:
 	@echo '  build         Build the project and tests (alr build)'
 	@echo '  run           Build and run tests'
 	@echo '  test          Alias for run (fuzz tests included in suite)'
-	@echo '  prove         Run SPARK proofs (alr gnatprove)'
+	@echo '  covex         Ensure covex (adacovex) dev dependency is built'
+	@echo '  prove         Run SPARK proofs via adacovex (resolves covex dev dep)'
 	@echo '  coverage-gate Gate docstring coverage vs the last release tag (adacovex --coverage-delta)'
 	@echo '  verify-report Auto-generate VERIFICATION.md from gnatprove.out + test results'
 	@echo '  doc           Generate Markdown API docs (docs/api-docs/)'
@@ -40,25 +41,60 @@ run: build
 
 test: run
 
-prove:
-	@if [ ! -x "../adacovex/bin/adacovex" ]; then \
-		echo "Building adacovex first (binary not found)..."; \
-		$(MAKE) -C ../adacovex build || { echo "adacovex build failed"; exit 1; }; \
-	fi; \
-	SOURCE_DATE_EPOCH=$$(git show -s --format=%ct HEAD 2>/dev/null || echo 0) ../adacovex/bin/adacovex prove --target=. --no-svg
+# covex (adacovex) is a dev dependency (see alire-dev.toml, pinned to
+# ../adacovex). Resolve it through `alr exec` so the dev-pinned binary is used,
+# and build it via `alr build` on first use if the binary is missing.
+# alire only reads alire.toml, so if the clean publishing manifest is active
+# (no covex), alire-dev.toml is swapped in temporarily and restored afterwards
+# (same pattern as the fmt target).
+define swap-in-covex
+	if ! grep -q 'covex' alire.toml 2>/dev/null; then \
+		cp alire.toml alire.toml.covexbak; \
+		cp alire-dev.toml alire.toml; \
+		restore=1; \
+	else \
+		restore=0; \
+	fi;
+endef
 
-coverage-gate:
-	@if [ ! -x "../adacovex/bin/adacovex" ]; then \
-		echo "Building adacovex first (binary not found)..."; \
-		$(MAKE) -C ../adacovex build || { echo "adacovex build failed"; exit 1; }; \
-	fi; \
+define swap-out-covex
+	if [ "$$restore" -eq 1 ]; then \
+		mv alire.toml.covexbak alire.toml; \
+	fi;
+endef
+
+covex:
+	@if ! alr exec -- adacovex --help >/dev/null 2>&1; then \
+		echo "Building covex dev dependency (adacovex)..."; \
+		$(swap-in-covex) \
+		alr build; \
+		status=$$?; \
+		$(swap-out-covex) \
+		if [ "$$status" -ne 0 ]; then \
+			echo "covex build failed"; \
+			exit 1; \
+		fi; \
+	fi
+
+prove: covex
+	@$(swap-in-covex) \
+	SOURCE_DATE_EPOCH=$$(git show -s --format=%ct HEAD 2>/dev/null || echo 0) alr exec -- adacovex prove --target=. --no-svg; \
+	status=$$?; \
+	$(swap-out-covex) \
+	exit $$status
+
+coverage-gate: covex
+	@$(swap-in-covex) \
 	prev=$$(git tag --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$$' | head -1); \
 	if [ -z "$$prev" ]; then \
 		echo "  No release tag found; nothing to gate against."; \
 		exit 0; \
 	fi; \
 	echo "=== Coverage delta gate: current tree vs $$prev ==="; \
-	SOURCE_DATE_EPOCH=$$(git show -s --format=%ct HEAD 2>/dev/null || echo 0) ../adacovex/bin/adacovex --target=. --coverage-delta="$$prev"
+	SOURCE_DATE_EPOCH=$$(git show -s --format=%ct HEAD 2>/dev/null || echo 0) alr exec -- adacovex --target=. --coverage-delta="$$prev"; \
+	status=$$?; \
+	$(swap-out-covex) \
+	exit $$status
 
 # --- Auto-generate verification report from build artifacts ---
 # Single source of truth: obj/gnatprove/gnatprove.out (SPARK proof) and
@@ -266,13 +302,13 @@ verify-report:
 	\
 	echo "=== Verification report complete ==="
 
-badges:
+badges: covex
 	@echo "=== Generating adacovex badges ==="; \
-	if [ ! -x "../adacovex/bin/adacovex" ]; then \
-		echo "Building adacovex first (binary not found)..."; \
-		$(MAKE) -C ../adacovex build || { echo "adacovex build failed"; exit 1; }; \
-	fi; \
-	SOURCE_DATE_EPOCH=$$(git show -s --format=%ct HEAD 2>/dev/null || echo 0) ../adacovex/bin/adacovex --target=. --dal=C --emit-svg=docs/badges/;
+	$(swap-in-covex) \
+	SOURCE_DATE_EPOCH=$$(git show -s --format=%ct HEAD 2>/dev/null || echo 0) alr exec -- adacovex --target=. --dal=C --emit-svg=docs/badges/; \
+	status=$$?; \
+	$(swap-out-covex) \
+	exit $$status
 
 compliance: verify-report
 	@echo ""; \

@@ -3,7 +3,7 @@
   "specVersion": "1.5",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-08-07T10:26:23",
+    "timestamp": "2026-08-10T03:13:22",
     "tools": [
       {"vendor": "bladeacer", "name": "adacovex", "version": "1.7.0"}
     ],
@@ -19,6 +19,13 @@
       }
   },
   "components": [
+    {
+      "type": "library",
+      "bom-ref": "pkg:alire/covex",
+      "name": "covex",
+      "purl": "pkg:alire/covex",
+      "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}]
+      },
     {
       "type": "library",
       "bom-ref": "pkg:alire/gnatdoc_bin@26.0.0",
@@ -53,7 +60,7 @@
   "dependencies": [
     {
       "ref": "pkg:alire/crdt@1.8.0",
-      "dependsOn": ["pkg:alire/gnatdoc_bin@26.0.0", "pkg:alire/gnatformat_bin@26.0.0", "pkg:alire/gnatprove@15.1.0"]
+      "dependsOn": ["pkg:alire/covex", "pkg:alire/gnatdoc_bin@26.0.0", "pkg:alire/gnatformat_bin@26.0.0", "pkg:alire/gnatprove@15.1.0"]
     }
   ]
 }

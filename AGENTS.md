@@ -80,7 +80,10 @@ Ada_CRDT/
 |--------|-------------|--------------|
 | `build` | Compile library + tests | `alr build` (filters out `.sframe` linker noise) |
 | `run` / `test` | Build + run test suite (fuzz, convergence, GoL included) | `alr run` (all tests across 9 categories) |
-| `prove` | SPARK formal verification | `alr gnatprove` |
+| `covex` | Ensure the covex (adacovex) dev dependency is built | `alr exec -- adacovex --help`; builds via `alr build` if missing |
+| `prove` | SPARK formal verification | `alr exec -- adacovex prove --target=. --no-svg` |
+| `coverage-gate` | Gate docstring coverage vs the last release tag | `alr exec -- adacovex --coverage-delta` |
+| `badges` | Regenerate DO-178C/coverage/SPARK badges | `alr exec -- adacovex --emit-svg=docs/badges/` |
 | `verify-report` | Auto-generate VERIFICATION.md from gnatprove.out + test_result.md | Parses proof stats and test counts, writes deterministic report |
 | `doc` / `api-docs` | Generate Markdown API docs | `gnatdoc` -> RST -> `tools/rst2md.py` -> `docs/api-docs/` |
 | `compliance` | DO-178C traceability + Quick Reference link validation + auto-generate report | Scans source HLR tags, validates HLR.md coverage, checks README links, runs verify-report |
@@ -94,7 +97,15 @@ Ada_CRDT/
 ### Alire (Ada Package Manager)
 
 - Primary build tool: `alr build` / `alr run` / `alr gnatprove`
-- Dependencies managed in `alire.toml` (currently: `gnatprove`, `gnatdoc_bin`, `gnatformat_bin`)
+- `make prove`, `make coverage-gate`, and `make badges` resolve the adacovex
+  binary through `alr exec -- adacovex` (declared as the `covex` dev dependency
+  in `alire-dev.toml`, pinned to `../adacovex`). Alire only reads `alire.toml`,
+  so these targets temporarily swap `alire-dev.toml` over `alire.toml` when the
+  clean publishing manifest is active, and restore it afterwards (same pattern
+  as `make fmt`).
+- CI uses the `bladeacer/adacovex@v1` GitHub Action directly (`.github/workflows/ci.yml`
+  and `.github/workflows/pr-check.yml`) -- no local dev-setup required there.
+- Dependencies managed in `alire.toml` (currently: `gnatprove`, `gnatdoc_bin`, `gnatformat_bin`) and `alire-dev.toml` (additionally: `covex`)
 - GNAT toolchain managed automatically by Alire
 - Version: defined in `alire.toml` (currently 1.8.0), mirrors in `index/ad/crdt/` and `alire/releases/`
 
