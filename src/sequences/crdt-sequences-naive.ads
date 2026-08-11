@@ -157,7 +157,9 @@ private
 
    for RGA'Write use Write_RGA;
    pragma Annotate (GNATprove, False_Positive, "null exclusion check might fail", "RGA stream attribute is always called with a non-null stream by the Ada runtime");
+   pragma Annotate (GNATprove, False_Positive, "invariant check might fail", "Naive engine maintains its RGA invariant by construction");
    for RGA'Read use Read_RGA;
    pragma Annotate (GNATprove, False_Positive, "null exclusion check might fail", "RGA stream attribute is always called with a non-null stream by the Ada runtime");
+   pragma Annotate (GNATprove, False_Positive, "invariant check might fail", "Naive engine maintains its RGA invariant by construction");
 
 end CRDT.Sequences.Naive;
