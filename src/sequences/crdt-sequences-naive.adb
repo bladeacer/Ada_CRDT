@@ -9,16 +9,19 @@ is
 
    use type Core.Replica_Id;
 
+   function Invariant (R : RGA) return Boolean
+   is (R.Count <= R.Capacity
+       and then (R.Head = 0 or else R.Head in 1 .. R.Capacity)
+       and then (R.Free = 0 or else R.Free in 1 .. R.Capacity)
+       and then (for all I in 1 .. R.Capacity => R.Items (I).Next in 0 .. R.Capacity));
+
    function Id_Less (Left, Right : Node_Id) return Boolean
    is (Left.Seq < Right.Seq or else (Left.Seq = Right.Seq and then Left.Replica < Right.Replica));
 
    function Id_Eq (Left, Right : Node_Id) return Boolean
    is (Left.Replica = Right.Replica and then Left.Seq = Right.Seq);
 
-   procedure Alloc_Item (R : in out RGA; Idx : out Natural)
-     with Pre => R.Free in 0 .. R.Capacity and then R.Count <= R.Capacity,
-          Post => Idx in 0 .. R.Capacity
-   is
+   procedure Alloc_Item (R : in out RGA; Idx : out Natural) with Pre => Invariant (R), Post => Idx in 0 .. R.Capacity and then Invariant (R) is
    begin
       if R.Free /= 0 then
          Idx := R.Free;
@@ -32,7 +35,7 @@ is
       end if;
    end Alloc_Item;
 
-   procedure Free_Item (R : in out RGA; Idx : Natural) with Pre => Idx in 1 .. R.Capacity is
+   procedure Free_Item (R : in out RGA; Idx : Natural) with Pre => Idx in 1 .. R.Capacity and then Invariant (R), Post => Invariant (R) is
    begin
       R.Items (Idx).Deleted := False;
       R.Items (Idx).Next := R.Free;
@@ -40,9 +43,8 @@ is
       R.Free := Idx;
    end Free_Item;
 
-   procedure New_Item (R : in out RGA; Id : Node_Id; Val : Element_Type; Idx : out Natural) with Post => Idx in 0 .. R.Capacity is
+   procedure New_Item (R : in out RGA; Id : Node_Id; Val : Element_Type; Idx : out Natural) with Pre => Invariant (R), Post => Idx in 0 .. R.Capacity and then Invariant (R) is
    begin
-      pragma Annotate (GNATprove, False_Positive, "precondition might fail", "Alloc_Item preconditions hold by construction in the Naive engine");
       Alloc_Item (R, Idx);
       if Idx > 0 then
          R.Items (Idx).Id := Id;
@@ -52,9 +54,8 @@ is
       end if;
    end New_Item;
 
-   procedure Copy_Item (R : in out RGA; Src : RGA_Item; Idx : out Natural) with Post => Idx in 0 .. R.Capacity is
+   procedure Copy_Item (R : in out RGA; Src : RGA_Item; Idx : out Natural) with Pre => Invariant (R), Post => Idx in 0 .. R.Capacity and then Invariant (R) is
    begin
-      pragma Annotate (GNATprove, False_Positive, "precondition might fail", "Alloc_Item preconditions hold by construction in the Naive engine");
       Alloc_Item (R, Idx);
       if Idx > 0 then
          R.Items (Idx) := Src;
@@ -64,10 +65,7 @@ is
       end if;
    end Copy_Item;
 
-   function Find_Last (R : RGA) return Natural
-     with Pre  => R.Head in 0 .. R.Capacity,
-          Post => Find_Last'Result in 0 .. R.Capacity
-   is
+   function Find_Last (R : RGA) return Natural with Pre => Invariant (R), Post => Find_Last'Result in 0 .. R.Capacity is
       Cur : Natural := R.Head;
    begin
       if Cur = 0 then
@@ -81,11 +79,7 @@ is
       return Cur;
    end Find_Last;
 
-   function Find_Node (R : RGA; Id : Node_Id) return Natural
-     with Pre  => R.Head in 0 .. R.Capacity
-                  and then (for all I in 1 .. R.Capacity => R.Items (I).Next in 0 .. R.Capacity),
-          Post => Find_Node'Result in 0 .. R.Capacity
-   is
+   function Find_Node (R : RGA; Id : Node_Id) return Natural with Pre => Invariant (R), Post => Find_Node'Result in 0 .. R.Capacity is
       Cur : Natural := R.Head;
    begin
       while Cur /= 0 loop
@@ -99,11 +93,7 @@ is
       return 0;
    end Find_Node;
 
-   procedure Link_Before (R : in out RGA; Before, New_Idx : Natural)
-     with Pre => Before in 0 .. R.Capacity
-                 and then New_Idx in 1 .. R.Capacity
-                 and then R.Head in 0 .. R.Capacity
-   is
+   procedure Link_Before (R : in out RGA; Before, New_Idx : Natural) with Pre => Invariant (R) and then Before in 0 .. R.Capacity and then New_Idx in 1 .. R.Capacity, Post => Invariant (R) is
       Cur : Natural;
    begin
       if Before = R.Head then
@@ -122,9 +112,7 @@ is
       end if;
    end Link_Before;
 
-   procedure Append_Item (R : in out RGA; Idx : Natural)
-     with Pre => R.Head in 0 .. R.Capacity and then Idx in 1 .. R.Capacity
-   is
+   procedure Append_Item (R : in out RGA; Idx : Natural) with Pre => Invariant (R) and then Idx in 1 .. R.Capacity, Post => Invariant (R) is
       Last : constant Natural := Find_Last (R);
    begin
       if Last = 0 then
@@ -134,11 +122,7 @@ is
       end if;
    end Append_Item;
 
-   function Find_Pos (R : RGA; Pos : Positive) return Natural
-     with Pre  => R.Head in 0 .. R.Capacity
-                  and then (for all I in 1 .. R.Capacity => R.Items (I).Next in 0 .. R.Capacity),
-          Post => Find_Pos'Result in 0 .. R.Capacity
-   is
+   function Find_Pos (R : RGA; Pos : Positive) return Natural with Pre => Invariant (R), Post => Find_Pos'Result in 0 .. R.Capacity is
       P   : Natural := Pos;
       Cur : Natural := R.Head;
    begin
@@ -226,20 +210,18 @@ is
 
       Before := Find_Pos (R, Pos);
       New_Item (R, Id, Value, New_Idx);
-       if New_Idx > 0 then
-          if Before = 0 then
-             Append_Item (R, New_Idx);
-          else
-             Link_Before (R, Before, New_Idx);
-          end if;
-       end if;
-      pragma Annotate (GNATprove, False_Positive, "invariant check might fail", "Naive engine maintains its RGA invariant by construction");
+      if New_Idx > 0 then
+         if Before = 0 then
+            Append_Item (R, New_Idx);
+         else
+            Link_Before (R, Before, New_Idx);
+         end if;
+      end if;
    end Insert;
 
    procedure Insert_Bulk (R : in out RGA; Pos : Positive; Id : Node_Id; Values : Element_Array) is
    begin
       for I in Values'Range loop
-         pragma Annotate (GNATprove, False_Positive, "invariant check might fail", "Naive engine maintains its RGA invariant by construction");
          Insert (R, Pos + (I - Values'First), (Replica => Id.Replica, Seq => Id.Seq + (I - Values'First)), Values (I));
          pragma Annotate (GNATprove, False_Positive, "overflow check might fail", "Insert_Bulk offsets bounded by Values'Length in practice");
       end loop;
@@ -303,7 +285,7 @@ is
             New_Idx : Natural;
             T_Idx   : Natural := Target.Head;
             Ins     : Boolean := False;
-          begin
+         begin
             pragma Annotate (GNATprove, False_Positive, "array index check might fail", "Merge source indices are validated while collecting them");
             Copy_Item (Target, Source.Items (Srcs (I).Idx), New_Idx);
             if New_Idx > 0 then

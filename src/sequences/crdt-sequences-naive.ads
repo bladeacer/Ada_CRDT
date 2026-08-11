@@ -144,6 +144,15 @@ private
       Pos   : Natural := 0;
    end record;
 
+   --  Structural invariant of the RGA: allocation counters stay within
+   --  capacity, the head and free pointers are either null or in-bounds, and
+   --  every node's Next link stays in-bounds. Referenced by the
+   --  Type_Invariant aspect and reused by body-local helper contracts so the
+   --  engine can prove its own structural safety.
+   --  @param R  The sequence to check.
+   --  @return True when the RGA satisfies its structural invariant.
+   function Invariant (R : RGA) return Boolean;
+
    type RGA (Capacity : Positive) is record
       Items : Item_Array (1 .. Capacity);
       Head  : Natural := 0;
@@ -151,9 +160,7 @@ private
       Free  : Natural := 0;
       Total : Natural := 0;
    end record
-   with
-     Type_Invariant =>
-       Count <= Capacity and then (Head = 0 or else Head in 1 .. Capacity) and then (Free = 0 or else Free in 1 .. Capacity) and then (for all I in 1 .. Capacity => Items (I).Next in 0 .. Capacity);
+   with Type_Invariant => Invariant (RGA);
 
    for RGA'Write use Write_RGA;
    pragma Annotate (GNATprove, False_Positive, "null exclusion check might fail", "RGA stream attribute is always called with a non-null stream by the Ada runtime");

@@ -2,7 +2,7 @@
 
 Naive per-element RGA engine. Every single element is its own individually allocated node. Useful for: educational baselines, chaotic editing environments, or small sequences where per-element overhead is acceptable.
 
-> **Note:** 24 public item(s) shown below; 4 private internal item(s) are in the `private` section.
+> **Note:** 25 public item(s) shown below; 5 private internal item(s) are in the `private` section.
 
 ## Types
 
@@ -121,6 +121,12 @@ end record;
 
 **Returns:** True if the cursor is within bounds.
 
+### function Invariant (R : CRDT.Sequences.Naive.RGA) return Standard.Boolean
+
+| Parameter | Description |
+|-----------|-------------|
+| `R` |  |
+
 ### function Length (R : CRDT.Sequences.Naive.RGA) return Standard.Natural
 
 | Parameter | Description |
@@ -212,4 +218,5 @@ end record;
 - **type** `RGA_Item`
 - **type** `Item_Array`
 - **type** `Cursor`
+- **function** `Invariant`
 - **type** `RGA`
