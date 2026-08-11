@@ -1,4 +1,4 @@
-.PHONY: help all build run test prove coverage-gate doc api-docs badges compliance verify-report ascii-check fmt bump-version clean release publish demo covex
+.PHONY: help all build run test prove coverage-gate doc api-docs badges sbom compliance verify-report ascii-check fmt bump-version clean release publish demo covex
 
 .DEFAULT_GOAL := help
 
@@ -12,10 +12,12 @@ help:
 	@echo '  test          Alias for run (fuzz tests included in suite)'
 	@echo '  covex         Ensure covex (adacovex) dev dependency is built'
 	@echo '  prove         Run SPARK proofs via adacovex (resolves covex dev dep)'
+	@echo '                (also auto-regenerates SVG badges in docs/badges/)'
 	@echo '  coverage-gate Gate docstring coverage vs the last release tag (adacovex --coverage-delta)'
 	@echo '  verify-report Auto-generate VERIFICATION.md from gnatprove.out + test results'
 	@echo '  doc           Generate Markdown API docs (docs/api-docs/)'
 	@echo '  badges        Regenerate SVG badges via adacovex (docs/badges/)'
+	@echo '  sbom          Generate a proof-aware CycloneDX SBOM (sbom.json)'
 	@echo '  compliance    HLR traceability check + auto-generate verification report'
 	@echo '  ascii-check   Enforce ASCII-only charset across all source files'
 	@echo '  fmt           Format all Ada sources with gnatformat (requires make dev-setup)'
@@ -78,7 +80,7 @@ covex:
 
 prove: covex
 	@$(swap-in-covex) \
-	SOURCE_DATE_EPOCH=$$(git show -s --format=%ct HEAD 2>/dev/null || echo 0) alr exec -- adacovex prove --target=. --no-svg; \
+	SOURCE_DATE_EPOCH=$$(git show -s --format=%ct HEAD 2>/dev/null || echo 0) alr exec -- adacovex prove --target=. --dal=C --emit-svg=docs/badges/; \
 	status=$$?; \
 	$(swap-out-covex) \
 	exit $$status
@@ -306,6 +308,14 @@ badges: covex
 	@echo "=== Generating adacovex badges ==="; \
 	$(swap-in-covex) \
 	SOURCE_DATE_EPOCH=$$(git show -s --format=%ct HEAD 2>/dev/null || echo 0) alr exec -- adacovex --target=. --dal=C --emit-svg=docs/badges/; \
+	status=$$?; \
+	$(swap-out-covex) \
+	exit $$status
+
+sbom: covex
+	@echo "=== Generating proof-aware SBOM ==="; \
+	$(swap-in-covex) \
+	SOURCE_DATE_EPOCH=$$(git show -s --format=%ct HEAD 2>/dev/null || echo 0) alr exec -- adacovex sbom --target=. --dal=C; \
 	status=$$?; \
 	$(swap-out-covex) \
 	exit $$status

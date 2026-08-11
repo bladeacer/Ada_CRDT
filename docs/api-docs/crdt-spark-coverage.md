@@ -93,10 +93,10 @@ All core specs use `SPARK_Mode` (On) at package level. The following packages ha
 
 ### `src/sequences/crdt-sequences-naive.adb`
 
-- Line 388: `procedure Write_RGA (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : RGA) with SPARK_Mode => Off is`
+- Line 372: `procedure Write_RGA (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : RGA) with SPARK_Mode => Off is`
   - Justification: Serialization
 
-- Line 406: `procedure Read_RGA (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : out RGA) with SPARK_Mode => Off is`
+- Line 390: `procedure Read_RGA (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : out RGA) with SPARK_Mode => Off is`
 
 
 ### `src/sequences/crdt-sequences-yjs.adb`

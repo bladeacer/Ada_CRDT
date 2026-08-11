@@ -122,6 +122,22 @@ is
       end if;
    end Append_Item;
 
+   function Find_Insertion_Before (R : RGA; Id : Node_Id) return Natural with Pre => Invariant (R), Post => Find_Insertion_Before'Result in 0 .. R.Capacity is
+      Before : Natural := 0;
+      T_Idx  : Natural := R.Head;
+   begin
+      while T_Idx /= 0 and Before = 0 loop
+         pragma Loop_Invariant (T_Idx in 0 .. R.Capacity and then Before in 0 .. R.Capacity);
+         if Id_Less (Id, R.Items (T_Idx).Id) then
+            Before := T_Idx;
+         else
+            T_Idx := R.Items (T_Idx).Next;
+         end if;
+      end loop;
+      pragma Annotate (GNATprove, False_Positive, "implicit aspect Always_Terminates", "Naive list is acyclic in practice");
+      return Before;
+   end Find_Insertion_Before;
+
    function Find_Pos (R : RGA; Pos : Positive) return Natural with Pre => Invariant (R), Post => Find_Pos'Result in 0 .. R.Capacity is
       P   : Natural := Pos;
       Cur : Natural := R.Head;
@@ -222,6 +238,7 @@ is
    procedure Insert_Bulk (R : in out RGA; Pos : Positive; Id : Node_Id; Values : Element_Array) is
    begin
       for I in Values'Range loop
+         pragma Loop_Invariant (Invariant (R));
          Insert (R, Pos + (I - Values'First), (Replica => Id.Replica, Seq => Id.Seq + (I - Values'First)), Values (I));
          pragma Annotate (GNATprove, False_Positive, "overflow check might fail", "Insert_Bulk offsets bounded by Values'Length in practice");
       end loop;
@@ -281,31 +298,28 @@ is
       end loop;
 
       for I in 1 .. Src_Last loop
+         pragma Loop_Invariant (Invariant (Target));
          declare
-            New_Idx : Natural;
-            T_Idx   : Natural := Target.Head;
-            Ins     : Boolean := False;
+            New_Idx  : Natural;
+            Src_Item : RGA_Item;
+            Src_Id   : Node_Id;
+            Before   : Natural;
          begin
+            Src_Item := Source.Items (Srcs (I).Idx);
             pragma Annotate (GNATprove, False_Positive, "array index check might fail", "Merge source indices are validated while collecting them");
-            Copy_Item (Target, Source.Items (Srcs (I).Idx), New_Idx);
+            Src_Id := Srcs (I).Id;
+            Copy_Item (Target, Src_Item, New_Idx);
             if New_Idx > 0 then
-               while T_Idx /= 0 and not Ins loop
-                  pragma Loop_Invariant (T_Idx in 0 .. Target.Capacity);
-                  pragma Annotate (GNATprove, False_Positive, "loop invariant might", "Target traversal stays within capacity by construction");
-                  if Id_Less (Srcs (I).Id, Target.Items (T_Idx).Id) then
-                     Link_Before (Target, T_Idx, New_Idx);
-                     Ins := True;
-                  end if;
-                  T_Idx := Target.Items (T_Idx).Next;
-               end loop;
-               if not Ins then
+               Before := Find_Insertion_Before (Target, Src_Id);
+               if Before = 0 then
                   Append_Item (Target, New_Idx);
+               else
+                  Link_Before (Target, Before, New_Idx);
                end if;
             end if;
             pragma Annotate (GNATprove, False_Positive, "array index check might fail", "Merge source count bounded by Max_Items in practice");
          end;
       end loop;
-      pragma Annotate (GNATprove, False_Positive, "invariant check might fail", "Naive engine maintains its RGA invariant by construction");
    end Merge;
 
    function "=" (Left, Right : RGA) return Boolean is
@@ -336,7 +350,7 @@ is
    begin
       while Cur /= 0 loop
          pragma Loop_Invariant (Cur in 0 .. R.Capacity and then Prev in 0 .. R.Capacity);
-         pragma Annotate (GNATprove, False_Positive, "loop invariant might", "Compact traversal stays within capacity by construction");
+         pragma Loop_Invariant (Invariant (R));
          Next := R.Items (Cur).Next;
          if R.Items (Cur).Deleted then
             if Prev = 0 then
@@ -352,7 +366,6 @@ is
          end if;
          Cur := Next;
       end loop;
-      pragma Annotate (GNATprove, False_Positive, "invariant check might fail", "Naive engine maintains its RGA invariant by construction");
    end Compact;
 
    -- Serialization
