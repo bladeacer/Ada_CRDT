@@ -1,4 +1,3 @@
-dependency:covex=1.1.0=3d37230a83fb465c875a0e3bb8001ae55087f4856eb4b37266cdf5e7e770de76
 external:CRDT_LIBRARY_TYPE=default
 external:LIBRARY_TYPE=default
 profile:crdt=DEVELOPMENT

@@ -60,6 +60,14 @@ define swap-in-covex
 	fi;
 endef
 
+# adacovex (covex) binary resolution.
+# Prefer a freshly-built sibling checkout's binary (workspace/dev case, e.g.
+# ../adacovex) so local make targets exercise the current tree; otherwise fall
+# back to the covex crate pulled in via alire-dev.toml, resolved through
+# `alr exec -- adacovex` (published index / CI case).
+ADACOVEX_SIBLING := $(abspath ../adacovex)/bin/adacovex
+ADACOVEX_BIN := $(if $(wildcard $(ADACOVEX_SIBLING)),$(ADACOVEX_SIBLING),alr exec -- adacovex)
+
 define swap-out-covex
 	if [ "$$restore" -eq 1 ]; then \
 		mv alire.toml.covexbak alire.toml; \
@@ -67,7 +75,9 @@ define swap-out-covex
 endef
 
 covex:
-	@if ! alr exec -- adacovex --help >/dev/null 2>&1; then \
+	@if [ -x "$(ADACOVEX_SIBLING)" ]; then \
+		echo "Using sibling adacovex binary: $(ADACOVEX_SIBLING)"; \
+	elif ! alr exec -- adacovex --help >/dev/null 2>&1; then \
 		echo "Building covex dev dependency (adacovex)..."; \
 		$(swap-in-covex) \
 		alr build; \
@@ -81,7 +91,7 @@ covex:
 
 prove: covex
 	@$(swap-in-covex) \
-	SOURCE_DATE_EPOCH=$$(git show -s --format=%ct HEAD 2>/dev/null || echo 0) alr exec -- adacovex prove --target=. --dal=C --emit-svg=docs/badges/; \
+	SOURCE_DATE_EPOCH=$$(git show -s --format=%ct HEAD 2>/dev/null || echo 0) $(ADACOVEX_BIN) prove --target=. --dal=C --emit-svg=docs/badges/; \
 	status=$$?; \
 	$(swap-out-covex) \
 	exit $$status
@@ -94,7 +104,7 @@ coverage-gate: covex
 		exit 0; \
 	fi; \
 	echo "=== Coverage delta gate: current tree vs $$prev ==="; \
-	SOURCE_DATE_EPOCH=$$(git show -s --format=%ct HEAD 2>/dev/null || echo 0) alr exec -- adacovex --target=. --coverage-delta="$$prev"; \
+	SOURCE_DATE_EPOCH=$$(git show -s --format=%ct HEAD 2>/dev/null || echo 0) $(ADACOVEX_BIN) --target=. --coverage-delta="$$prev"; \
 	status=$$?; \
 	$(swap-out-covex) \
 	exit $$status
@@ -308,7 +318,7 @@ verify-report:
 badges: covex
 	@echo "=== Generating adacovex badges ==="; \
 	$(swap-in-covex) \
-	SOURCE_DATE_EPOCH=$$(git show -s --format=%ct HEAD 2>/dev/null || echo 0) alr exec -- adacovex --target=. --dal=C --emit-svg=docs/badges/; \
+	SOURCE_DATE_EPOCH=$$(git show -s --format=%ct HEAD 2>/dev/null || echo 0) $(ADACOVEX_BIN) --target=. --dal=C --emit-svg=docs/badges/; \
 	status=$$?; \
 	$(swap-out-covex) \
 	exit $$status
@@ -316,7 +326,7 @@ badges: covex
 sbom: covex
 	@echo "=== Generating proof-aware SBOM ==="; \
 	$(swap-in-covex) \
-	SOURCE_DATE_EPOCH=$$(git show -s --format=%ct HEAD 2>/dev/null || echo 0) alr exec -- adacovex sbom --target=. --dal=C; \
+	SOURCE_DATE_EPOCH=$$(git show -s --format=%ct HEAD 2>/dev/null || echo 0) $(ADACOVEX_BIN) sbom --target=. --dal=C; \
 	status=$$?; \
 	$(swap-out-covex) \
 	exit $$status
