@@ -99,13 +99,15 @@ Ada_CRDT/
 - Primary build tool: `alr build` / `alr run` / `alr gnatprove`
 - `make prove`, `make coverage-gate`, and `make badges` resolve the adacovex
   binary through `alr exec -- adacovex` (declared as the `covex` dev dependency
-  in `alire-dev.toml`, pinned to `../adacovex`). Alire only reads `alire.toml`,
-  so these targets temporarily swap `alire-dev.toml` over `alire.toml` when the
-  clean publishing manifest is active, and restore it afterwards (same pattern
-  as `make fmt`).
+  in `alire-dev.toml` as `covex = "*"`, a normal index dependency -- never a
+  path pin, so it resolves in any consumer workspace and on CI). Alire only
+  reads `alire.toml`, so these targets temporarily swap `alire-dev.toml` over
+  `alire.toml` when the clean publishing manifest is active, and restore it
+  afterwards (same pattern as `make fmt`).
 - CI uses the `bladeacer/adacovex@v1` GitHub Action directly (`.github/workflows/ci.yml`
   and `.github/workflows/pr-check.yml`) -- no local dev-setup required there.
-- Dependencies managed in `alire.toml` (currently: `gnatprove`, `gnatdoc_bin`, `gnatformat_bin`) and `alire-dev.toml` (additionally: `covex`)
+- `alire.toml` is the clean publishing manifest (no dev deps, no pins);
+  `alire-dev.toml` additionally carries `gnatprove`, `gnatdoc_bin`, `gnatformat_bin`, and `covex`
 - GNAT toolchain managed automatically by Alire
 - Version: defined in `alire.toml` (currently 1.8.0), mirrors in `index/ad/crdt/` and `alire/releases/`
 

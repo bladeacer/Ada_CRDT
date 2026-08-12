@@ -43,14 +43,15 @@ run: build
 
 test: run
 
-# covex (adacovex) is a dev dependency (see alire-dev.toml, pinned to
-# ../adacovex). Resolve it through `alr exec` so the dev-pinned binary is used,
-# and build it via `alr build` on first use if the binary is missing.
+# covex (adacovex) is a dev dependency (see alire-dev.toml, declared as a
+# normal index dependency `covex = "*"` -- never pinned to a local path, so it
+# resolves in any workspace and on CI). Resolve it through `alr exec` and build
+# it via `alr build` on first use if the binary is missing.
 # alire only reads alire.toml, so if the clean publishing manifest is active
 # (no covex), alire-dev.toml is swapped in temporarily and restored afterwards
 # (same pattern as the fmt target).
 define swap-in-covex
-	if ! grep -q 'covex' alire.toml 2>/dev/null; then \
+	if ! grep -qE '^[[:space:]]*covex[[:space:]]*=' alire.toml 2>/dev/null; then \
 		cp alire.toml alire.toml.covexbak; \
 		cp alire-dev.toml alire.toml; \
 		restore=1; \
@@ -424,7 +425,7 @@ ascii-check:
 
 fmt:
 	@echo "=== Formatting Ada sources with gnatformat ==="; \
-	if ! grep -q 'gnatformat_bin' alire.toml 2>/dev/null; then \
+	if ! grep -qE '^[[:space:]]*gnatformat_bin[[:space:]]*=' alire.toml 2>/dev/null; then \
 		cp alire.toml alire.toml.fmtbak; \
 		cp alire-dev.toml alire.toml; \
 		restore=1; \

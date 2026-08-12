@@ -1,20 +1,19 @@
 # Development manifest for local SPARK proof, doc generation, formatting, and
-# adacovex tooling. Copy this over alire.toml during development:
-#   make dev-setup
-# Restore the clean publishing manifest with:
-#   make prod-setup
+# adacovex tooling. Used exclusively by `make prove`, `make doc`, `make fmt`,
+# `make coverage-gate`, `make badges`, and `make sbom`, which temporarily swap
+# this manifest over alire.toml for the duration of the command and restore the
+# clean publishing manifest afterwards.
 #
 # This manifest includes gnatprove, gnatdoc_bin, gnatformat_bin, and covex
-# (adacovex) which are required for `make prove`, `make doc`, `make fmt`, and
-# `make coverage-gate` but MUST NOT appear in the published Alire community
-# index (they are build tools, not library dependencies).
+# (adacovex) which are required for the dev targets above but MUST NOT appear
+# in the published Alire community index (they are build tools, not library
+# dependencies). Only the clean alire.toml is published.
 #
-# covex is pinned to the sibling adacovex working tree (../adacovex) so the
-# local dev version (which implements --coverage-delta) is used. The pin is
-# dev-only; it never ships in the published alire.toml.
-#
-# The clean alire.toml is what gets committed and published.
-# Only alire.toml is published to the community index.
+# covex is declared as a normal index dependency (covex = "*"); it is NOT pinned
+# to a local path. A path pin such as `{ path = "../adacovex" }` resolves only
+# on a machine that has the sibling checkout, so `alr build` and adacovex's
+# `prove` subcommand (which run `alr exec -- gnatprove` against this manifest)
+# would fail in any consumer workspace or on CI. Use the published crate.
 name = "crdt"
 description = "CRDT library for Ada/SPARK"
 long-description = """
@@ -47,6 +46,3 @@ gnatprove = "^15.1.0"
 gnatdoc_bin = "^26.0.0"
 gnatformat_bin = "^26.0.0"
 covex = "*"
-
-[[pins]]
-covex = { path = "../adacovex" }
