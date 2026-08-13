@@ -13,7 +13,7 @@ jobs:
     name: SPARK proof + assessment (DAL-C)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # build: false downloads the adacovex release binary. `build: true` is
       # only valid when the checked-out repository IS adacovex (self-assessment);
       # in a consumer workspace it would just `alr build` this project and no
@@ -30,7 +30,7 @@ jobs:
     name: Build + native test suite
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: alire-project/setup-alire@latest
         with:
           version: '2.1.1'
