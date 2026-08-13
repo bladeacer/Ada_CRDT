@@ -56,10 +56,6 @@ comments explaining the pin-to-local + version-pin-to-published pattern.
 
 ## Changes
 
-### Version
-
-Bumped from 1.7.0 to 1.7.1.
-
 ### Makefile Targets
 
 | Target | Before | After |
@@ -79,3 +75,7 @@ Bumped from 1.7.0 to 1.7.1.
 ## Breaking Changes
 
 None. All changes are additive or internal to the build system.
+
+## Version
+
+Bumped from 1.7.0 to 1.7.1.

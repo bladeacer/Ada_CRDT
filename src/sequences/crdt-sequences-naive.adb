@@ -155,16 +155,6 @@ is
    end Find_Pos;
 
    -- Iterator
-   function Has_Element (Position : Cursor) return Boolean is
-   begin
-      return Position.Pos in 1 .. Position.Total;
-   end Has_Element;
-
-   function Has_Element (Container : RGA; Position : Cursor) return Boolean is
-   begin
-      return Position.Pos in 1 .. Container.Total;
-   end Has_Element;
-
    function First (Container : RGA) return Cursor is
    begin
       if Container.Total = 0 then
@@ -177,14 +167,12 @@ is
    begin
       if Position.Pos < Container.Total then
          Position.Pos := Position.Pos + 1;
-         pragma Annotate (GNATprove, False_Positive, "range check might fail", "Naive cursor Pos bounded by Total in practice");
       else
          Position.Pos := 0;
       end if;
    end Next;
 
    function Element (Container : RGA; Position : Cursor) return Element_Type is
-      pragma Annotate (GNATprove, False_Positive, "range check might fail", "Naive cursor Pos is within Positive range when valid");
       Idx : constant Natural := Find_Pos (Container, Position.Pos);
    begin
       if Idx = 0 then

@@ -2,7 +2,7 @@
 
 Naive per-element RGA engine. Every single element is its own individually allocated node. Useful for: educational baselines, chaotic editing environments, or small sequences where per-element overhead is acceptable.
 
-> **Note:** 25 public item(s) shown below; 5 private internal item(s) are in the `private` section.
+> **Note:** 27 public item(s) shown below; 5 private internal item(s) are in the `private` section.
 
 ## Types
 
@@ -78,7 +78,7 @@ end record;
 
 **Returns:** Count of allocated nodes (includes tombstones).
 
-### function Element (Container : CRDT.Sequences.Naive.RGA; Position : CRDT.Sequences.Naive.Cursor) return CRDT.Sequences.Naive.Element_Type
+### function Element (Container : CRDT.Sequences.Naive.RGA; Position : CRDT.Sequences.Naive.Cursor) return CRDT.Sequences.Naive.Element_Type `[Pre]`
 
 | Parameter | Description |
 |-----------|-------------|
@@ -111,6 +111,23 @@ end record;
 | `Position` | Cursor to check. |
 
 **Returns:** True if the cursor is not at the end.
+
+### function Has_Element (Position : CRDT.Sequences.Naive.Cursor) return Standard.Boolean
+
+| Parameter | Description |
+|-----------|-------------|
+| `Position` | Cursor to check. |
+
+**Returns:** True if the cursor is not at the end.
+
+### function Has_Element (Container : CRDT.Sequences.Naive.RGA; Position : CRDT.Sequences.Naive.Cursor) return Standard.Boolean
+
+| Parameter | Description |
+|-----------|-------------|
+| `Container` | The sequence container. |
+| `Position` | Cursor to check. |
+
+**Returns:** True if the cursor is within bounds.
 
 ### function Has_Element (Container : CRDT.Sequences.Naive.RGA; Position : CRDT.Sequences.Naive.Cursor) return Standard.Boolean
 

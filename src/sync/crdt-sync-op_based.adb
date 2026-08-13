@@ -20,10 +20,9 @@ is
 
    function Get (Log : Op_Log; Index : Positive) return Operation is
    begin
-      if Log.GC + Index <= Log.Capacity then
+      if Index <= Log.Capacity and then Log.GC <= Log.Capacity - Index then
          return Log.Ops (Log.GC + Index);
       end if;
-      pragma Annotate (GNATprove, False_Positive, "overflow check might fail", "GC + Index bounded by Capacity <= Positive'Last");
       return Log.Ops (1);
    end Get;
 

@@ -67,7 +67,7 @@ with the 'C' key. Status bar displays the active strategy.
 ## Documentation and Tooling
 
 - **AGENTS.md**: Comprehensive codebase guide for AI agents covering structure, conventions, SPARK status, DO-178C, internal interfaces.
-- **API docs**: `make doc` now generates documentation for **both public and private** entities (`--generate private`), producing 39 package docs.
+- **API docs**: `make doc` now generates documentation for **both public and private** entities (`--generate private`), producing a per-package page for every CRDT package and type.
 - **SPARK coverage report**: `docs/api-docs/crdt-spark-coverage.md` lists all SPARK_Mode Off locations with justifications.
 - **ASCII enforcement**: `make ascii-check` now scans all source files including `docs/changelogs/` and `docs/compliance/` (excludes generated `docs/api-docs/` and vendored `vt100/`).
 - **README**: Restructured with Quick Reference table, Roadmap section, wire protocol V3 documentation, API doc links above each code example, and deprecation notices. Examples are illustrative; generated API docs are authoritative.
@@ -84,10 +84,6 @@ with the 'C' key. Status bar displays the active strategy.
 `Lww_Sets` instantiated with all three strategies.
 
 ## Changes
-
-### Version
-
-Bumped from 1.6.0 to 1.7.0.
 
 ### SPARK Statistics
 
@@ -110,3 +106,7 @@ Bumped from 1.6.0 to 1.7.0.
 None. All existing APIs are fully backward-compatible. `Lww_Element_Sets`,
 `RGA`, `PN_Counters` continue to write V2 format. V3 readers can read all
 V1, V2, and V3 data.
+
+## Version
+
+Bumped from 1.6.0 to 1.7.0.

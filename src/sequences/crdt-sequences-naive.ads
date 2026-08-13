@@ -54,7 +54,8 @@ package CRDT.Sequences.Naive with SPARK_Mode is
    --  @param Container  The sequence container.
    --  @param Position   Cursor to read from.
    --  @return Element at the cursor's position.
-   function Element (Container : RGA; Position : Cursor) return Element_Type;
+   function Element (Container : RGA; Position : Cursor) return Element_Type
+   with Pre => Has_Element (Container, Position);
 
    --  Number of internal storage items (linked list nodes).
    --  @param R  The sequence to examine.
@@ -168,5 +169,18 @@ private
    for RGA'Read use Read_RGA;
    pragma Annotate (GNATprove, False_Positive, "null exclusion check might fail", "RGA stream attribute is always called with a non-null stream by the Ada runtime");
    pragma Annotate (GNATprove, False_Positive, "invariant check might fail", "Naive engine maintains its RGA invariant by construction");
+
+   --  Expression functions for SPARK visibility. See public specs for docs.
+   --  @param Position  Cursor to check.
+   --  @return True if the cursor is not at the end.
+   function Has_Element (Position : Cursor) return Boolean
+   is (Position.Pos in 1 .. Position.Total);
+
+   --  Expression functions for SPARK visibility. See public specs for docs.
+   --  @param Container  The sequence container.
+   --  @param Position   Cursor to check.
+   --  @return True if the cursor is within bounds.
+   function Has_Element (Container : RGA; Position : Cursor) return Boolean
+   is (Position.Pos in 1 .. Container.Total);
 
 end CRDT.Sequences.Naive;

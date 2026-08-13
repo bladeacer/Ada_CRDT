@@ -4,9 +4,9 @@ Date: _2026-08-12_
 
 Build-system tooling integration, a full SPARK proof restoration pass, and a
 CI/consumability fix for adacovex. SPARK Platinum is restored across all
-SPARK-analyzable units with 0 unproved verification conditions, and the project
-now drives the adacovex tool through the standard `covex` dev dependency rather
-than a hard-coded sibling checkout.
+SPARK-analyzable units with 0 unproved verification conditions and justified
+VCs trimmed to 42, and the project now drives the adacovex tool through the
+standard `covex` dev dependency rather than a hard-coded sibling checkout.
 
 ## Build System
 
@@ -84,18 +84,47 @@ reset whenever the wall clock advances).
 conditions that had regressed, restoring provability of the flat linked-list
 RGA engine under SPARK.
 
+### Justified-to-Proved Reduction
+
+Non-deferred SPARK checks that were previously marked as false positives are
+now proven outright:
+
+- **`CRDT.Sync.Op_Based.Get`** (`crdt-sync-op_based.adb`): the bounds guard is
+  rewritten as `Index <= Log.Capacity and then Log.GC <= Log.Capacity - Index`
+  so the `GC + Index` overflow check (previously justified as "bounded by
+  Capacity <= Positive'Last") is now discharged by SPARK.
+- **`CRDT.Sequences.Naive`** (`crdt-sequences-naive.*`):
+  - `Next` no longer carries the "Naive cursor Pos bounded by Total"
+    false-positive annotation: its `Pos + 1` range check is proved directly
+    from `Position.Pos < Container.Total`.
+  - `Element` now requires `Pre => Has_Element (Container, Position)`, and its
+    cursor-position range check is proved (the deliberate out-of-range raise
+    remains a documented false positive). The `Has_Element` bodies moved to
+    private-part expression functions so SPARK can unfold them inside the
+    precondition.
+
+Proof state: **584 VCs -- 435 proved, 42 justified, 0 unproved** (justified
+down from 44). The 42 remaining justified VCs are documented false positives
+that cannot be discharged without changing behaviour or public contracts: HLC
+`Log` advancement against the wall clock (4), bounded PN-Counter arithmetic
+(4), LWW set capacity bounds (4), Naive engine structural bounds and
+linked-list traversal termination (17), deliberate accessor range checks (2),
+and stream-attribute `not null`/invariant checks (11).
+
 ## Documentation & Tooling
 
-### gen-coverage.py Live Proof Numbers
+### Python Tooling Typing Refactor
 
-`tools/gen-coverage.py` previously hardcoded SPARK proof statistics; it now
-parses `obj/gnatprove/gnatprove.out` for live numbers (with a placeholder
-fallback when the file is absent), so generated coverage reports stay accurate.
+`tools/gen-coverage.py` and `tools/rst2md.py` now use typed helpers and
+`TypedDict`-based structured data (SPARK_Mode => Off breakdowns, proof stats,
+sub-item blocks), making the doc-generation tooling more maintainable and
+robust.
 
 ### RST-to-Markdown Pipeline
 
-`tools/rst2md.py`: refactored to emit `docs/api-docs/` Markdown that now
-documents both public and private entities, and improved robustness.
+`tools/rst2md.py`: refactored the Markdown generation with typed parsing
+helpers for package descriptions, annotations, and private-item extraction,
+improving robustness of the generated `docs/api-docs/` output.
 
 ### Patch File for Vendored Demo Dependency
 
@@ -120,12 +149,9 @@ crisper rendering; the adacovex badge step now produces clean SVG artifacts.
 
 ## Other
 
-- **Makefile**: `demo` target hardened to no longer invoke `stty -isig`/
-  `stty isig` outside a TTY (which failed in CI/non-interactive shells); wrapped
-  with `2>/dev/null` and `|| true` fallbacks.
-- **verify-report**: the `index.md` update now uses a PID-suffixed temp file
-  with explicit `sed` exit-status checks before replacing the original, so a
-  mid-write failure cannot corrupt the compliance index.
+- **crdt-bounded.ads**: reverted `with CRDT.Rga with SPARK_Mode` back to a bare
+  `pragma SPARK_Mode;` (plus a plain `with`), aligning with the remaining spec
+  files in the tree.
 - **Broken links**: fixed stale documentation/Quick-Reference links.
 
 ## Breaking Changes
@@ -134,3 +160,7 @@ None. All changes are additive, corrective, or internal. The public API
 signatures of all generic packages (`Rga`, `Lww_Element_Sets`, `Lww_Sets`,
 `Pn_Counters`, `Protected`, `Bounded`) and the wire protocol (V1/V2/V3) are
 unchanged.
+
+## Version
+
+Bumped from 1.8.0 to 1.9.0.

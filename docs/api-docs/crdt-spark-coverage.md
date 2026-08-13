@@ -93,10 +93,10 @@ All core specs use `SPARK_Mode` (On) at package level. The following packages ha
 
 ### `src/sequences/crdt-sequences-naive.adb`
 
-- Line 372: `procedure Write_RGA (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : RGA) with SPARK_Mode => Off is`
+- Line 360: `procedure Write_RGA (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : RGA) with SPARK_Mode => Off is`
   - Justification: Serialization
 
-- Line 390: `procedure Read_RGA (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : out RGA) with SPARK_Mode => Off is`
+- Line 378: `procedure Read_RGA (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : out RGA) with SPARK_Mode => Off is`
 
 
 ### `src/sequences/crdt-sequences-yjs.adb`
@@ -125,7 +125,7 @@ All core specs use `SPARK_Mode` (On) at package level. The following packages ha
 ## Public vs Private Interface Count
 
 - Public subprograms: **170**
-- Private subprograms: **23**
+- Private subprograms: **25**
 
 ### Per-package breakdown
 
@@ -174,7 +174,7 @@ All core specs use `SPARK_Mode` (On) at package level. The following packages ha
   - `src/core/crdt-core.ads`: 4 subprograms
   - `src/core/crdt-hlc.ads`: 2 subprograms
   - `src/sequences/crdt-sequences-fugue.ads`: 0 subprograms
-  - `src/sequences/crdt-sequences-naive.ads`: 1 subprograms
+  - `src/sequences/crdt-sequences-naive.ads`: 3 subprograms
   - `src/sequences/crdt-sequences-yjs.ads`: 0 subprograms
   - `src/sequences/crdt-sequences.ads`: 0 subprograms
   - `src/serialization/crdt-serialization-legacy.ads`: 0 subprograms
