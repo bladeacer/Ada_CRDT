@@ -1,3 +1,7 @@
+# First-release fallback template. `make bump-version` normally copies the
+# most recent real release file so the full metadata (header comments,
+# `executables`, `[origin]`) carries forward; this file is only used when no
+# prior release manifest exists yet.
 name = "crdt"
 description = "CRDT library for Ada/SPARK"
 long-description = """
@@ -22,3 +26,5 @@ maintainers-logins = ["bladeacer"]
 licenses = "MIT"
 website = "https://github.com/bladeacer/ada_crdt"
 tags = ["crdt", "spark", "ada"]
+
+executables = ["test_crdt"]

@@ -15,6 +15,8 @@ Ada_CRDT/
 |-- Makefile                    # Build/test/doc/release/compliance targets
 |-- AGENTS.md                   # This file -- conventions and codebase guide
 |-- README.md                   # User-facing docs
+|-- CONTRIBUTING.md             # Contribution guide (issues/PRs)
+|-- CODE_OF_CONDUCT.md          # Contributor Covenant 3.0
 |-- src/
 |   |-- crdt.ads                # Root package (SPARK_Mode)
 |   |-- crdt-lww_element_sets.* # LWW set (Lamport timestamps, backwards-compat)
@@ -53,6 +55,10 @@ Ada_CRDT/
 |   |-- crdt_demo.gpr          # Demo project file
 |   |-- demo_life.adb          # Conway's Game of Life demo
 |   +-- deps/vt100/            # Terminal VT100 library
+|-- .github/
+|   |-- FUNDING.yml            # Sponsor links
+|   |-- ISSUE_TEMPLATE/        # Bug/feature/security templates
+|   +-- workflows/             # CI + PR compliance workflows
 |-- docs/
 |   |-- compliance/            # DO-178C artifacts
 |   |   |-- index.md           # Overview, DAL-C scope
@@ -412,6 +418,17 @@ To switch between them:
 | `make prod-setup` | `git checkout alire.toml` to restore clean version |
 
 ### Release Process
+
+`make bump-version VERSION=1.7.0` prepares the release metadata without
+committing:
+1. Updates the version in `alire.toml`, `alire-dev.toml`, `demo/alire.toml`,
+   and `AGENTS.md` (rejects non-semver, already-set, or older versions)
+2. Creates/updates `alire/releases/crdt-{version}.toml` (copied from the most
+   recent release manifest so `executables` and `[origin]` carry forward)
+3. Creates/updates `index/ad/crdt/crdt-{version}.toml`
+4. Points the release manifest `[origin]` at the current commit and reminds
+   you to write/validate `docs/changelogs/crdt-{version}.md`
+   (`make changelog-check`)
 
 `make release VERSION=1.7.0`:
 1. Updates `alire.toml` and `alire-dev.toml` version

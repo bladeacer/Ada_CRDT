@@ -535,7 +535,16 @@ bump-version:
 		echo "Error: version must be in x.y.z format (got: $$version)"; \
 		exit 1; \
 	fi; \
-	echo "Bumping version to $$version..."; \
+	current=$$(sed -n 's/^version = "\(.*\)"/\1/p' alire.toml); \
+	if [ "$$current" = "$$version" ]; then \
+		echo "Error: version $$version is already set in alire.toml"; \
+		exit 1; \
+	fi; \
+	if [ "$$(printf '%s\n%s\n' "$$current" "$$version" | sort -V | head -1)" != "$$current" ]; then \
+		echo "Error: $$version is not newer than current version $$current"; \
+		exit 1; \
+	fi; \
+	echo "Bumping version from $$current to $$version..."; \
 	\
 	sed -i 's/^version = ".*"/version = "'$$version'"/' alire.toml; \
 	echo "  alire.toml: version = \"$$version\""; \
@@ -546,28 +555,44 @@ bump-version:
 	sed -i 's/(currently [0-9]\+\.[0-9]\+\.[0-9]\+)/(currently '"$$version"')/' AGENTS.md; \
 	echo "  AGENTS.md: version reference updated"; \
 	\
+	latest_release=$$(ls alire/releases/crdt-*.toml 2>/dev/null | grep -v 'crdt-0\.0\.0\.toml' | sort -V | tail -1); \
 	release_file="alire/releases/crdt-$$version.toml"; \
-	if [ ! -f "$$release_file" ]; then \
-		sed 's/^version = ".*"/version = "'$$version'"/' alire/releases/crdt-0.0.0.toml > "$$release_file"; \
-		echo "  $$release_file: created"; \
-	else \
+	if [ -f "$$release_file" ]; then \
 		sed -i 's/^version = ".*"/version = "'$$version'"/' "$$release_file"; \
 		echo "  $$release_file: updated"; \
+	elif [ -n "$$latest_release" ]; then \
+		sed 's/^version = ".*"/version = "'$$version'"/' "$$latest_release" > "$$release_file"; \
+		echo "  $$release_file: created (from $$latest_release)"; \
+	else \
+		sed 's/^version = ".*"/version = "'$$version'"/' alire/releases/crdt-0.0.0.toml > "$$release_file"; \
+		echo "  $$release_file: created (first release)"; \
+	fi; \
+	if grep -q '^\[origin\]' "$$release_file"; then \
+		sed -i "s/^commit = \".*\"/commit = \"$$(git rev-parse HEAD)\"/" "$$release_file"; \
+		echo "  $$release_file: [origin] commit -> $$(git rev-parse --short HEAD)"; \
 	fi; \
 	\
+	latest_index=$$(ls index/ad/crdt/crdt-*.toml 2>/dev/null | grep -v 'crdt-0\.' | sort -V | tail -1); \
 	index_file="index/ad/crdt/crdt-$$version.toml"; \
-	if [ ! -f "$$index_file" ]; then \
-		sed 's/^version = ".*"/version = "'$$version'"/' index/ad/crdt/crdt-0.1.0-dev.toml > "$$index_file"; \
-		echo "  $$index_file: created"; \
-	else \
+	if [ -f "$$index_file" ]; then \
 		sed -i 's/^version = ".*"/version = "'$$version'"/' "$$index_file"; \
 		echo "  $$index_file: updated"; \
+	elif [ -n "$$latest_index" ]; then \
+		sed 's/^version = ".*"/version = "'$$version'"/' "$$latest_index" > "$$index_file"; \
+		echo "  $$index_file: created (from $$latest_index)"; \
+	else \
+		sed 's/^version = ".*"/version = "'$$version'"/' index/ad/crdt/crdt-0.1.0-dev.toml > "$$index_file"; \
+		echo "  $$index_file: created"; \
 	fi; \
 	\
-	echo "Done. Remember to:"; \
-	echo "  - Create docs/changelogs/crdt-$$version.md (if not done)"; \
-	echo "  - Update docs/changelogs/index.md"; \
-	echo "  - Commit: git commit -am \"Release $$version\" && git tag -a v$$version -m \"Release $$version\""
+	echo "Done. Next steps:"; \
+	if [ -f "docs/changelogs/crdt-$$version.md" ]; then \
+		echo "  - docs/changelogs/crdt-$$version.md: present (validate with make changelog-check)"; \
+	else \
+		echo "  - WARNING: docs/changelogs/crdt-$$version.md missing -- write it (canonical format) before make release"; \
+	fi; \
+	echo "  - Regenerate changelog index + API docs: make doc"; \
+	echo "  - Commit, tag, and push: make release VERSION=$$version"
 
 release:
 	@if [ -n "$(VERSION)" ]; then \

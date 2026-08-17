@@ -366,6 +366,14 @@ Badges:
 
 - [adacovex](https://github.com/bladeacer/adacovex): Ada/SPARK code/proof coverage, SPARK level, DO-178C HAL status tool 
 
+## Contributing
+
+Contributions are welcome! Please read our
+[Contributing Guide](./CONTRIBUTING.md) and
+[Code of Conduct](./CODE_OF_CONDUCT.md) before opening an issue or pull
+request. Use the issue templates in `.github/ISSUE_TEMPLATE/` for bug reports,
+feature requests, and security reports.
+
 ## License
 
 MIT License.
