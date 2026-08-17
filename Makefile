@@ -1,4 +1,4 @@
-.PHONY: help all build run test prove coverage-gate doc api-docs badges sbom compliance verify-report ascii-check fmt bump-version clean release publish demo covex
+.PHONY: help all build run test prove coverage-gate doc api-docs badges sbom compliance changelog-check verify-report ascii-check fmt bump-version clean release publish demo covex
 
 .DEFAULT_GOAL := help
 
@@ -19,6 +19,7 @@ help:
 	@echo '  badges        Regenerate SVG badges via adacovex (docs/badges/)'
 	@echo '  sbom          Generate a proof-aware CycloneDX SBOM (sbom.json)'
 	@echo '  compliance    HLR traceability check + auto-generate verification report'
+	@echo '  changelog-check  Validate changelog format (canonical C#/H# style)'
 	@echo '  ascii-check   Enforce ASCII-only charset across all source files'
 	@echo '  fmt           Format all Ada sources with gnatformat (requires make dev-setup)'
 	@echo '  bump-version  Bump version across alire.toml, alire-dev.toml, demo, releases, index (VERSION=x.y.z)'
@@ -91,7 +92,9 @@ covex:
 
 prove: covex
 	@$(swap-in-covex) \
-	SOURCE_DATE_EPOCH=$$(git show -s --format=%ct HEAD 2>/dev/null || echo 0) $(ADACOVEX_BIN) prove --target=. --dal=C --emit-svg=docs/badges/; \
+	force=""; \
+	if [ ! -f obj/gnatprove/gnatprove.out ]; then force="--force"; fi; \
+	SOURCE_DATE_EPOCH=$$(git show -s --format=%ct HEAD 2>/dev/null || echo 0) $(ADACOVEX_BIN) prove --target=. --dal=C --emit-svg=docs/badges/ $$force; \
 	status=$$?; \
 	$(swap-out-covex) \
 	exit $$status
@@ -331,7 +334,11 @@ sbom: covex
 	$(swap-out-covex) \
 	exit $$status
 
-compliance: verify-report
+changelog-check:
+	@echo "=== Changelog format check ==="; \
+	python3 tools/check-changelog.py
+
+compliance: verify-report changelog-check
 	@echo ""; \
 	echo "=== DO-178C Traceability Verification ==="; \
 	errors=0; \
@@ -452,12 +459,28 @@ fmt:
 doc: api-docs
 
 api-docs:
-	mkdir -p obj
-	alr exec -- gnatdoc -P crdt.gpr --backend=rst --generate private --output-dir=obj/gnatdoc-rst
-	python3 tools/rst2md.py obj/gnatdoc-rst docs/api-docs
-	rm -f docs/api-docs/test_*.md docs/api-docs/crdt-test_support.md
-	sed -i '/](test_[^)]*\.md)/d' docs/api-docs/index.md
-	sed -i '/](crdt-test_support\.md)/d' docs/api-docs/index.md
+	@echo "=== Generating API docs with gnatdoc ==="; \
+	if ! grep -qE '^[[:space:]]*gnatdoc_bin[[:space:]]*=' alire.toml 2>/dev/null; then \
+		cp alire.toml alire.toml.docbak; \
+		cp alire-dev.toml alire.toml; \
+		restore=1; \
+	else \
+		restore=0; \
+	fi; \
+	mkdir -p obj; \
+	alr exec -- gnatdoc -P crdt.gpr --backend=rst --generate private --output-dir=obj/gnatdoc-rst; \
+	status=$$?; \
+	if [ "$$restore" -eq 1 ]; then \
+		mv alire.toml.docbak alire.toml; \
+	fi; \
+	if [ "$$status" -ne 0 ]; then \
+		echo "  gnatdoc failed (exit $$status)"; \
+		exit $$status; \
+	fi; \
+	python3 tools/rst2md.py obj/gnatdoc-rst docs/api-docs; \
+	rm -f docs/api-docs/test_*.md docs/api-docs/crdt-test_support.md; \
+	sed -i '/](test_[^)]*\.md)/d' docs/api-docs/index.md; \
+	sed -i '/](crdt-test_support\.md)/d' docs/api-docs/index.md; \
 	python3 tools/gen-coverage.py
 	@echo "Regenerating docs/changelogs/index.md..."
 	@{ \
@@ -608,4 +631,4 @@ demo:
 
 clean:
 	alr clean
-	rm -rf obj/ lib/ docs/badges/ docs/api-docs/ docs/compliance/VERIFICATION.md docs/compliance/TRACE.md
+	rm -rf obj/ lib/ docs/badges/ docs/api-docs/ docs/compliance/VERIFICATION.md

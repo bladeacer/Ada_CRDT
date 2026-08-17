@@ -2,7 +2,7 @@
 
 Naive per-element RGA engine. Every single element is its own individually allocated node. Useful for: educational baselines, chaotic editing environments, or small sequences where per-element overhead is acceptable.
 
-> **Note:** 27 public item(s) shown below; 5 private internal item(s) are in the `private` section.
+> **Note:** 27 public item(s) shown below; 6 private internal item(s) are in the `private` section.
 
 ## Types
 
@@ -142,7 +142,9 @@ end record;
 
 | Parameter | Description |
 |-----------|-------------|
-| `R` |  |
+| `R` | The sequence to check. |
+
+**Returns:** True when the RGA satisfies its structural invariant.
 
 ### function Length (R : CRDT.Sequences.Naive.RGA) return Standard.Natural
 
@@ -162,27 +164,27 @@ end record;
 
 ## Procedures
 
-### procedure Compact (R : CRDT.Sequences.Naive.RGA)
+### procedure Compact (R : CRDT.Sequences.Naive.RGA) `[Pre]` `[Post]`
 
 | Parameter | Description |
 |-----------|-------------|
 | `R` | The sequence to compact. |
 
-### procedure Delete (R : CRDT.Sequences.Naive.RGA; Pos : Standard.Positive)
+### procedure Delete (R : CRDT.Sequences.Naive.RGA; Pos : Standard.Positive) `[Pre]` `[Post]`
 
 | Parameter | Description |
 |-----------|-------------|
 | `Pos` | 1-based position of element to delete. |
 | `R` | The sequence to modify. |
 
-### procedure Delete_Node (R : CRDT.Sequences.Naive.RGA; Id : CRDT.Sequences.Naive.Node_Id)
+### procedure Delete_Node (R : CRDT.Sequences.Naive.RGA; Id : CRDT.Sequences.Naive.Node_Id) `[Pre]` `[Post]`
 
 | Parameter | Description |
 |-----------|-------------|
 | `Id` | Node identifier of the item to delete. |
 | `R` | The sequence to modify. |
 
-### procedure Insert (R : CRDT.Sequences.Naive.RGA; Pos : Standard.Positive; Id : CRDT.Sequences.Naive.Node_Id; Value : CRDT.Sequences.Naive.Element_Type)
+### procedure Insert (R : CRDT.Sequences.Naive.RGA; Pos : Standard.Positive; Id : CRDT.Sequences.Naive.Node_Id; Value : CRDT.Sequences.Naive.Element_Type) `[Pre]` `[Post]`
 
 | Parameter | Description |
 |-----------|-------------|
@@ -191,7 +193,7 @@ end record;
 | `R` | The sequence to modify. |
 | `Value` | Element to insert. |
 
-### procedure Insert_Bulk (R : CRDT.Sequences.Naive.RGA; Pos : Standard.Positive; Id : CRDT.Sequences.Naive.Node_Id; Values : CRDT.Sequences.Naive.Element_Array)
+### procedure Insert_Bulk (R : CRDT.Sequences.Naive.RGA; Pos : Standard.Positive; Id : CRDT.Sequences.Naive.Node_Id; Values : CRDT.Sequences.Naive.Element_Array) `[Pre]` `[Post]`
 
 | Parameter | Description |
 |-----------|-------------|
@@ -200,7 +202,7 @@ end record;
 | `R` | The sequence to modify. |
 | `Values` | Array of elements to insert contiguously. |
 
-### procedure Merge (Target : CRDT.Sequences.Naive.RGA; Source : CRDT.Sequences.Naive.RGA)
+### procedure Merge (Target : CRDT.Sequences.Naive.RGA; Source : CRDT.Sequences.Naive.RGA) `[Pre]` `[Post]`
 
 | Parameter | Description |
 |-----------|-------------|
@@ -235,5 +237,6 @@ end record;
 - **type** `RGA_Item`
 - **type** `Item_Array`
 - **type** `Cursor`
-- **function** `Invariant`
 - **type** `RGA`
+- **function** `Has_Element`
+- **function** `Has_Element`

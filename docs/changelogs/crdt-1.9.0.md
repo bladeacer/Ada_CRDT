@@ -8,9 +8,9 @@ SPARK-analyzable units with 0 unproved verification conditions and justified
 VCs trimmed to 42, and the project now drives the adacovex tool through the
 standard `covex` dev dependency rather than a hard-coded sibling checkout.
 
-## Build System
+## Changes
 
-### Adacovex Tooling Integration
+### C1: Adacovex Tooling Integration
 
 Replaced the ad-hoc `../adacovex/bin/adacovex` invocation in the `prove`,
 `coverage-gate`, and `badges` Makefile targets with the standard adacovex dev
@@ -27,64 +27,64 @@ workflow:
   path into the `../adacovex` working tree.
 
 This decouples the project from a sibling adacovex checkout and aligns the
-local dev flow with the published `covex` crate and the
-`bladeacer/adacovex` GitHub Action.
+local dev flow with the published `covex` crate and the `bladeacer/adacovex`
+GitHub Action.
 
-### Adacovex CI Manifest Fix
+### C2: Adacovex CI Manifest Fix
 
-- `alire.toml` is restored to the clean publishing manifest: it carried the full
-  dev toolchain (`gnatprove`, `gnatdoc_bin`, `gnatformat_bin`, `covex`) plus a
-  `[[pins]] covex = { path = "../adacovex" }`. In a fresh checkout or in CI
-  that path does not exist, so Alire aborted loading the workspace and **every
-  CI step that touched the manifest failed** (`alr build`, and the adacovex
-  action's `Run GNATprove` -- which resolves `gnatprove` via the target
-  manifest -- died with `Pin path is not a valid directory`).
+- `alire.toml` is restored to the clean publishing manifest: it carried the
+  full dev toolchain (`gnatprove`, `gnatdoc_bin`, `gnatformat_bin`, `covex`)
+  plus a `[[pins]] covex = { path = "../adacovex" }`. In a fresh checkout or
+  in CI that path does not exist, so Alire aborted loading the workspace and
+  **every CI step that touched the manifest failed** (`alr build`, and the
+  adacovex action's `Run GNATprove` -- which resolves `gnatprove` via the
+  target manifest -- died with `Pin path is not a valid directory`).
 - `alire-dev.toml` now declares `covex = "*"` (a normal index dependency)
   instead of pinning it to `../adacovex`. The path pin resolved only on a
-  machine with the sibling checkout; removing it lets `alr exec` (and adacovex's
-  `prove` dev-manifest swap) load the workspace in CI and in consumer checkouts.
+  machine with the sibling checkout; removing it lets `alr exec` (and
+  adacovex's `prove` dev-manifest swap) load the workspace in CI and in
+  consumer checkouts.
 - Hardened the Makefile's manifest-detection greps (`swap-in-covex` / `fmt`)
   to match a real dependency declaration (`^covex =` / `^gnatformat_bin =`)
-  rather than the bare crate word, so documentation comments can never trip the
-  swap detection.
+  rather than the bare crate word, so documentation comments can never trip
+  the swap detection.
 
-## SPARK Proof
-
-### Platinum Restoration
+### C3: Platinum Restoration
 
 Restored SPARK Platinum (all SPARK-analyzable units fully proved, 0 unproved
 verification conditions) after a regression, primarily in the Naive sequence
 engine. This commit series touched: `src/sequences/crdt-sequences-naive.adb`,
-`crdt-lww_sets.ads`, `src/core/crdt-hlc.adb`, `src/core/crdt-clocks-vector.ads`,
-`src/core/crdt-clocks-matrix.ads`, `src/crdt-pn_counters.ads`,
-`src/crdt-rgas.ads`, and `src/crdt-lww_sets.adb`.
+`crdt-lww_sets.ads`, `src/core/crdt-hlc.adb`,
+`src/core/crdt-clocks-vector.ads`, `src/core/crdt-clocks-matrix.ads`,
+`src/crdt-pn_counters.ads`, `src/crdt-rgas.ads`, and `src/crdt-lww_sets.adb`.
 
-### Contract Strengthening
+### C4: Contract Strengthening
 
 Added and tightened contracts to discharge proof obligations:
 
-- **LWW_Clocked_Set** (`crdt-lww_sets.ads`): `Add`/`Remove`/`Merge` post-
-  conditions now also bound `Remove_Count (S) <= S.Capacity`; `Clear`'s
+- **LWW_Clocked_Set** (`crdt-lww_sets.ads`): `Add`/`Remove`/`Merge`
+  post-conditions now also bound `Remove_Count (S) <= S.Capacity`; `Clear`'s
   `Depends` clause tightened to `(S => S)`.
 - **RGA / Pn_Counters**: added `Pre => Index <= RS.Count`,
   `Pre => Size (RS) < RS.Count`, and `Type_Invariant => Sz <= Count` clauses
   to narrow the proof obligations on indexed access.
-- **Vector clock / Matrix clock** (`crdt-clocks-vector`, `crdt-clocks-matrix`):
-  added overflow justifications on clock-array read/assign preconditions.
+- **Vector clock / Matrix clock** (`crdt-clocks-vector`,
+  `crdt-clocks-matrix`): added overflow justifications on clock-array
+  read/assign preconditions.
 
-### HLC Overflow Justifications
+### C5: HLC Overflow Justifications
 
 `src/core/crdt-hlc.adb`: added `GNATprove` `False_Positive` annotations for
-"overflow check might fail", justified (the HLC Log is bounded in practice and
-reset whenever the wall clock advances).
+"overflow check might fail", justified (the HLC Log is bounded in practice
+and reset whenever the wall clock advances).
 
-### Naive Engine Loop Fixes
+### C6: Naive Engine Loop Fixes
 
-`src/sequences/crdt-sequences-naive.adb`: corrected loop bounds and loop-exit
-conditions that had regressed, restoring provability of the flat linked-list
-RGA engine under SPARK.
+`src/sequences/crdt-sequences-naive.adb`: corrected loop bounds and
+loop-exit conditions that had regressed, restoring provability of the flat
+linked-list RGA engine under SPARK.
 
-### Justified-to-Proved Reduction
+### C7: Justified-to-Proved Reduction
 
 Non-deferred SPARK checks that were previously marked as false positives are
 now proven outright:
@@ -111,48 +111,78 @@ that cannot be discharged without changing behaviour or public contracts: HLC
 linked-list traversal termination (17), deliberate accessor range checks (2),
 and stream-attribute `not null`/invariant checks (11).
 
-## Documentation & Tooling
-
-### Python Tooling Typing Refactor
+### C8: Python Tooling Typing Refactor
 
 `tools/gen-coverage.py` and `tools/rst2md.py` now use typed helpers and
 `TypedDict`-based structured data (SPARK_Mode => Off breakdowns, proof stats,
 sub-item blocks), making the doc-generation tooling more maintainable and
 robust.
 
-### RST-to-Markdown Pipeline
+### C9: RST-to-Markdown Pipeline
 
 `tools/rst2md.py`: refactored the Markdown generation with typed parsing
 helpers for package descriptions, annotations, and private-item extraction,
 improving robustness of the generated `docs/api-docs/` output.
 
-### Patch File for Vendored Demo Dependency
+### C10: Patch File for Vendored Demo Dependency
 
-Added `.adacovex/patches/demo/deps/vt100/vt100.ads` -- a docstring patch for the
-vendored VT100 library used by the demo, applied in strict mode so adacovex can
-assess its documentation.
+Added `.adacovex/patches/demo/deps/vt100/vt100.ads` -- a docstring patch for
+the vendored VT100 library used by the demo, applied in strict mode so
+adacovex can assess its documentation.
 
-### Compliance Index
+### C11: Compliance Index
 
 `docs/compliance/index.md`: corrected stale verification summary entries and
-removed obsolete/incorrect statements, keeping the compliance overview accurate.
+removed obsolete/incorrect statements, keeping the compliance overview
+accurate.
 
-## SBOM
+### C12: SBOM Regeneration
 
 `sbom.json`: regenerated as a proof-aware CycloneDX document reflecting the
 current proof and test state (updated `make sbom` output).
 
-## Badges
+### C13: Badge Regeneration
 
 `docs/badges/*.svg`: regenerated with text-shadow removed from SVG badges for
 crisper rendering; the adacovex badge step now produces clean SVG artifacts.
 
-## Other
+## Fixes
 
-- **crdt-bounded.ads**: reverted `with CRDT.Rga with SPARK_Mode` back to a bare
-  `pragma SPARK_Mode;` (plus a plain `with`), aligning with the remaining spec
-  files in the tree.
-- **Broken links**: fixed stale documentation/Quick-Reference links.
+### H1: crdt-bounded.ads SPARK_Mode Consistency
+
+`crdt-bounded.ads`: reverted `with CRDT.Rga with SPARK_Mode` back to a bare
+`pragma SPARK_Mode;` (plus a plain `with`), aligning with the remaining spec
+files in the tree.
+
+### H2: Broken Links
+
+Fixed stale documentation/Quick-Reference links.
+
+## Test Suite
+
+10290 tests passing across 9 categories (unchanged from 1.8.0).
+
+## Proof Results
+
+| Metric | Count |
+|--------|-------|
+| Total checks | 584 |
+| Proved | 435 (74%) |
+| Justified | 42 (7%) |
+| Unproved | 0 (0%) |
+| Run-time Checks | 331 (294 proved, 37 justified, 0 unproved) |
+| Assertions | 58 (58 proved) |
+| Functional Contracts | 83 (83 proved) |
+| Termination | 68 (63 proved) |
+| Analyzed + skipped units | 152 analyzed, 97 skipped (10 generic, 97 SPARK_Mode => Off) |
+
+SPARK assurance: **Stone + Bronze + Silver + Gold + Platinum** -- all
+SPARK-analyzable units fully proved with 0 unproved verification conditions.
+
+## Traceability
+
+24 HLR tags (unchanged); compliance index corrected. All changes are covered
+by the existing HLR set -- no new HLRs added in this release.
 
 ## Breaking Changes
 

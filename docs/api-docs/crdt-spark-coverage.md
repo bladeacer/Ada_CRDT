@@ -57,7 +57,7 @@ All core specs use `SPARK_Mode` (On) at package level. The following packages ha
 
 ### `src/core/crdt-hlc.adb`
 
-- Line 98: `function Current_Time return Ada.Calendar.Time with SPARK_Mode => Off is`
+- Line 94: `function Current_Time return Ada.Calendar.Time with SPARK_Mode => Off is`
 
 
 ### `src/crdt-lww_element_sets.adb`
@@ -69,16 +69,16 @@ All core specs use `SPARK_Mode` (On) at package level. The following packages ha
 
 ### `src/crdt-lww_sets.adb`
 
-- Line 99: `procedure Write_LWW_Clocked_Set (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : LWW_Clocked_Set) with SPARK_Mode => Off is`
+- Line 99: `procedure Write_LWW_Clocked_Set (Stream : access Ada.Streams.Root_Stream_Type'Class; Item : LWW_Clocked_Set) with SPARK_Mode => Off is`
 
-- Line 112: `procedure Read_LWW_Clocked_Set (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : out LWW_Clocked_Set) with SPARK_Mode => Off is`
+- Line 112: `procedure Read_LWW_Clocked_Set (Stream : access Ada.Streams.Root_Stream_Type'Class; Item : out LWW_Clocked_Set) with SPARK_Mode => Off is`
 
 
 ### `src/crdt-pn_counters.adb`
 
-- Line 101: `procedure Write_PN_Counter (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : PN_Counter) with SPARK_Mode => Off is`
+- Line 115: `procedure Write_PN_Counter (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : PN_Counter) with SPARK_Mode => Off is`
 
-- Line 113: `procedure Read_PN_Counter (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : out PN_Counter) with SPARK_Mode => Off is`
+- Line 127: `procedure Read_PN_Counter (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : out PN_Counter) with SPARK_Mode => Off is`
 
 
 ### `src/crdt-rga.adb`
@@ -93,10 +93,16 @@ All core specs use `SPARK_Mode` (On) at package level. The following packages ha
 
 ### `src/sequences/crdt-sequences-naive.adb`
 
-- Line 360: `procedure Write_RGA (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : RGA) with SPARK_Mode => Off is`
+- Line 189: `function Element (Container : RGA; Position : Cursor) return Element_Type with SPARK_Mode => Off is`
+
+- Line 205: `function Get (R : RGA; Pos : Positive) return Element_Type with SPARK_Mode => Off is`
+
+- Line 340: `function "=" (Left, Right : RGA) return Boolean with SPARK_Mode => Off is`
+
+- Line 391: `procedure Write_RGA (Stream : access Ada.Streams.Root_Stream_Type'Class; Item : RGA) with SPARK_Mode => Off is`
   - Justification: Serialization
 
-- Line 378: `procedure Read_RGA (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : out RGA) with SPARK_Mode => Off is`
+- Line 409: `procedure Read_RGA (Stream : access Ada.Streams.Root_Stream_Type'Class; Item : out RGA) with SPARK_Mode => Off is`
 
 
 ### `src/sequences/crdt-sequences-yjs.adb`
@@ -124,8 +130,8 @@ All core specs use `SPARK_Mode` (On) at package level. The following packages ha
 
 ## Public vs Private Interface Count
 
-- Public subprograms: **170**
-- Private subprograms: **25**
+- Public subprograms: **171**
+- Private subprograms: **24**
 
 ### Per-package breakdown
 
@@ -146,7 +152,7 @@ All core specs use `SPARK_Mode` (On) at package level. The following packages ha
   - `src/core/crdt-core.ads`: 6 subprograms
   - `src/core/crdt-hlc.ads`: 4 subprograms
   - `src/sequences/crdt-sequences-fugue.ads`: 17 subprograms
-  - `src/sequences/crdt-sequences-naive.ads`: 17 subprograms
+  - `src/sequences/crdt-sequences-naive.ads`: 18 subprograms
   - `src/sequences/crdt-sequences-yjs.ads`: 19 subprograms
   - `src/sequences/crdt-sequences.ads`: 0 subprograms
   - `src/serialization/crdt-serialization-legacy.ads`: 1 subprograms
@@ -174,7 +180,7 @@ All core specs use `SPARK_Mode` (On) at package level. The following packages ha
   - `src/core/crdt-core.ads`: 4 subprograms
   - `src/core/crdt-hlc.ads`: 2 subprograms
   - `src/sequences/crdt-sequences-fugue.ads`: 0 subprograms
-  - `src/sequences/crdt-sequences-naive.ads`: 3 subprograms
+  - `src/sequences/crdt-sequences-naive.ads`: 2 subprograms
   - `src/sequences/crdt-sequences-yjs.ads`: 0 subprograms
   - `src/sequences/crdt-sequences.ads`: 0 subprograms
   - `src/serialization/crdt-serialization-legacy.ads`: 0 subprograms

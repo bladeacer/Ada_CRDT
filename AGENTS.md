@@ -289,12 +289,49 @@ CRDT.Clocks.Matrix             -- explicit Matrix strategy
 - **API docs**: Doc comments in `.ads` files using `--  @param`, `--  @return`, `--  @field`, `--  @formal` annotations. Generated via `make doc` which runs `gnatdoc` -> RST -> `tools/rst2md.py` -> `docs/api-docs/`. Now documents **both public and private** entities (`--generate private`). **This is the extended source of truth** for all subprograms, types, and interfaces.
 - **Changelogs**: Hand-written per-version in `docs/changelogs/crdt-X.Y.Z.md`. Auto-indexed via `make doc`.
 
-  **Changelog convention** (applies to every `crdt-X.Y.Z.md`):
-  - **Naming**: one file per released version: `crdt-1.7.0.md`, `crdt-1.7.1.md`, `crdt-1.8.0.md`. A patch release file sorts between the surrounding minors. The file is written when a release is prepared; work toward the *next* version goes into the not-yet-cut changelog file only.
-  - **Header**: `### CRDT X.Y.Z`, followed by `Date: _YYYY-MM-DD_` (italic) and a 2-4 sentence summary of the release's theme.
-  - **Sections**: `## New Features`, `## Changes`, `## Build System`, `## SPARK Proof`, `## Documentation & Tooling`, `## Correctness`, `## Consistency`, `## Compliance`, `## SBOM`, `## Badges`, `## Other`, `## Breaking Changes` (always present; `None. ...` when nothing breaks), and a trailing `## Version` with `Bumped from A.B.C to X.Y.Z.`. Sub-topics use `###` subsections; lists indent with 3 spaces.
-  - **Accuracy**: every entry must describe a change that is actually present in that release and must not duplicate a change that already shipped in an earlier release (verify against git; a fix belongs in the changelog of the version that introduced it). Proof/test statistics must match `make prove` / `make verify-report` output.
-  - **Style**: ASCII-only, `--` for dashes, no emoji. Older entries may use looser formatting; keep new entries compliant.
+  **Changelog convention** -- one canonical format applies to every
+  `crdt-X.Y.Z.md` (past, present, and future), machine-enforced by
+  `make changelog-check` (`tools/check-changelog.py`) and run as part of
+  `make compliance`. The format below is the single enforced format; the
+  sibling `adacovex` project's changelogs use the same C#/H# style.
+  - **Naming**: one file per released version: `crdt-1.7.0.md`,
+    `crdt-1.7.1.md`, `crdt-1.8.0.md`. A patch release file sorts between the
+    surrounding minors. The file is written when a release is prepared; work
+    toward the *next* version goes into the not-yet-cut changelog file only.
+  - **Header**: `### CRDT X.Y.Z` as the first line, followed by a blank line,
+    `Date: _YYYY-MM-DD_` (italic), a blank line, and a 2-4 sentence summary of
+    the release's theme. No title above the `###` header; no other header
+    lines.
+  - **Sections**: exactly these `##` sections, in this order, using only those
+    relevant to the release (omit, do not stub out, unused topical sections):
+    `## Changes` (numbered `### C1:`... subsections), `## Fixes` (numbered
+    `### H1:`... subsections; at least one of Changes/Fixes must be present),
+    then the mandatory closers `## Test Suite`, `## Proof Results`,
+    `## Traceability`, `## Breaking Changes`, and `## Version` (always
+    present, in that order, at the end of the file). Sub-topics under
+    Changes/Fixes use `### C#:` / `### H#:` numbered subsections with
+    Title-Case headings, numbered sequentially from 1 within each section
+    (C1..Cn, H1..Hn); lists and detail lines indent with 3 spaces; proof/test
+    statistics are presented as Markdown tables.
+  - **Test Suite**: mandatory; reports the passing test count for the release
+    (e.g. `10290 tests passing`) and any new tests added.
+  - **Proof Results**: mandatory; reports SPARK proof statistics for the
+    release (total/proved/justified/unproved VCs), as a table where multiple
+    numbers are reported.
+  - **Traceability**: mandatory; lists the HLR tags relevant to the release
+    and notes any HLRs added/removed (e.g. `24 HLR tags (unchanged)`),
+    or states that no HLRs existed yet for early versions.
+  - **Breaking Changes**: always present. Write `None.` followed by a short
+    justification sentence when nothing breaks; otherwise a `-` bullet list.
+  - **Version**: always present as the last section, containing exactly
+    `Bumped from A.B.C to X.Y.Z.`.
+  - **Accuracy**: every entry must describe a change that is actually present
+    in that release and must not duplicate a change that already shipped in an
+    earlier release (verify against git; a fix belongs in the changelog of the
+    version that introduced it). Proof/test statistics must match `make prove`
+    / `make verify-report` output.
+  - **Style**: ASCII-only, `--` for dashes, no emoji, no smart quotes.
+    Headings use Title Case; section text uses sentence case.
 - **README**: Hand-written, mirrors Codeberg repo page. Provides a high-level overview; **consult generated API docs** (`docs/api-docs/index.md`) for complete interface reference. Code examples in README are illustrative; the generated API docs should be considered authoritative for exact signatures and usage.
 - **Compliance**: DO-178C artifacts in `docs/compliance/`. HLRs/LLRs are hand-written and must stay in sync with source code. `make compliance` validates HLR tag consistency.
 - **Private interface warnings**: Private items in `.ads` files carry a docstring warning that they may change between minor versions and are not part of the stable public API.

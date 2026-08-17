@@ -1,6 +1,7 @@
 # CRDT Changelogs
 
 <!-- CHANGELOG_LIST -->
+- [1.10.0](crdt-1.10.0.md)
 - [1.9.0](crdt-1.9.0.md)
 - [1.8.0](crdt-1.8.0.md)
 - [1.7.1](crdt-1.7.1.md)
