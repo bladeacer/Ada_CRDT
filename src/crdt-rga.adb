@@ -463,7 +463,7 @@ is
    --  Serialization       --
    --------------------------
 
-   procedure Write_RGA (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : RGA) is
+   procedure Write_RGA (Stream : access Ada.Streams.Root_Stream_Type'Class; Item : RGA) is
       use Ada.Streams;
    begin
       Core.LEB128.Encode (Stream, 2);
@@ -484,7 +484,7 @@ is
       end;
    end Write_RGA;
 
-   procedure Read_RGA (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : out RGA) is
+   procedure Read_RGA (Stream : access Ada.Streams.Root_Stream_Type'Class; Item : out RGA) is
       use Ada.Streams;
       use CRDT.Serialization;
       Kind      : Protocol_Kind;

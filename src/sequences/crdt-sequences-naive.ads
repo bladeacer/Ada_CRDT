@@ -26,6 +26,13 @@ package CRDT.Sequences.Naive with SPARK_Mode is
    --  Bounded Naive RGA with pre-allocated node capacity.
    type RGA (Capacity : Positive) is private;
 
+   --  Structural invariant of the RGA. See the private part for the
+   --  definition; exposed so public operations can state Pre/Post that keep
+   --  the engine structurally safe at every entry/exit.
+   --  @param R  The sequence to check.
+   --  @return True when the RGA satisfies its structural invariant.
+   function Invariant (R : RGA) return Boolean;
+
    --  Standard Ada iterator support
    type Cursor is private;
 
@@ -84,30 +91,35 @@ package CRDT.Sequences.Naive with SPARK_Mode is
    --  @param Pos    1-based insertion position.
    --  @param Id     Unique node identifier for this element.
    --  @param Value  Element to insert.
-   procedure Insert (R : in out RGA; Pos : Positive; Id : Node_Id; Value : Element_Type);
+   procedure Insert (R : in out RGA; Pos : Positive; Id : Node_Id; Value : Element_Type)
+   with Pre => Invariant (R), Post => Invariant (R);
 
    --  Insert multiple contiguous elements as a single Item block.
    --  @param R       The sequence to modify.
    --  @param Pos     1-based insertion position.
    --  @param Id      Unique node identifier (used for first element).
    --  @param Values  Array of elements to insert contiguously.
-   procedure Insert_Bulk (R : in out RGA; Pos : Positive; Id : Node_Id; Values : Element_Array);
+   procedure Insert_Bulk (R : in out RGA; Pos : Positive; Id : Node_Id; Values : Element_Array)
+   with Pre => Invariant (R), Post => Invariant (R);
 
    --  Tombstone-delete element at physical position.
    --  @param R    The sequence to modify.
    --  @param Pos  1-based position of element to delete.
-   procedure Delete (R : in out RGA; Pos : Positive);
+   procedure Delete (R : in out RGA; Pos : Positive)
+   with Pre => Invariant (R), Post => Invariant (R);
 
    --  Tombstone-delete the item with the given Node_Id.
    --  @param R   The sequence to modify.
    --  @param Id  Node identifier of the item to delete.
-   procedure Delete_Node (R : in out RGA; Id : Node_Id);
+   procedure Delete_Node (R : in out RGA; Id : Node_Id)
+   with Pre => Invariant (R), Post => Invariant (R);
 
    --  Convergent merge: insert all Source items not in Target,
    --  preserving causal order by Node_Id.
    --  @param Target  The sequence to merge into.
    --  @param Source  The sequence to merge from.
-   procedure Merge (Target : in out RGA; Source : RGA);
+   procedure Merge (Target : in out RGA; Source : RGA)
+   with Pre => Invariant (Target) and then Invariant (Source), Post => Invariant (Target);
 
    --  Structural equality: same Node_Id, content, and deletion status.
    --  @param Left   Left sequence operand.
@@ -117,17 +129,18 @@ package CRDT.Sequences.Naive with SPARK_Mode is
 
    --  Physically remove all tombstoned items, reclaiming slots.
    --  @param R  The sequence to compact.
-   procedure Compact (R : in out RGA);
+   procedure Compact (R : in out RGA)
+   with Pre => Invariant (R), Post => Invariant (R);
 
    --  Serialize the RGA to a stream.
    --  @param Stream  Output stream.
    --  @param Item    RGA to serialize.
-   procedure Write_RGA (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : RGA);
+   procedure Write_RGA (Stream : access Ada.Streams.Root_Stream_Type'Class; Item : RGA);
 
    --  Deserialize the RGA from a stream.
    --  @param Stream  Input stream.
    --  @param Item    Deserialized RGA.
-   procedure Read_RGA (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : out RGA);
+   procedure Read_RGA (Stream : access Ada.Streams.Root_Stream_Type'Class; Item : out RGA);
 
 private
 
@@ -145,30 +158,16 @@ private
       Pos   : Natural := 0;
    end record;
 
-   --  Structural invariant of the RGA: allocation counters stay within
-   --  capacity, the head and free pointers are either null or in-bounds, and
-   --  every node's Next link stays in-bounds. Referenced by the
-   --  Type_Invariant aspect and reused by body-local helper contracts so the
-   --  engine can prove its own structural safety.
-   --  @param R  The sequence to check.
-   --  @return True when the RGA satisfies its structural invariant.
-   function Invariant (R : RGA) return Boolean;
-
    type RGA (Capacity : Positive) is record
       Items : Item_Array (1 .. Capacity);
       Head  : Natural := 0;
       Count : Natural := 0;
       Free  : Natural := 0;
       Total : Natural := 0;
-   end record
-   with Type_Invariant => Invariant (RGA);
+   end record;
 
    for RGA'Write use Write_RGA;
-   pragma Annotate (GNATprove, False_Positive, "null exclusion check might fail", "RGA stream attribute is always called with a non-null stream by the Ada runtime");
-   pragma Annotate (GNATprove, False_Positive, "invariant check might fail", "Naive engine maintains its RGA invariant by construction");
    for RGA'Read use Read_RGA;
-   pragma Annotate (GNATprove, False_Positive, "null exclusion check might fail", "RGA stream attribute is always called with a non-null stream by the Ada runtime");
-   pragma Annotate (GNATprove, False_Positive, "invariant check might fail", "Naive engine maintains its RGA invariant by construction");
 
    --  Expression functions for SPARK visibility. See public specs for docs.
    --  @param Position  Cursor to check.

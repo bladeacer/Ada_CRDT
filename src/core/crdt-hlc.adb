@@ -62,8 +62,7 @@ is
          Clock.Wall := Now_Time;
          Clock.Log := 0;
       else
-         Clock.Log := Clock.Log + 1;
-         pragma Annotate (GNATprove, False_Positive, "overflow check might fail", "HLC Log bounded in practice (reset whenever wall clock advances)");
+         Clock.Log := (if Clock.Log = Natural'Last then Natural'Last else Clock.Log + 1);
       end if;
    end Tick;
 
@@ -78,16 +77,13 @@ is
          Clock.Wall := Now_Time;
          Clock.Log := 0;
       elsif Clock.Wall > Remote.Wall then
-         Clock.Log := Clock.Log + 1;
-         pragma Annotate (GNATprove, False_Positive, "overflow check might fail", "HLC Log bounded in practice (reset whenever wall clock advances)");
+         Clock.Log := (if Clock.Log = Natural'Last then Natural'Last else Clock.Log + 1);
       elsif Remote.Wall > Clock.Wall then
          Clock.Wall := Remote.Wall;
-         Clock.Log := Remote.Log + 1;
-         pragma Annotate (GNATprove, False_Positive, "overflow check might fail", "HLC Log bounded in practice (reset whenever wall clock advances)");
+         Clock.Log := (if Remote.Log = Natural'Last then Natural'Last else Remote.Log + 1);
       else
-         --Equal wall times
-         Clock.Log := Natural'Max (Clock.Log, Remote.Log) + 1;
-         pragma Annotate (GNATprove, False_Positive, "overflow check might fail", "HLC Log bounded in practice (reset whenever wall clock advances)");
+         --  Equal wall times
+         Clock.Log := (if Natural'Max (Clock.Log, Remote.Log) = Natural'Last then Natural'Last else Natural'Max (Clock.Log, Remote.Log) + 1);
       end if;
    end Recv;
 

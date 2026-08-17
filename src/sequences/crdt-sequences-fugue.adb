@@ -293,7 +293,7 @@ is
       null;
    end Compact;
 
-   procedure Write_RGA (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : RGA) is
+   procedure Write_RGA (Stream : access Ada.Streams.Root_Stream_Type'Class; Item : RGA) is
       use Ada.Streams;
       Cur : Natural := Inorder_First (Item, Item.Root);
    begin
@@ -308,7 +308,7 @@ is
       end loop;
    end Write_RGA;
 
-   procedure Read_RGA (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : out RGA) is
+   procedure Read_RGA (Stream : access Ada.Streams.Root_Stream_Type'Class; Item : out RGA) is
       use Ada.Streams;
       use CRDT.Serialization;
       Kind      : Protocol_Kind;

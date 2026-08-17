@@ -173,12 +173,12 @@ package CRDT.Sequences.Yjs with SPARK_Mode is
    --  Serialize the RGA to a stream.
    --  @param Stream  Output stream.
    --  @param Item    RGA to serialize.
-   procedure Write_RGA (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : RGA);
+   procedure Write_RGA (Stream : access Ada.Streams.Root_Stream_Type'Class; Item : RGA);
 
    --  Deserialize the RGA from a stream.
    --  @param Stream  Input stream.
    --  @param Item    Deserialized RGA.
-   procedure Read_RGA (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : out RGA);
+   procedure Read_RGA (Stream : access Ada.Streams.Root_Stream_Type'Class; Item : out RGA);
 
 private
 
@@ -208,8 +208,6 @@ private
    end record;
 
    for RGA'Write use Write_RGA;
-   pragma Annotate (GNATprove, False_Positive, "null exclusion check might fail", "RGA stream attribute is always called with a non-null stream by the Ada runtime");
    for RGA'Read use Read_RGA;
-   pragma Annotate (GNATprove, False_Positive, "null exclusion check might fail", "RGA stream attribute is always called with a non-null stream by the Ada runtime");
 
 end CRDT.Sequences.Yjs;

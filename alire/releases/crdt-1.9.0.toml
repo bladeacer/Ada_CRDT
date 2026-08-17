@@ -1,3 +1,12 @@
+# Clean publishing manifest. This is what gets committed and published to the
+# Alire community index; it carries NO dev-only dependencies (gnatprove,
+# gnatdoc_bin, gnatformat_bin, covex) and NO pins, so it builds in any consumer
+# workspace and in CI with only Alire + the GNAT toolchain installed.
+#
+# The development manifest (alire-dev.toml) extends this with the proof/doc/
+# formatting toolchain for local `make prove`, `make doc`, `make fmt`,
+# `make coverage-gate`, etc. The Makefile swaps it in temporarily
+# (`make dev-setup` / auto-swap) and restores this clean file afterwards.
 name = "crdt"
 description = "CRDT library for Ada/SPARK"
 long-description = """
@@ -22,3 +31,9 @@ maintainers-logins = ["bladeacer"]
 licenses = "MIT"
 website = "https://github.com/bladeacer/ada_crdt"
 tags = ["crdt", "spark", "ada"]
+
+executables = ["test_crdt"]
+[origin]
+commit = "62b7474e4544833e5bb9794700387c28a598b931"
+url = "git+https://github.com/bladeacer/ada_crdt.git"
+

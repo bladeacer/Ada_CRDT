@@ -25,8 +25,16 @@ is
       Total : Long_Long_Integer := 0;
    begin
       for I in 1 .. C.Count loop
-         Total := Total + Long_Long_Integer (C.Entries (I).P) - Long_Long_Integer (C.Entries (I).N);
-         pragma Annotate (GNATprove, False_Positive, "overflow check might fail", "Long_Long_Integer overflow impossible in practice");
+         if Total > Long_Long_Integer'Last - Long_Long_Integer (C.Entries (I).P) then
+            Total := Long_Long_Integer'Last;
+         else
+            Total := Total + Long_Long_Integer (C.Entries (I).P);
+         end if;
+         if Total < Long_Long_Integer'First + Long_Long_Integer (C.Entries (I).N) then
+            Total := Long_Long_Integer'First;
+         else
+            Total := Total - Long_Long_Integer (C.Entries (I).N);
+         end if;
       end loop;
       if Total < Long_Long_Integer (Integer'First) then
          return Integer'First;
@@ -47,8 +55,11 @@ is
          C.Count := C.Count + 1;
          C.Entries (C.Count) := (Actor => Actor, P => By, N => 0);
       else
-         C.Entries (Idx).P := C.Entries (Idx).P + By;
-         pragma Annotate (GNATprove, False_Positive, "overflow check might fail", "Counter_Range bounded in practice");
+         if By > Counter_Range'Last - C.Entries (Idx).P then
+            C.Entries (Idx).P := Counter_Range'Last;
+         else
+            C.Entries (Idx).P := C.Entries (Idx).P + By;
+         end if;
       end if;
       pragma Assert (C.Count >= Old_Ct);
    end Increment;
@@ -63,8 +74,11 @@ is
          C.Count := C.Count + 1;
          C.Entries (C.Count) := (Actor => Actor, P => 0, N => By);
       else
-         C.Entries (Idx).N := C.Entries (Idx).N + By;
-         pragma Annotate (GNATprove, False_Positive, "overflow check might fail", "Counter_Range bounded in practice");
+         if By > Counter_Range'Last - C.Entries (Idx).N then
+            C.Entries (Idx).N := Counter_Range'Last;
+         else
+            C.Entries (Idx).N := C.Entries (Idx).N + By;
+         end if;
       end if;
       pragma Assert (C.Count >= Old_Ct);
    end Decrement;

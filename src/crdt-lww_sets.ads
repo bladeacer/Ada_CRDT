@@ -24,8 +24,8 @@ generic
    with function "=" (L, R : Clock_Time) return Boolean is <>;
    with function ">" (L, R : Clock_Time) return Boolean is <>;
    with function Max (L, R : Clock_Time) return Clock_Time;
-   with procedure Write_Clock (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : Clock_Time) is <>;
-   with procedure Read_Clock (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : out Clock_Time) is <>;
+   with procedure Write_Clock (Stream : access Ada.Streams.Root_Stream_Type'Class; Item : Clock_Time) is <>;
+   with procedure Read_Clock (Stream : access Ada.Streams.Root_Stream_Type'Class; Item : out Clock_Time) is <>;
 package CRDT.Lww_Sets with SPARK_Mode is
 
    Max_Capacity : constant Positive := Max_Set_Size;
@@ -87,12 +87,12 @@ package CRDT.Lww_Sets with SPARK_Mode is
    --  Serialize the clocked set to a stream (V3: LEB128 + clock kind byte).
    --  @param Stream  Output stream to write to.
    --  @param Item    Set to serialize.
-   procedure Write_LWW_Clocked_Set (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : LWW_Clocked_Set);
+   procedure Write_LWW_Clocked_Set (Stream : access Ada.Streams.Root_Stream_Type'Class; Item : LWW_Clocked_Set);
 
    --  Deserialize the clocked set from a stream (auto-detects V1/V2/V3).
    --  @param Stream  Input stream to read from.
    --  @param Item    Set to populate from stream data.
-   procedure Read_LWW_Clocked_Set (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : out LWW_Clocked_Set);
+   procedure Read_LWW_Clocked_Set (Stream : access Ada.Streams.Root_Stream_Type'Class; Item : out LWW_Clocked_Set);
 
    for LWW_Clocked_Set'Write use Write_LWW_Clocked_Set;
    for LWW_Clocked_Set'Read use Read_LWW_Clocked_Set;

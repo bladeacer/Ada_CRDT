@@ -52,10 +52,10 @@ is
             S.Remove_Size := S.Remove_Size - 1;
          end if;
       else
-         S.Add_Size := S.Add_Size + 1;
-         pragma Annotate (GNATprove, False_Positive, "overflow check might fail", "LWW set size bounded by Capacity in practice");
-         S.Add_Array (S.Add_Size) := (E, TS);
-         pragma Annotate (GNATprove, False_Positive, "array index check might fail", "LWW set size bounded by Capacity in practice");
+         if S.Add_Size < S.Capacity then
+            S.Add_Size := S.Add_Size + 1;
+            S.Add_Array (S.Add_Size) := (E, TS);
+         end if;
       end if;
    end Add;
 
@@ -73,10 +73,10 @@ is
             S.Remove_Array (Remove_I) := (E, TS);
          end if;
       else
-         S.Remove_Size := S.Remove_Size + 1;
-         pragma Annotate (GNATprove, False_Positive, "overflow check might fail", "LWW set size bounded by Capacity in practice");
-         S.Remove_Array (S.Remove_Size) := (E, TS);
-         pragma Annotate (GNATprove, False_Positive, "array index check might fail", "LWW set size bounded by Capacity in practice");
+         if S.Remove_Size < S.Capacity then
+            S.Remove_Size := S.Remove_Size + 1;
+            S.Remove_Array (S.Remove_Size) := (E, TS);
+         end if;
       end if;
    end Remove;
 
@@ -96,7 +96,7 @@ is
    --  Write/Read --
    ---------------
 
-   procedure Write_LWW_Clocked_Set (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : LWW_Clocked_Set) with SPARK_Mode => Off is
+   procedure Write_LWW_Clocked_Set (Stream : access Ada.Streams.Root_Stream_Type'Class; Item : LWW_Clocked_Set) with SPARK_Mode => Off is
    begin
       CRDT.Serialization.Write_Header_V3 (Stream, Item.Add_Size, Item.Remove_Size, Clk_Kind);
       for I in 1 .. Item.Add_Size loop
@@ -109,7 +109,7 @@ is
       end loop;
    end Write_LWW_Clocked_Set;
 
-   procedure Read_LWW_Clocked_Set (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : out LWW_Clocked_Set) with SPARK_Mode => Off is
+   procedure Read_LWW_Clocked_Set (Stream : access Ada.Streams.Root_Stream_Type'Class; Item : out LWW_Clocked_Set) with SPARK_Mode => Off is
       Kind        : CRDT.Serialization.Protocol_Kind;
       Add_Size    : Natural;
       Remove_Size : Natural;

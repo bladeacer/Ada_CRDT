@@ -49,8 +49,9 @@ is
       if Idx > 0 then
          R.Items (Idx).Id := Id;
          R.Items (Idx).Value := Val;
-         R.Total := R.Total + 1;
-         pragma Annotate (GNATprove, False_Positive, "overflow check might fail", "Naive RGA Total bounded by Capacity in practice");
+         if R.Total < R.Capacity then
+            R.Total := R.Total + 1;
+         end if;
       end if;
    end New_Item;
 
@@ -60,36 +61,43 @@ is
       if Idx > 0 then
          R.Items (Idx) := Src;
          R.Items (Idx).Next := 0;
-         R.Total := R.Total + 1;
-         pragma Annotate (GNATprove, False_Positive, "overflow check might fail", "Naive RGA Total bounded by Capacity in practice");
+         if R.Total < R.Capacity then
+            R.Total := R.Total + 1;
+         end if;
       end if;
    end Copy_Item;
 
    function Find_Last (R : RGA) return Natural with Pre => Invariant (R), Post => Find_Last'Result in 0 .. R.Capacity is
-      Cur : Natural := R.Head;
+      Cur   : Natural := R.Head;
+      Steps : Natural := 0;
    begin
       if Cur = 0 then
          return 0;
       end if;
-      while R.Items (Cur).Next /= 0 loop
-         pragma Loop_Invariant (Cur in 1 .. R.Capacity);
+      loop
+         pragma Loop_Invariant (Cur in 1 .. R.Capacity and then Steps <= R.Capacity);
+         pragma Loop_Variant (Increases => Steps);
+         exit when R.Items (Cur).Next = 0 or else Steps >= R.Capacity;
          Cur := R.Items (Cur).Next;
+         Steps := Steps + 1;
       end loop;
-      pragma Annotate (GNATprove, False_Positive, "implicit aspect Always_Terminates", "Naive list is acyclic in practice");
       return Cur;
    end Find_Last;
 
    function Find_Node (R : RGA; Id : Node_Id) return Natural with Pre => Invariant (R), Post => Find_Node'Result in 0 .. R.Capacity is
-      Cur : Natural := R.Head;
+      Cur   : Natural := R.Head;
+      Steps : Natural := 0;
    begin
-      while Cur /= 0 loop
-         pragma Loop_Invariant (Cur in 0 .. R.Capacity);
+      loop
+         pragma Loop_Invariant (Cur in 0 .. R.Capacity and then Steps <= R.Capacity);
+         pragma Loop_Variant (Increases => Steps);
+         exit when Cur = 0 or else Steps >= R.Capacity;
          if R.Items (Cur).Id = Id then
             return Cur;
          end if;
          Cur := R.Items (Cur).Next;
+         Steps := Steps + 1;
       end loop;
-      pragma Annotate (GNATprove, False_Positive, "implicit aspect Always_Terminates", "Naive list is acyclic in practice");
       return 0;
    end Find_Node;
 
@@ -125,32 +133,38 @@ is
    function Find_Insertion_Before (R : RGA; Id : Node_Id) return Natural with Pre => Invariant (R), Post => Find_Insertion_Before'Result in 0 .. R.Capacity is
       Before : Natural := 0;
       T_Idx  : Natural := R.Head;
+      Steps  : Natural := 0;
    begin
-      while T_Idx /= 0 and Before = 0 loop
-         pragma Loop_Invariant (T_Idx in 0 .. R.Capacity and then Before in 0 .. R.Capacity);
+      loop
+         pragma Loop_Invariant (T_Idx in 0 .. R.Capacity and then Before in 0 .. R.Capacity and then Steps <= R.Capacity);
+         pragma Loop_Variant (Increases => Steps);
+         exit when T_Idx = 0 or Before /= 0 or Steps >= R.Capacity;
          if Id_Less (Id, R.Items (T_Idx).Id) then
             Before := T_Idx;
          else
             T_Idx := R.Items (T_Idx).Next;
          end if;
+         Steps := Steps + 1;
       end loop;
-      pragma Annotate (GNATprove, False_Positive, "implicit aspect Always_Terminates", "Naive list is acyclic in practice");
       return Before;
    end Find_Insertion_Before;
 
    function Find_Pos (R : RGA; Pos : Positive) return Natural with Pre => Invariant (R), Post => Find_Pos'Result in 0 .. R.Capacity is
-      P   : Natural := Pos;
-      Cur : Natural := R.Head;
+      P     : Natural := Pos;
+      Cur   : Natural := R.Head;
+      Steps : Natural := 0;
    begin
-      while Cur /= 0 loop
-         pragma Loop_Invariant (Cur in 0 .. R.Capacity and then P in 1 .. Natural'Last);
+      loop
+         pragma Loop_Invariant (Cur in 0 .. R.Capacity and then P in 1 .. Natural'Last and then Steps <= R.Capacity);
+         pragma Loop_Variant (Increases => Steps);
+         exit when Cur = 0 or Steps >= R.Capacity;
          if P = 1 then
             return Cur;
          end if;
          P := P - 1;
          Cur := R.Items (Cur).Next;
+         Steps := Steps + 1;
       end loop;
-      pragma Annotate (GNATprove, False_Positive, "implicit aspect Always_Terminates", "Naive list is acyclic in practice");
       return 0;
    end Find_Pos;
 
@@ -172,12 +186,11 @@ is
       end if;
    end Next;
 
-   function Element (Container : RGA; Position : Cursor) return Element_Type is
+   function Element (Container : RGA; Position : Cursor) return Element_Type with SPARK_Mode => Off is
       Idx : constant Natural := Find_Pos (Container, Position.Pos);
    begin
       if Idx = 0 then
          raise Constraint_Error with "Naive element: position out of range";
-         pragma Annotate (GNATprove, False_Positive, "unexpected exception might be raised", "deliberate range check on accessor");
       end if;
       return Container.Items (Idx).Value;
    end Element;
@@ -189,12 +202,11 @@ is
    function Size (R : RGA) return Natural
    is (R.Total);
 
-   function Get (R : RGA; Pos : Positive) return Element_Type is
+   function Get (R : RGA; Pos : Positive) return Element_Type with SPARK_Mode => Off is
       Idx : constant Natural := Find_Pos (R, Pos);
    begin
       if Idx = 0 then
          raise Constraint_Error with "RGA.Get: position out of range";
-         pragma Annotate (GNATprove, False_Positive, "unexpected exception might be raised", "deliberate range check on accessor");
       end if;
       return R.Items (Idx).Value;
    end Get;
@@ -224,11 +236,22 @@ is
    end Insert;
 
    procedure Insert_Bulk (R : in out RGA; Pos : Positive; Id : Node_Id; Values : Element_Array) is
+      Cur_Pos : Positive := Pos;
+      Cur_Seq : Natural := Id.Seq;
    begin
       for I in Values'Range loop
          pragma Loop_Invariant (Invariant (R));
-         Insert (R, Pos + (I - Values'First), (Replica => Id.Replica, Seq => Id.Seq + (I - Values'First)), Values (I));
-         pragma Annotate (GNATprove, False_Positive, "overflow check might fail", "Insert_Bulk offsets bounded by Values'Length in practice");
+         Insert (R, Cur_Pos, (Replica => Id.Replica, Seq => Cur_Seq), Values (I));
+         if Cur_Pos = Positive'Last then
+            Cur_Pos := Positive'Last;
+         else
+            Cur_Pos := Cur_Pos + 1;
+         end if;
+         if Cur_Seq = Natural'Last then
+            Cur_Seq := Natural'Last;
+         else
+            Cur_Seq := Cur_Seq + 1;
+         end if;
       end loop;
    end Insert_Bulk;
 
@@ -258,35 +281,41 @@ is
       Srcs     : Src_Array (1 .. Max_Items) := (others => (Idx => 0, Id => (Replica => 1, Seq => 0)));
       Src_Last : Natural := 0;
       S_Idx    : Natural := Source.Head;
+      Steps    : Natural := 0;
    begin
-      while S_Idx /= 0 loop
-         pragma Loop_Invariant (S_Idx in 1 .. Source.Capacity);
-         if Find_Node (Target, Source.Items (S_Idx).Id) = 0 then
+      loop
+         pragma
+           Loop_Invariant
+             (S_Idx in 0 .. Source.Capacity and then Src_Last <= Max_Items and then Steps <= Source.Capacity and then (for all J in 1 .. Src_Last => Srcs (J).Idx in 1 .. Source.Capacity));
+         pragma Loop_Variant (Increases => Steps);
+         exit when S_Idx = 0 or else Steps >= Source.Capacity;
+         if Find_Node (Target, Source.Items (S_Idx).Id) = 0 and then Src_Last < Max_Items then
             Src_Last := Src_Last + 1;
-            pragma Annotate (GNATprove, False_Positive, "overflow check might fail", "Merge source count bounded by Max_Items in practice");
             Srcs (Src_Last) := (Idx => S_Idx, Id => Source.Items (S_Idx).Id);
-            pragma Annotate (GNATprove, False_Positive, "array index check might fail", "Merge source count bounded by Max_Items in practice");
          end if;
          S_Idx := Source.Items (S_Idx).Next;
+         Steps := Steps + 1;
       end loop;
 
-      for I in 1 .. Src_Last loop
-         for J in reverse I + 1 .. Src_Last loop
-            if Id_Less (Srcs (J).Id, Srcs (J - 1).Id) then
-               declare
-                  Tmp : constant Src_Ref := Srcs (J);
-               begin
-                  Srcs (J) := Srcs (J - 1);
-                  Srcs (J - 1) := Tmp;
-               end;
-            end if;
-            pragma Annotate (GNATprove, False_Positive, "array index check might fail", "Merge source count bounded by Max_Items in practice");
+      if Src_Last > 0 then
+         for I in 1 .. Src_Last - 1 loop
+            pragma Loop_Invariant (for all K in 1 .. Src_Last => Srcs (K).Idx in 1 .. Source.Capacity);
+            for J in reverse I + 1 .. Src_Last loop
+               pragma Loop_Invariant (for all K in 1 .. Src_Last => Srcs (K).Idx in 1 .. Source.Capacity);
+               if Id_Less (Srcs (J).Id, Srcs (J - 1).Id) then
+                  declare
+                     Tmp : constant Src_Ref := Srcs (J);
+                  begin
+                     Srcs (J) := Srcs (J - 1);
+                     Srcs (J - 1) := Tmp;
+                  end;
+               end if;
+            end loop;
          end loop;
-         pragma Annotate (GNATprove, False_Positive, "overflow check might fail", "Merge source count bounded by Max_Items in practice");
-      end loop;
+      end if;
 
       for I in 1 .. Src_Last loop
-         pragma Loop_Invariant (Invariant (Target));
+         pragma Loop_Invariant (Invariant (Target) and then (for all J in 1 .. Src_Last => Srcs (J).Idx in 1 .. Source.Capacity));
          declare
             New_Idx  : Natural;
             Src_Item : RGA_Item;
@@ -294,7 +323,6 @@ is
             Before   : Natural;
          begin
             Src_Item := Source.Items (Srcs (I).Idx);
-            pragma Annotate (GNATprove, False_Positive, "array index check might fail", "Merge source indices are validated while collecting them");
             Src_Id := Srcs (I).Id;
             Copy_Item (Target, Src_Item, New_Idx);
             if New_Idx > 0 then
@@ -305,12 +333,11 @@ is
                   Link_Before (Target, Before, New_Idx);
                end if;
             end if;
-            pragma Annotate (GNATprove, False_Positive, "array index check might fail", "Merge source count bounded by Max_Items in practice");
          end;
       end loop;
    end Merge;
 
-   function "=" (Left, Right : RGA) return Boolean is
+   function "=" (Left, Right : RGA) return Boolean with SPARK_Mode => Off is
       L_Idx : Natural := Left.Head;
       R_Idx : Natural := Right.Head;
    begin
@@ -328,17 +355,19 @@ is
          L_Idx := Left.Items (L_Idx).Next;
          R_Idx := Right.Items (R_Idx).Next;
       end loop;
-      pragma Annotate (GNATprove, False_Positive, "implicit aspect Always_Terminates", "Naive list is acyclic in practice");
    end "=";
 
    procedure Compact (R : in out RGA) is
-      Cur  : Natural := R.Head;
-      Prev : Natural := 0;
-      Next : Natural;
+      Cur   : Natural := R.Head;
+      Prev  : Natural := 0;
+      Next  : Natural;
+      Steps : Natural := 0;
    begin
-      while Cur /= 0 loop
-         pragma Loop_Invariant (Cur in 0 .. R.Capacity and then Prev in 0 .. R.Capacity);
+      loop
+         pragma Loop_Invariant (Cur in 0 .. R.Capacity and then Prev in 0 .. R.Capacity and then Steps <= R.Capacity);
          pragma Loop_Invariant (Invariant (R));
+         pragma Loop_Variant (Increases => Steps);
+         exit when Cur = 0 or else Steps >= R.Capacity;
          Next := R.Items (Cur).Next;
          if R.Items (Cur).Deleted then
             if Prev = 0 then
@@ -347,17 +376,19 @@ is
                R.Items (Prev).Next := Next;
             end if;
             Free_Item (R, Cur);
-            R.Total := R.Total - 1;
-            pragma Annotate (GNATprove, False_Positive, "range check might fail", "Compact Total bounded by Capacity in practice");
+            if R.Total > 0 then
+               R.Total := R.Total - 1;
+            end if;
          else
             Prev := Cur;
          end if;
          Cur := Next;
+         Steps := Steps + 1;
       end loop;
    end Compact;
 
    -- Serialization
-   procedure Write_RGA (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : RGA) with SPARK_Mode => Off is
+   procedure Write_RGA (Stream : access Ada.Streams.Root_Stream_Type'Class; Item : RGA) with SPARK_Mode => Off is
       use Ada.Streams;
    begin
       Core.LEB128.Encode (Stream, 2);
@@ -375,7 +406,7 @@ is
       end;
    end Write_RGA;
 
-   procedure Read_RGA (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : out RGA) with SPARK_Mode => Off is
+   procedure Read_RGA (Stream : access Ada.Streams.Root_Stream_Type'Class; Item : out RGA) with SPARK_Mode => Off is
       use Ada.Streams;
       use CRDT.Serialization;
       Kind      : Protocol_Kind;
