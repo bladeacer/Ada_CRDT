@@ -86,7 +86,8 @@ Ada_CRDT/
 |--------|-------------|--------------|
 | `build` | Compile library + tests | `alr build` (filters out `.sframe` linker noise) |
 | `run` / `test` | Build + run test suite (fuzz, convergence, GoL included) | `alr run` (all tests across 9 categories) |
-| `check` | Pre-commit quality gate (ascii, changelog, build, tests, SPARK proof, compliance, coverage) | `ascii-check` + `changelog-check` + `build` + `run` + `prove` + `compliance` + `coverage-gate` in order |
+| `check` | Pre-commit quality gate (ascii, changelog, links, spark-off, build, tests, SPARK proof, compliance, coverage) | `ascii-check` + `changelog-check` + `link-check` + `spark-off-check` + `build` + `run` + `prove` + `compliance` + `coverage-gate` in order |
+| `spark-off-check` | Verify every `SPARK_Mode => Off` location is listed in the spark-coverage report | `python3 tools/gen-coverage.py --check` (pure-static, no Alire needed) |
 | `covex` | Ensure the covex (adacovex) dev dependency is built | `alr exec -- adacovex --help`; builds via `alr build` if missing |
 | `prove` | SPARK formal verification | `alr exec -- adacovex prove --target=. --no-svg` |
 | `coverage-gate` | Gate docstring coverage vs the last release tag | `alr exec -- adacovex --coverage-delta` |
@@ -94,6 +95,7 @@ Ada_CRDT/
 | `verify-report` | Auto-generate VERIFICATION.md from gnatprove.out + test_result.md | Parses proof stats and test counts, writes deterministic report |
 | `doc` / `api-docs` | Generate Markdown API docs | `gnatdoc` -> RST -> `tools/rst2md.py` -> `docs/api-docs/` |
 | `compliance` | DO-178C traceability + Quick Reference link validation + auto-generate report | Scans source HLR tags, validates HLR.md coverage, checks README links, runs verify-report |
+| `link-check` | Verify every markdown link + GitHub-style anchor resolves | `python3 tools/check-links.py` (pure-static, no Alire needed) |
 | `ascii-check` | Enforce ASCII-only charset across source files | `LC_ALL=C grep` for bytes > 0x7E |
 | `fmt` | Format all Ada sources with gnatformat | `alr exec -- gnatformat -P crdt.gpr -U` (requires `make dev-setup` first) |
 | `release` | Tag + publish new version | Updates metadata, commits, tags, pushes |
@@ -113,6 +115,11 @@ Ada_CRDT/
   afterwards (same pattern as `make fmt`).
 - CI uses the `bladeacer/adacovex@v1` GitHub Action directly (`.github/workflows/ci.yml`
   and `.github/workflows/pr-check.yml`) -- no local dev-setup required there.
+  `ci.yml` also runs two static gates: a `spark-off-check` job (pure Python:
+  `make spark-off-check`) and a `coverage-gate` job (the action with
+  `coverage-delta` set to the previous release tag, mirroring the local
+  `make coverage-gate` target). Full workflow/job breakdown and local
+  equivalents: [docs/ci-cd.md](docs/ci-cd.md).
 - `.github/workflows/release.yml` runs on `v*` tags: it builds + tests the crate
   and runs the SPARK proof gate via the `bladeacer/adacovex@v1` action
   (Platinum, 100% docstrings, 10290 tests, 0 unproved), generates the
@@ -147,7 +154,7 @@ Ada_CRDT/
 | `gnatprove` | `make prove` | Alire dev dependency (`alire-dev.toml`) |
 | `gnatformat_bin` | `make fmt` | Alire dev dependency (`alire-dev.toml`); run `make dev-setup` first |
 | `gnatdoc_bin` | `make doc` | Alire dev dependency (`alire-dev.toml`) |
-| Python 3 | `make doc` | Runs `tools/rst2md.py` and `tools/gen-coverage.py` |
+| Python 3 | `make doc`, `make link-check` | Runs `tools/rst2md.py`, `tools/gen-coverage.py`, and `tools/check-links.py` |
 | `sha256sum` | `make verify-report` | Content hashing for deterministic output (part of coreutils) |
 | POSIX tools (sed, awk, grep) | Various Makefile targets | Standard on any Linux system |
 

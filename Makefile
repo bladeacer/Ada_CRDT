@@ -1,4 +1,4 @@
-.PHONY: help all check build run test prove coverage-gate doc api-docs badges sbom compliance changelog-check verify-report ascii-check fmt bump-version clean release publish demo covex
+.PHONY: help all check build run test prove coverage-gate spark-off-check doc api-docs badges sbom compliance changelog-check verify-report ascii-check link-check fmt bump-version clean release publish demo covex
 
 .DEFAULT_GOAL := help
 
@@ -10,17 +10,19 @@ help:
 	@echo '  build         Build the project and tests (alr build)'
 	@echo '  run           Build and run tests'
 	@echo '  test          Alias for run (fuzz tests included in suite)'
-	@echo '  check         Pre-commit quality gate: ascii, changelog, build, tests, prove, compliance, coverage'
+	@echo '  check         Pre-commit quality gate: ascii, changelog, links, spark-off, build, tests, prove, compliance, coverage'
 	@echo '  covex         Ensure covex (adacovex) dev dependency is built'
 	@echo '  prove         Run SPARK proofs via adacovex (resolves covex dev dep)'
 	@echo '                (also auto-regenerates SVG badges in docs/badges/)'
 	@echo '  coverage-gate Gate docstring coverage vs the last release tag (adacovex --coverage-delta)'
+	@echo '  spark-off-check Verify every SPARK_Mode => Off location is in the spark-coverage report (gen-coverage.py --check)'
 	@echo '  verify-report Auto-generate VERIFICATION.md from gnatprove.out + test results'
 	@echo '  doc           Generate Markdown API docs (docs/api-docs/)'
 	@echo '  badges        Regenerate SVG badges via adacovex (docs/badges/)'
 	@echo '  sbom          Generate a proof-aware CycloneDX SBOM (sbom.json)'
 	@echo '  compliance    HLR traceability check + auto-generate verification report'
 	@echo '  changelog-check  Validate changelog format (canonical C#/H# style)'
+	@echo '  link-check    Verify every markdown link + anchor resolves (tools/check-links.py)'
 	@echo '  ascii-check   Enforce ASCII-only charset across all source files'
 	@echo '  fmt           Format all Ada sources with gnatformat (requires make dev-setup)'
 	@echo '  bump-version  Bump version across alire.toml, alire-dev.toml, demo, releases, index (VERSION=x.y.z)'
@@ -49,7 +51,7 @@ test: run
 # matters: `run` writes test_result.md and `prove` writes obj/gnatprove
 # output that `compliance` (verify-report) parses, so they run first;
 # `coverage-gate` compares docstring coverage against the last release tag.
-check: ascii-check changelog-check build run prove compliance coverage-gate
+check: ascii-check changelog-check link-check spark-off-check build run prove compliance coverage-gate
 	@echo ""; \
 	echo "=== All pre-commit quality gates passed ==="
 
@@ -327,6 +329,10 @@ verify-report:
 	\
 	echo "=== Verification report complete ==="
 
+spark-off-check:
+	@echo "=== SPARK_Mode Off verification ==="; \
+	python3 tools/gen-coverage.py --check
+
 badges: covex
 	@echo "=== Generating adacovex badges ==="; \
 	$(swap-in-covex) \
@@ -448,6 +454,10 @@ ascii-check:
 		echo "$$error file(s) contain non-ASCII characters."; \
 		exit 1; \
 	fi
+
+link-check:
+	@echo "=== Markdown link verification ==="; \
+	python3 tools/check-links.py
 
 fmt:
 	@echo "=== Formatting Ada sources with gnatformat ==="; \

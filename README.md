@@ -80,6 +80,9 @@ and private entities.
 DO-178C compliance artifacts (PSAC, HLR, LLR, traceability):
 [docs/compliance/index.md](docs/compliance/index.md).
 
+CI/CD workflows, jobs, and their local equivalents:
+[docs/ci-cd.md](docs/ci-cd.md).
+
 ## Upgrading
 
 See [changelogs](docs/changelogs/index.md) and

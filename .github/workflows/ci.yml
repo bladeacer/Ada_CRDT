@@ -39,3 +39,41 @@ jobs:
         run: alr build
       - name: Run test suite
         run: ./test_crdt
+
+  spark-off-check:
+    name: SPARK_Mode Off verification
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      # Pure-static gate (Python 3 only, no Alire/toolchain): every
+      # SPARK_Mode => Off location must be listed in the committed
+      # spark-coverage report (docs/api-docs/crdt-spark-coverage.md).
+      - name: Check SPARK coverage report is in sync
+        run: make spark-off-check
+
+  coverage-gate:
+    name: Docstring coverage gate (vs last release tag)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Resolve previous release tag
+        id: prev-tag
+        run: |
+          prev=$(git tag --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1 || true)
+          echo "prev=$prev" >> "$GITHUB_OUTPUT"
+          if [ -z "$prev" ]; then
+            echo "No previous release tag; nothing to gate against."
+          fi
+      # Same gate as the local `make coverage-gate` target (adacovex
+      # --coverage-delta vs the last release tag), run through the action so
+      # CI uses the published adacovex release binary.
+      - uses: bladeacer/adacovex@v1
+        if: steps.prev-tag.outputs.prev != ''
+        with:
+          target: .
+          dal: C
+          gnat-version: 15.2.1
+          build: false
+          coverage-delta: ${{ steps.prev-tag.outputs.prev }}

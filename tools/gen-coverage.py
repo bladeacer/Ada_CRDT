@@ -3,7 +3,13 @@
 Generate SPARK coverage report page for docs/api-docs/.
 Scans all .ads and .adb files for SPARK_Mode => Off annotations
 and extracts their justification from surrounding comments.
+
+Usage:
+  python3 tools/gen-coverage.py          # regenerate docs/api-docs/crdt-spark-coverage.md
+  python3 tools/gen-coverage.py --check  # verify the committed report is in sync
+                                         # (used by `make spark-off-check`); exit 1 on drift
 """
+import argparse
 import os
 import re
 import sys
@@ -129,7 +135,8 @@ def parse_gnatprove_stats(prove_out: str) -> ProofStats:
     return stats
 
 
-def main() -> None:
+def generate_report() -> List[str]:
+    """Return the SPARK coverage report lines without writing them."""
     items = find_spark_off(SRC_DIR)
     counts, details = public_private_breakdown(SRC_DIR)
     sp = parse_gnatprove_stats("obj/gnatprove/gnatprove.out")
@@ -187,10 +194,70 @@ def main() -> None:
     lines.append("- Run `alr gnatprove` or `make prove` to regenerate.")
     lines.append("")
 
+    return lines
+
+
+def check() -> int:
+    """Verify the committed report is in sync with the source.
+
+    Exits 1 when a `SPARK_Mode => Off` location is missing from the committed
+    report (i.e. `make doc` has not been re-run after a source change), so a
+    new SPARK_Mode => Off can never land undocumented. Locations without an
+    inline justification comment are reported as a non-failing warning: the
+    policy (stream I/O, wall clock, RNG, access types, tests, demo) is
+    documented in AGENTS.md, and the report itself is the review surface.
+    """
+    errors: List[str] = []
+    warnings: List[str] = []
+
+    items = find_spark_off(SRC_DIR)
+    for item in items:
+        if item["justification"] == "(no comment)":
+            warnings.append(f"{item['file']}:{item['line']}: SPARK_Mode => Off "
+                            f"without an inline justification comment "
+                            f"(policy documented in AGENTS.md)")
+
+    # The committed report must match a fresh generation exactly.
+    fresh = "\n".join(generate_report()) + "\n"
+    if not os.path.isfile(OUTPUT):
+        errors.append(f"{OUTPUT} is missing -- run `make doc` to generate it")
+    else:
+        with open(OUTPUT, "r", encoding="utf-8") as fp:
+            current = fp.read()
+        if current != fresh:
+            errors.append(f"{OUTPUT} is out of date -- run `make doc` to "
+                          f"regenerate it (make spark-off-check compares "
+                          f"source annotations against this report)")
+
+    if warnings:
+        print(f"  note: {len(warnings)} SPARK_Mode => Off location(s) lack an "
+              f"inline justification comment (see AGENTS.md for the policy)")
+
+    if errors:
+        for e in errors:
+            print(f"  ERROR: {e}")
+        print(f"  SPARK coverage check FAILED ({len(errors)} issue(s))")
+        return 1
+    print(f"  SPARK coverage report is in sync ({len(items)} SPARK_Mode => Off "
+          f"locations, all listed in {OUTPUT}).")
+    return 0
+
+
+def main(argv: List[str]) -> int:
+    ap: argparse.ArgumentParser = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--check", action="store_true",
+                    help="verify the committed report is in sync instead of "
+                         "regenerating it")
+    args: argparse.Namespace = ap.parse_args(argv)
+
+    if args.check:
+        return check()
+
     with open(OUTPUT, "w", encoding="utf-8") as fp:
-        fp.write("\n".join(lines) + "\n")
+        fp.write("\n".join(generate_report()) + "\n")
     print(f"Wrote {OUTPUT}")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main(sys.argv[1:]))
