@@ -1,4 +1,4 @@
-.PHONY: help all build run test prove coverage-gate doc api-docs badges sbom compliance changelog-check verify-report ascii-check fmt bump-version clean release publish demo covex
+.PHONY: help all check build run test prove coverage-gate doc api-docs badges sbom compliance changelog-check verify-report ascii-check fmt bump-version clean release publish demo covex
 
 .DEFAULT_GOAL := help
 
@@ -10,6 +10,7 @@ help:
 	@echo '  build         Build the project and tests (alr build)'
 	@echo '  run           Build and run tests'
 	@echo '  test          Alias for run (fuzz tests included in suite)'
+	@echo '  check         Pre-commit quality gate: ascii, changelog, build, tests, prove, compliance, coverage'
 	@echo '  covex         Ensure covex (adacovex) dev dependency is built'
 	@echo '  prove         Run SPARK proofs via adacovex (resolves covex dev dep)'
 	@echo '                (also auto-regenerates SVG badges in docs/badges/)'
@@ -43,6 +44,14 @@ run: build
 	./test_crdt
 
 test: run
+
+# Pre-commit quality gate. Every target must pass before committing. Order
+# matters: `run` writes test_result.md and `prove` writes obj/gnatprove
+# output that `compliance` (verify-report) parses, so they run first;
+# `coverage-gate` compares docstring coverage against the last release tag.
+check: ascii-check changelog-check build run prove compliance coverage-gate
+	@echo ""; \
+	echo "=== All pre-commit quality gates passed ==="
 
 # covex (adacovex) is a dev dependency (see alire-dev.toml, declared as a
 # normal index dependency `covex = "*"` -- never pinned to a local path, so it

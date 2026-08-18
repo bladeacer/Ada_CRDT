@@ -86,6 +86,7 @@ Ada_CRDT/
 |--------|-------------|--------------|
 | `build` | Compile library + tests | `alr build` (filters out `.sframe` linker noise) |
 | `run` / `test` | Build + run test suite (fuzz, convergence, GoL included) | `alr run` (all tests across 9 categories) |
+| `check` | Pre-commit quality gate (ascii, changelog, build, tests, SPARK proof, compliance, coverage) | `ascii-check` + `changelog-check` + `build` + `run` + `prove` + `compliance` + `coverage-gate` in order |
 | `covex` | Ensure the covex (adacovex) dev dependency is built | `alr exec -- adacovex --help`; builds via `alr build` if missing |
 | `prove` | SPARK formal verification | `alr exec -- adacovex prove --target=. --no-svg` |
 | `coverage-gate` | Gate docstring coverage vs the last release tag | `alr exec -- adacovex --coverage-delta` |
