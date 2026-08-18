@@ -127,7 +127,7 @@ Ada_CRDT/
   `gnatdoc_bin`, `gnatformat_bin`, `covex`, and the `test_crdt` executable
   (the test suite binary is a development artifact and is not published)
 - GNAT toolchain managed automatically by Alire
-- Version: defined in `alire.toml` (currently 1.9.0), mirrors in `index/ad/crdt/` and `alire/releases/`
+- Version: defined in `alire.toml` (currently 1.10.0), mirrors in `index/ad/crdt/` and `alire/releases/`
 
 ### Compiler Flags (from `crdt.gpr`)
 
