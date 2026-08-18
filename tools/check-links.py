@@ -42,21 +42,29 @@ LINK_RE = re.compile(r"!?\[[^\]]*\]\(([^)]+)\)")
 
 
 def slugify(heading: str) -> str:
-    """GitHub-style anchor slug for a markdown heading.
+    """GitHub-faithful anchor slug for a markdown heading.
 
-    GitHub keeps underscores and hyphens in anchors, lowercases everything,
-    strips the remaining punctuation, and replaces spaces with hyphens.
+    Mirrors github/html-pipeline's TableOfContentsFilter: lowercase, drop
+    everything that is not a word character (letters, digits, underscore),
+    hyphen, or space, then replace *each* space with a hyphen (consecutive
+    spaces yield consecutive hyphens, e.g. `a  b` -> `a--b`).
     """
     s: str = heading.strip().lower()
-    s = re.sub(r"[`*~]", "", s)            # drop markdown emphasis / backticks
-    s = re.sub(r"[^\w\s\-]", "", s)       # drop remaining punctuation
-    s = re.sub(r"\s+", "-", s)            # spaces -> hyphens
+    s = re.sub(r"^#{1,6}\s+", "", s)          # drop leading markdown markers
+    s = re.sub(r"[^\w\- ]", "", s)            # remove punctuation
+    s = s.strip()                               # drop space left by markers
+    s = s.replace(" ", "-")                    # each space -> hyphen
     return s
 
 
 def headings_slugs(path: Path) -> List[str]:
-    """Return the GitHub anchor slugs of all headings in a markdown file."""
+    """Return the GitHub anchor slugs of all headings in a markdown file.
+
+    Duplicate headings get GitHub's `-1`, `-2`, ... suffixes (the first
+    occurrence keeps the bare slug).
+    """
     slugs: List[str] = []
+    seen: Dict[str, int] = {}
     try:
         text: str = path.read_text(encoding="utf-8", errors="replace")
     except OSError:
@@ -64,7 +72,10 @@ def headings_slugs(path: Path) -> List[str]:
     for line in text.splitlines():
         m = re.match(r"^#{1,6}\s+(.+?)\s*#*\s*$", line)
         if m:
-            slugs.append(slugify(m.group(1)))
+            slug: str = slugify(m.group(1))
+            n: int = seen.get(slug, 0)
+            seen[slug] = n + 1
+            slugs.append(slug if n == 0 else f"{slug}-{n}")
     return slugs
 
 
