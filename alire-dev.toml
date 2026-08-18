@@ -9,6 +9,11 @@
 # in the published Alire community index (they are build tools, not library
 # dependencies). Only the clean alire.toml is published.
 #
+# It also declares the `test_crdt` executable: the test suite is a development
+# artifact, so the executable lives here (and in the clean manifest used for
+# a plain `alr build` + `./test_crdt` CI flow it is implied by the GPR `for
+# Main` -- no `executables` entry is needed for consumers).
+#
 # covex is declared as a normal index dependency (covex = "*"); it is NOT pinned
 # to a local path. A path pin such as `{ path = "../adacovex" }` resolves only
 # on a machine that has the sibling checkout, so `alr build` and adacovex's

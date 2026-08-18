@@ -63,9 +63,11 @@ non-null stream to `'Read`/`'Write` attributes, so behavior is unchanged.
 
 ### C4: Release Metadata Completion
 
-`alire/releases/crdt-1.9.0.toml` gained the `executables = ["test_crdt"]`
-field and an `[origin]` section (commit + URL), completing the release
-metadata for downstream publishing.
+`alire/releases/crdt-1.9.0.toml` gained an `[origin]` section (commit + URL),
+completing the release metadata for downstream publishing. The published
+manifest now carries **no** `executables` entry: the `test_crdt` test-suite
+binary is a development artifact, so the executable declaration lives only in
+`alire-dev.toml` (the GPR's `for Main` still builds it in CI).
 
 ### C5: Documentation Regeneration
 
@@ -76,6 +78,27 @@ metadata for downstream publishing.
 relaxation. `docs/compliance/VERIFICATION.md` and
 `docs/compliance/index.md` were regenerated with the new proof statistics
 (0 justified checks).
+
+### C7: Quick Reference Auto-Regeneration
+
+The README `### Quick Reference` documentation table is now generated instead
+of hand-maintained: `tools/gen-quickref.py` reads each component's package
+name from `docs/api-docs/*.md` and rewrites the table (failing if a referenced
+doc is missing), and the `make doc` / `api-docs` target runs it after gnatdoc
+so the table cannot drift from the generated docs.
+
+### C8: GitHub Release Attestation (SLSA)
+
+A new `.github/workflows/release.yml` runs on `v*` tags: it builds and tests
+the crate, runs the SPARK proof gate via the `bladeacer/adacovex@v1` action
+(Platinum, 100% docstrings, 10290 tests, 0 unproved), and generates the
+proof-aware SBOM. The release artifacts (source archive, SBOM, test results)
+are attested with Sigstore `actions/attest@v4` and published via
+`gh release create` with changelog links and the attestation URL; the release
+also updates the floating `v#` / `v#.#` / `latest` tags. Issue templates are
+now enforced via `.github/ISSUE_TEMPLATE/config.yml` (blank issues disabled),
+and a `.github/PULL_REQUEST_TEMPLATE.md` guides PRs through the DO-178C and
+backward-compatibility gates.
 
 ### C6: SBOM and Badges Regeneration
 

@@ -481,7 +481,8 @@ api-docs:
 	rm -f docs/api-docs/test_*.md docs/api-docs/crdt-test_support.md; \
 	sed -i '/](test_[^)]*\.md)/d' docs/api-docs/index.md; \
 	sed -i '/](crdt-test_support\.md)/d' docs/api-docs/index.md; \
-	python3 tools/gen-coverage.py
+	python3 tools/gen-coverage.py; \
+	python3 tools/gen-quickref.py
 	@echo "Regenerating docs/changelogs/index.md..."
 	@{ \
 	  echo "# CRDT Changelogs"; \

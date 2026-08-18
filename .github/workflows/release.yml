@@ -1,0 +1,148 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  attestations: write
+  id-token: write
+
+jobs:
+  release:
+    name: Build and publish release artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: bladeacer/adacovex@v1
+        id: adacovex
+        with:
+          target: .
+          dal: C
+          gnat-version: 15.2.1
+          build: true
+          run-tests: true
+          test-command: ./test_crdt
+          prove: true
+          require-spark: Platinum
+          require-docstrings: 100
+          require-tests: 10290
+          require-proof: 100
+
+      - name: Require Platinum SPARK level
+        shell: bash
+        run: |
+          set -euo pipefail
+          LEVEL="${{ steps.adacovex.outputs.spark-level }}"
+          if [ "$LEVEL" != "Platinum" ]; then
+            echo "::error::release gate requires SPARK Platinum, got: $LEVEL"
+            exit 1
+          fi
+          echo "SPARK level: $LEVEL (release gate passed)"
+
+      - name: Package release artifacts
+        shell: bash
+        run: |
+          set -euxo pipefail
+          VERSION="${{ github.ref_name }}"
+          mkdir -p dist
+          git archive --format=tar.gz --prefix="crdt-${VERSION#v}/" -o "dist/crdt-$VERSION.tar.gz" HEAD
+          cp sbom.json "dist/sbom-$VERSION.json"
+          cp test_result.md "dist/test_result-$VERSION.md"
+          cp LICENSE dist/LICENSE
+
+      - name: Attest release artifacts
+        id: attest
+        uses: actions/attest@v4
+        with:
+          subject-path: |
+            dist/crdt-*.tar.gz
+            dist/sbom-*.json
+
+      - name: Create GitHub Release
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          ATTESTATION_URL: ${{ steps.attest.outputs.attestation-url }}
+        run: |
+          set -euo pipefail
+          VERSION="${{ github.ref_name }}"
+          CUR="${VERSION#v}"
+          PREV=$(git tag --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | grep -v "^$VERSION$" | head -1 || true)
+          PREV_NUM="${PREV#v}"
+          # Every changelog from the last release tag up to this version.
+          CHANGELOGS=""
+          for f in docs/changelogs/crdt-*.md; do
+            v="${f#docs/changelogs/crdt-}"
+            v="${v%.md}"
+            if [ -n "$PREV_NUM" ]; then
+              # Skip versions at or below the previous release.
+              [ "$(printf '%s\n%s\n' "$v" "$PREV_NUM" | sort -V | head -1)" != "$v" ] || continue
+            fi
+            # Skip anything newer than this version (should not happen).
+            [ "$(printf '%s\n%s\n' "$v" "$CUR" | sort -V | tail -1)" = "$v" ] || continue
+            CHANGELOGS="$CHANGELOGS
+          - https://github.com/${{ github.repository }}/blob/main/docs/changelogs/crdt-$v.md"
+          done
+          BODY="**Changelogs**$CHANGELOGS"
+          ASSETS=(dist/crdt-$VERSION.tar.gz dist/sbom-$VERSION.json dist/test_result-$VERSION.md)
+          if [ -n "$PREV" ]; then
+            BODY="$BODY
+
+          *Git Changelog*:
+          https://github.com/${{ github.repository }}/compare/$PREV...$VERSION"
+          fi
+          if [ -n "$ATTESTATION_URL" ]; then
+            BODY="$BODY
+
+          *Build Provenance Attestation*:
+          $ATTESTATION_URL"
+          fi
+          gh release create "$VERSION" "${ASSETS[@]}" --notes "$BODY"
+
+      - name: Update floating version tags
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euxo pipefail
+          VERSION="${{ github.ref_name }}"
+          MAJOR="${VERSION%%.*}"
+          MINOR="${VERSION%.*}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git"
+          git tag -fa "$MAJOR" -m "Release $VERSION"
+          git tag -fa "$MINOR" -m "Release $VERSION"
+          git tag -fa latest -m "Release $VERSION"
+          git push origin "refs/tags/$MAJOR" --force
+          git push origin "refs/tags/$MINOR" --force
+          git push origin "refs/tags/latest" --force
+
+  summary:
+    name: Release summary
+    if: always()
+    needs: [release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Write release summary
+        shell: bash
+        env:
+          RELEASE: ${{ needs.release.result }}
+          VERSION: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          {
+            echo '## Release summary'
+            echo ''
+            echo "| Item | Value |"
+            echo "|------|-------|"
+            echo "| Tag | $VERSION |"
+            echo "| Build + self-assessment + publish | $RELEASE |"
+            echo ''
+          } >> "$GITHUB_STEP_SUMMARY"
