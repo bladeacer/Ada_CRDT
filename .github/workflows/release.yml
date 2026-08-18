@@ -19,6 +19,21 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Build and run the native test suite ourselves: the adacovex action's
+      # `build: true` builds adacovex from source in a scratch checkout and
+      # does not build this project's test binary, so ./test_crdt must be
+      # produced here (it also writes test_result.md, which is packaged
+      # below and parsed by the assessment).
+      - uses: alire-project/setup-alire@latest
+        with:
+          version: '2.1.1'
+          toolchain: 'gnat_native=15.2.1 gprbuild'
+
+      - name: Build + run native tests
+        run: |
+          alr build
+          ./test_crdt
+
       - uses: bladeacer/adacovex@v1
         id: adacovex
         with:
@@ -26,8 +41,6 @@ jobs:
           dal: C
           gnat-version: 15.2.1
           build: true
-          run-tests: true
-          test-command: ./test_crdt
           prove: true
           require-spark: Platinum
           require-docstrings: 100
