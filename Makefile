@@ -51,7 +51,7 @@ test: build
 # output that `compliance` (verify-report) parses, so they run first;
 # `coverage-gate` compares docstring coverage against the last release tag;
 # `description` (CHECK=1) verifies the crate description stayed in sync.
-check: ascii-check changelog-check link-check spark-off-check build test prove coverage-gate compliance description
+check: ascii-check changelog-check link-check fmt doc spark-off-check build test prove coverage-gate compliance description
 	@echo ""; \
 	echo "=== All pre-commit quality gates passed ==="
 	@echo "=== Quality gate: description sync ==="; python3 tools/update-description.py --check

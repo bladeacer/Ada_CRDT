@@ -1,6 +1,17 @@
---  Adacovex docstring patch for vendored vt100 library.
+--  Adacovex docstring + SPARK proof patch for vendored vt100 library.
 --  Original author: darkestkhan (ISC License).
-package VT100 is
+--
+--  Two overlays consume this file:
+--    * docstring overlay (strict mode): the docstrings below give the
+--      vendored spec 100% coverage without touching the original;
+--    * proof overlay (adacovex prove): the SPARK_Mode => On aspect on the
+--      package declaration brings the vendored unit into proof scope, and
+--      the Pre contract on Scroll_Screen pins the intended scroll-region
+--      invariant.  The vendored bodies call Ada.Text_IO (SPARK_Mode Off),
+--      so gnatprove skips the I/O bodies by design and the unit is
+--      reported out of proof scope -- it never drags the target's proof
+--      level down.
+package VT100 with SPARK_Mode => On is
 
    --  Reset terminal to default state.
    procedure Reset;
@@ -56,7 +67,12 @@ package VT100 is
    --  Scroll a region of the screen up.
    --  @param From  Starting line of scroll region.
    --  @param To    Ending line of scroll region.
-   procedure Scroll_Screen (From : in Natural; To : in Natural);
+   --  The scroll region is well-formed: the start line never exceeds the
+   --  end line (declared by the proof patch; the vendored body does not
+   --  check it, so gnatprove treats this as an unverified caller contract
+   --  while the I/O body stays out of proof scope).
+   procedure Scroll_Screen (From : in Natural; To : in Natural)
+     with Pre => From <= To;
 
    --  Scroll screen down by one line.
    procedure Scroll_Down;
