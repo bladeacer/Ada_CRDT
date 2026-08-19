@@ -17,7 +17,7 @@ component per DO-178C / ED-12C.
 | Verification | `VERIFICATION.md` | SPARK proof results, test counts, artifact inventory |
 | Verification | `docs/api-docs/*.md` | Generated API documentation |
 | Verification | `obj/gnatprove/*.out` | SPARK proof results |
-| Verification | test output | Test harness results (`make run`) |
+| Verification | test output | Test harness results (`make test`) |
 
 ## Verification Summary
 

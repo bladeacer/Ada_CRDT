@@ -1,4 +1,4 @@
-.PHONY: help all check build run test prove coverage-gate spark-off-check doc api-docs badges sbom compliance changelog-check verify-report ascii-check link-check fmt bump-version clean release publish demo covex
+.PHONY: help build test check covex prove coverage-gate description verify-report compliance changelog-check ascii-check link-check spark-off-check fmt doc sbom demo bump-version release publish clean
 
 .DEFAULT_GOAL := help
 
@@ -8,33 +8,34 @@ help:
 	@echo 'Usage: make <target>'
 	@echo ''
 	@echo '  build         Build the project and tests (alr build)'
-	@echo '  run           Build and run tests'
-	@echo '  test          Alias for run (fuzz tests included in suite)'
-	@echo '  check         Pre-commit quality gate: ascii, changelog, links, spark-off, build, tests, prove, compliance, coverage'
-	@echo '  covex         Ensure covex (adacovex) dev dependency is built'
-	@echo '  prove         Run SPARK proofs via adacovex (resolves covex dev dep)'
-	@echo '                (also auto-regenerates SVG badges in docs/badges/)'
+	@echo '  test          Build and run the full test suite (fuzz included)'
+	@echo '  check         Pre-commit quality gate: ascii, changelog, links, spark-off,'
+	@echo '                build, tests, prove, coverage, compliance, description'
+	@echo '  prove         Run SPARK proofs via adacovex (resolves covex dev dep);'
+	@echo '                also auto-regenerates SVG badges in docs/badges/'
 	@echo '  coverage-gate Gate docstring coverage vs the last release tag (adacovex --coverage-delta)'
-	@echo '  spark-off-check Verify every SPARK_Mode => Off location is in the spark-coverage report (gen-coverage.py --check)'
+	@echo '  description   Sync the crate description from alire/description.txt +'
+	@echo '                alire/long-description.txt into every manifest'
+	@echo '                (tools/update-description.py; add CHECK=1 for a verify-only run)'
 	@echo '  verify-report Auto-generate VERIFICATION.md from gnatprove.out + test results'
-	@echo '  doc           Generate Markdown API docs (docs/api-docs/)'
-	@echo '  badges        Regenerate SVG badges via adacovex (docs/badges/)'
-	@echo '  sbom          Generate a proof-aware CycloneDX SBOM (sbom.json)'
 	@echo '  compliance    HLR traceability check + auto-generate verification report'
 	@echo '  changelog-check  Validate changelog format (canonical C#/H# style)'
 	@echo '  link-check    Verify every markdown link + anchor resolves (tools/check-links.py)'
 	@echo '  ascii-check   Enforce ASCII-only charset across all source files'
-	@echo '  fmt           Format all Ada sources with gnatformat (requires make dev-setup)'
+	@echo '  spark-off-check Verify every SPARK_Mode => Off location is in the spark-coverage report'
+	@echo '                  (gen-coverage.py --check)'
+	@echo '  doc           Generate Markdown API docs (docs/api-docs/) + changelog index'
+	@echo '  sbom          Generate a proof-aware CycloneDX SBOM (sbom.json)'
+	@echo '  fmt           Format all Ada sources with gnatformat (swaps in alire-dev.toml)'
+	@echo '  demo          Build + run the Game of Life demo'
 	@echo '  bump-version  Bump version across alire.toml, alire-dev.toml, demo, releases, index (VERSION=x.y.z)'
 	@echo '  release       Tag, update index+releases, push. Use VERSION=x.y.z'
 	@echo '  publish       Publish to Alire community index (run after make release)'
-	@echo '  test-publish  Dry-run showing what make publish would do'
-	@echo '  demo          Build and run the Game of Life demo'
 	@echo '  clean         Remove build artifacts'
 	@echo '  help          Show this message'
 	@echo ''
 	@echo 'System dependencies: Alire (alr), GNAT/SPARK toolchain (managed by Alire),'
-	@echo '  Python 3 (for doc generation), coreutils (sha256sum).'
+	@echo '  Python 3 (for the tools/ dev scripts), coreutils (sha256sum).'
 
 build:
 	tmpfile=$$(mktemp); \
@@ -42,17 +43,19 @@ build:
 	grep -v "no .sframe will be created" $$tmpfile; \
 	rm -f $$tmpfile; exit $$result
 
-run: build
+test: build
 	./test_crdt
 
-test: run
-
 # Pre-commit quality gate. Every target must pass before committing. Order
-# matters: `run` writes test_result.md and `prove` writes obj/gnatprove
+# matters: `test` writes test_result.md and `prove` writes obj/gnatprove
 # output that `compliance` (verify-report) parses, so they run first;
-# `coverage-gate` compares docstring coverage against the last release tag.
-check: ascii-check changelog-check link-check spark-off-check build run prove compliance coverage-gate
+# `coverage-gate` compares docstring coverage against the last release tag;
+# `description` (CHECK=1) verifies the crate description stayed in sync.
+check: ascii-check changelog-check link-check spark-off-check build test prove coverage-gate compliance description
 	@echo ""; \
+	echo "=== All pre-commit quality gates passed ==="
+	@echo "=== Quality gate: description sync ==="; python3 tools/update-description.py --check
+
 	echo "=== All pre-commit quality gates passed ==="
 
 # covex (adacovex) is a dev dependency (see alire-dev.toml, declared as a
@@ -122,6 +125,16 @@ coverage-gate: covex
 	status=$$?; \
 	$(swap-out-covex) \
 	exit $$status
+
+# Sync the crate description + long description from the canonical files
+# (alire/description.txt + alire/long-description.txt) into every manifest.
+# CHECK=1 verifies without writing (used by the quality gate).
+description:
+	@if [ "$(CHECK)" = "1" ]; then \
+		python3 tools/update-description.py --check; \
+	else \
+		python3 tools/update-description.py; \
+	fi
 
 # --- Auto-generate verification report from build artifacts ---
 # Single source of truth: obj/gnatprove/gnatprove.out (SPARK proof) and
@@ -333,14 +346,6 @@ spark-off-check:
 	@echo "=== SPARK_Mode Off verification ==="; \
 	python3 tools/gen-coverage.py --check
 
-badges: covex
-	@echo "=== Generating adacovex badges ==="; \
-	$(swap-in-covex) \
-	SOURCE_DATE_EPOCH=$$(git show -s --format=%ct HEAD 2>/dev/null || echo 0) $(ADACOVEX_BIN) --target=. --dal=C --emit-svg=docs/badges/; \
-	status=$$?; \
-	$(swap-out-covex) \
-	exit $$status
-
 sbom: covex
 	@echo "=== Generating proof-aware SBOM ==="; \
 	$(swap-in-covex) \
@@ -475,9 +480,7 @@ fmt:
 	fi; \
 	exit $$status
 
-doc: api-docs
-
-api-docs:
+doc:
 	@echo "=== Generating API docs with gnatdoc ==="; \
 	if ! grep -qE '^[[:space:]]*gnatdoc_bin[[:space:]]*=' alire.toml 2>/dev/null; then \
 		cp alire.toml alire.toml.docbak; \
@@ -534,16 +537,6 @@ api-docs:
 	  done; \
 	done; \
 	echo "All changelog links OK"
-
-dev-setup:
-	@echo "Development dependencies (gnatprove, gnatdoc_bin, gnatformat_bin) are"
-	@echo "declared in 'alire-dev.toml'. Run 'make fmt' or 'make prove' to"
-	@echo "use them -- alire.toml is temporarily swapped and restored automatically."
-
-prod-setup:
-	@echo "Restoring clean publishing manifest..."; \
-	git checkout alire.toml; \
-	echo "alire.toml restored to clean publishing version."
 
 bump-version:
 	@if [ -z "$(VERSION)" ]; then \
@@ -654,16 +647,6 @@ publish:
 		exit 1; \
 	fi; \
 	alr publish
-
-test-publish:
-	@version=$$(git describe --tags --abbrev=0 2>/dev/null || \
-		sed -n 's/^version = "\(.*\)"/\1/p' alire.toml); \
-	echo "=== test-publish dry-run ==="; \
-	echo "Version:  $$version"; \
-	echo "Action:   alr publish (auto-detects GitHub, test deps excluded)"; \
-	echo "Requires: GitHub PAT in GITHUB_TOKEN env var or gh auth token"; \
-	echo "Docs:     https://github.com/alire-project/alire/blob/master/doc/publishing.md"; \
-	echo "=== end dry-run ==="
 
 demo:
 	cd demo && alr build

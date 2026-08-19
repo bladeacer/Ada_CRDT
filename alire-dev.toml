@@ -1,6 +1,6 @@
 # Development manifest for local SPARK proof, doc generation, formatting, and
 # adacovex tooling. Used exclusively by `make prove`, `make doc`, `make fmt`,
-# `make coverage-gate`, `make badges`, and `make sbom`, which temporarily swap
+# `make coverage-gate` and `make sbom`, which temporarily swap
 # this manifest over alire.toml for the duration of the command and restore the
 # clean publishing manifest afterwards.
 #

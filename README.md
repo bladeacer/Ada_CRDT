@@ -1,7 +1,7 @@
 [![crdt Alire crate badge](https://img.shields.io/endpoint?url=https://alire.ada.dev/badges/crdt.json)](https://alire.ada.dev/crates/crdt)
 ![SPARK](docs/badges/spark.svg)
-![Tests](docs/badges/tests.svg)
 ![DO-178C](docs/badges/do178c.svg)
+![Tests](docs/badges/tests.svg)
 ![docs](docs/badges/docs.svg)
 
 ![Ada CRDTs logo](./ada_logo.png)
@@ -66,7 +66,7 @@ Clone and build locally:
 git clone https://github.com/bladeacer/Ada_CRDT.git
 cd ada_crdt
 make build
-make run
+make test
 ```
 
 ---
@@ -299,7 +299,7 @@ rolling upgrades.
 | Command | Action |
 |---------|--------|
 | `make build` | Build library + tests |
-| `make run` / `make test` | Run test suite (see [test results](test_result.md)) |
+| `make test` | Run test suite (see [test results](test_result.md)) |
 | `make prove` | SPARK proofs via `alr gnatprove` |
 | `make demo` | Run Conway Game of Life Demo |
 | `make doc` | Generate Markdown API docs (See [API docs](docs/api-docs/index.md) |

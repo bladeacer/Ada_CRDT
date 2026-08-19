@@ -85,19 +85,19 @@ Ada_CRDT/
 | Target | What it does | How it works |
 |--------|-------------|--------------|
 | `build` | Compile library + tests | `alr build` (filters out `.sframe` linker noise) |
-| `run` / `test` | Build + run test suite (fuzz, convergence, GoL included) | `alr run` (all tests across 9 categories) |
-| `check` | Pre-commit quality gate (ascii, changelog, links, spark-off, build, tests, SPARK proof, compliance, coverage) | `ascii-check` + `changelog-check` + `link-check` + `spark-off-check` + `build` + `run` + `prove` + `compliance` + `coverage-gate` in order |
+| `test` | Build + run test suite (fuzz, convergence, GoL included) | `alr build && ./test_crdt` (all tests across 9 categories) |
+| `check` | Pre-commit quality gate (ascii, changelog, links, spark-off, build, tests, SPARK proof, coverage, compliance, description) | `ascii-check` + `changelog-check` + `link-check` + `spark-off-check` + `build` + `test` + `prove` + `coverage-gate` + `compliance` + `description` in order |
 | `spark-off-check` | Verify every `SPARK_Mode => Off` location is listed in the spark-coverage report | `python3 tools/gen-coverage.py --check` (pure-static, no Alire needed) |
 | `covex` | Ensure the covex (adacovex) dev dependency is built | `alr exec -- adacovex --help`; builds via `alr build` if missing |
-| `prove` | SPARK formal verification | `alr exec -- adacovex prove --target=. --no-svg` |
+| `prove` | SPARK formal verification + badge regeneration | `adacovex prove --target=. --dal=C --emit-svg=docs/badges/` |
 | `coverage-gate` | Gate docstring coverage vs the last release tag | `alr exec -- adacovex --coverage-delta` |
-| `badges` | Regenerate DO-178C/coverage/SPARK badges | `alr exec -- adacovex --emit-svg=docs/badges/` |
+| `description` | Sync the crate description from the canonical files into every manifest | `python3 tools/update-description.py` (add `CHECK=1` for a verify-only run); canonical files: `alire/description.txt` + `alire/long-description.txt` |
 | `verify-report` | Auto-generate VERIFICATION.md from gnatprove.out + test_result.md | Parses proof stats and test counts, writes deterministic report |
-| `doc` / `api-docs` | Generate Markdown API docs | `gnatdoc` -> RST -> `tools/rst2md.py` -> `docs/api-docs/` |
+| `doc` | Generate Markdown API docs + changelog index | `gnatdoc` -> RST -> `tools/rst2md.py` -> `docs/api-docs/` |
 | `compliance` | DO-178C traceability + Quick Reference link validation + auto-generate report | Scans source HLR tags, validates HLR.md coverage, checks README links, runs verify-report |
 | `link-check` | Verify every markdown link + GitHub-style anchor resolves | `python3 tools/check-links.py` (pure-static, no Alire needed) |
 | `ascii-check` | Enforce ASCII-only charset across source files | `LC_ALL=C grep` for bytes > 0x7E |
-| `fmt` | Format all Ada sources with gnatformat | `alr exec -- gnatformat -P crdt.gpr -U` (requires `make dev-setup` first) |
+| `fmt` | Format all Ada sources with gnatformat | `alr exec -- gnatformat -P crdt.gpr -U` (swaps in `alire-dev.toml` automatically) |
 | `release` | Tag + publish new version | Updates metadata, commits, tags, pushes |
 | `publish` | Publish to Alire community index | Archives source, pushes to community index |
 | `demo` | Build + run Game of Life demo | `cd demo && alr build && ./demo_life` |
@@ -106,7 +106,7 @@ Ada_CRDT/
 ### Alire (Ada Package Manager)
 
 - Primary build tool: `alr build` / `alr run` / `alr gnatprove`
-- `make prove`, `make coverage-gate`, and `make badges` resolve the adacovex
+- `make prove` and `make coverage-gate` resolve the adacovex
   binary through `alr exec -- adacovex` (declared as the `covex` dev dependency
   in `alire-dev.toml` as `covex = "*"`, a normal index dependency -- never a
   path pin, so it resolves in any consumer workspace and on CI). Alire only
@@ -114,7 +114,7 @@ Ada_CRDT/
   `alire.toml` when the clean publishing manifest is active, and restore it
   afterwards (same pattern as `make fmt`).
 - CI uses the `bladeacer/adacovex@v1` GitHub Action directly (`.github/workflows/ci.yml`
-  and `.github/workflows/pr-check.yml`) -- no local dev-setup required there.
+  and `.github/workflows/pr-check.yml`) -- no local Alire/dev manifest setup required there.
   `ci.yml` also runs two static gates: a `spark-off-check` job (pure Python:
   `make spark-off-check`) and a `coverage-gate` job (the action with
   `coverage-delta` set to the previous release tag, mirroring the local
@@ -152,7 +152,7 @@ Ada_CRDT/
 | Alire (`alr`) | All builds | Ada package manager, manages GNAT toolchain |
 | GNAT/SPARK toolchain | Build, proof | Installed automatically by Alire (FSF GNAT v15.2.1) |
 | `gnatprove` | `make prove` | Alire dev dependency (`alire-dev.toml`) |
-| `gnatformat_bin` | `make fmt` | Alire dev dependency (`alire-dev.toml`); run `make dev-setup` first |
+| `gnatformat_bin` | `make fmt` | Alire dev dependency (`alire-dev.toml`) |
 | `gnatdoc_bin` | `make doc` | Alire dev dependency (`alire-dev.toml`) |
 | Python 3 | `make doc`, `make link-check` | Runs `tools/rst2md.py`, `tools/gen-coverage.py`, and `tools/check-links.py` |
 | `sha256sum` | `make verify-report` | Content hashing for deterministic output (part of coreutils) |
@@ -414,7 +414,7 @@ Artifacts in `docs/compliance/`:
 
 ### Changelog & Doc Generation
 
-All generated by `make doc` / `make api-docs`:
+All generated by `make doc`:
 1. `gnatdoc` reads `.ads` files, generates RST in `obj/gnatdoc-rst/`
 2. `tools/rst2md.py` converts RST -> Markdown in `docs/api-docs/`
 3. Test and internal packages are excluded from docs
@@ -429,12 +429,12 @@ Two manifest files manage build tool dependencies:
 - **`alire-dev.toml`** -- full development manifest with `gnatprove`, `gnatdoc_bin`, and
   `gnatformat_bin` dependencies. Used for local SPARK proof, doc generation, and formatting.
 
-To switch between them:
-
-| Command | Action |
-|---------|--------|
-| `make dev-setup` | Copy `alire-dev.toml` over `alire.toml` for local dev |
-| `make prod-setup` | `git checkout alire.toml` to restore clean version |
+The dev targets (`make fmt`, `make doc`, `make prove`, `make coverage-gate`,
+`make sbom`) swap `alire-dev.toml` over `alire.toml` for the duration of the
+command and restore the clean publishing manifest afterwards, so no manual
+switch is required. The `description` make target keeps both manifests'
+`description` / `long-description` in sync with the canonical
+`alire/description.txt` + `alire/long-description.txt`.
 
 ### Release Process
 
