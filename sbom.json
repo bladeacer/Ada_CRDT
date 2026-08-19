@@ -3,7 +3,7 @@
   "specVersion": "1.5",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-08-19T13:33:49",
+    "timestamp": "2026-08-19T13:51:39",
     "tools": [
       {"vendor": "bladeacer", "name": "adacovex", "version": "1.16.0"}
     ],
@@ -27,7 +27,7 @@
       "purl": "pkg:alire/covex@1.1.0",
       "licenses": [{"license": {"id": "Apache-2.0"}}],
       "description": "Ada/SPARK coverage, proof, DO-178C compliance tool",
-      "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "base"}]
+      "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "dev"}]
       },
     {
       "type": "library",
@@ -37,7 +37,7 @@
       "purl": "pkg:alire/gnatdoc_bin@26.0.0",
       "licenses": [{"license": {"id": "GPL-3.0-or-later WITH GCC-exception-3.1"}}],
       "description": "GNAT Documentation Generation Tool - Binary Release",
-      "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "base"}]
+      "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "dev"}]
       },
     {
       "type": "library",
@@ -47,7 +47,7 @@
       "purl": "pkg:alire/gnatformat_bin@26.0.0",
       "licenses": [{"license": {"id": "GPL-3.0-or-later WITH GCC-exception-3.1"}}],
       "description": "GNAT code formatter for the Ada language - Binary Release",
-      "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "base"}]
+      "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "dev"}]
       },
     {
       "type": "library",
@@ -57,7 +57,7 @@
       "purl": "pkg:alire/gnatprove@15.1.0",
       "licenses": [{"license": {"id": "GPL-3.0-or-later"}}],
       "description": "Automatic formal verification of SPARK code",
-      "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "base"}]
+      "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "dev"}]
       },
     {
       "type": "library",
