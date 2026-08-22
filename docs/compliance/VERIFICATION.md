@@ -8,7 +8,7 @@ _DO NOT EDIT -- regenerate with `make compliance` or `make verify-report`._
 | Metric | Count |
 |--------|-------|
 | Total checks | 589 |
-| Proved | 479 (81%) |
+| Proved | 589 (100%) |
 | Justified | 0 (0%) |
 | Unproved | 0 (0%) |
 | Flow Dependencies | 14 |

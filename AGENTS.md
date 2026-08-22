@@ -8,75 +8,53 @@ layers. See [README.md](README.md) for a user-oriented overview.
 
 ## Codebase Structure
 
+<!-- agents-tree:begin -->
 ```
-Ada_CRDT/
-|-- alire.toml                  # Alire crate config (version, deps, metadata)
-|-- crdt.gpr                    # GNAT project file (source dirs, compiler flags)
-|-- Makefile                    # Build/test/doc/release/compliance targets
-|-- AGENTS.md                   # This file -- conventions and codebase guide
-|-- README.md                   # User-facing docs
-|-- CONTRIBUTING.md             # Contribution guide (issues/PRs)
-|-- CODE_OF_CONDUCT.md          # Contributor Covenant 3.0
-|-- src/
-|   |-- crdt.ads                # Root package (SPARK_Mode)
-|   |-- crdt-lww_element_sets.* # LWW set (Lamport timestamps, backwards-compat)
-|   |-- crdt-lww_sets.*         # Generic LWW set (any clock strategy)
-|   |-- crdt-pn_counters.*      # PN-Counter
-|   |-- crdt-rga.*              # RGA sequence (Yjs engine, default)
-|   |-- crdt-rgas.*             # Multi-RGA container
-|   |-- crdt-protected.*        # Thread-safe protected wrappers
-|   |-- core/
-|   |   |-- crdt-core.*         # Core types: Replica_Id, Lamport_Time, HLC_Time, VTime
-|   |   |-- crdt-core-leb128.*  # LEB128 variable-length encoding
-|   |   |-- crdt-hlc.*          # Hybrid Logical Clock
-|   |   |-- crdt-clocks.*       # Clock strategy root
-|   |   |-- crdt-clocks-lamport.*  # Lamport clock strategy
-|   |   |-- crdt-clocks-vector.*   # Vector clock strategy
-|   |   +-- crdt-clocks-matrix.*   # Matrix clock strategy
-|   |-- sequences/
-|   |   |-- crdt-sequences.*       # Sequence engine root
-|   |   |-- crdt-sequences-yjs.*   # Yjs chunk engine
-|   |   |-- crdt-sequences-naive.* # Flat linked-list engine
-|   |   +-- crdt-sequences-fugue.* # BST anti-interleaving engine
-|   |-- serialization/
-|   |   |-- crdt-serialization.*      # Protocol version router (V1/V2/V3 detection)
-|   |   +-- crdt-serialization-legacy.* # V1 fixed-width reader
-|   |-- sync/
-|   |   |-- crdt-sync.*                # Sync root (State_Vector type)
-|   |   |-- crdt-sync-op_based.*       # Op-based (CmRDT) sync
-|   |   |-- crdt-sync-state_based.*     # State-based (CvRDT) sync
-|   |   +-- crdt-sync-state_based-clocked.* # Generic clock-strategy-aware sync
-|   +-- tests/
-|       |-- crdt-test_support.*    # Test runner utilities
-|       |-- test_crdt.adb          # Main test harness
-|       +-- test_*.ad[sb]          # Per-category test modules
-|-- demo/
-|   |-- alire.toml             # Demo Alire config (pins parent)
-|   |-- crdt_demo.gpr          # Demo project file
-|   |-- demo_life.adb          # Conway's Game of Life demo
-|   +-- deps/vt100/            # Terminal VT100 library
-|-- .github/
-|   |-- FUNDING.yml            # Sponsor links
-|   |-- ISSUE_TEMPLATE/        # Bug/feature/security templates
-|   +-- workflows/             # CI + PR compliance workflows
-|-- docs/
-|   |-- compliance/            # DO-178C artifacts
-|   |   |-- index.md           # Overview, DAL-C scope
-|   |   |-- PSAC.md            # Plan for Software Aspects of Certification (hand-written)
-|   |   |-- HLR.md             # High-Level Requirements (hand-written)
-|   |   |-- LLR.md             # Low-Level Requirements (hand-written)
-|   |   |-- TRACE.md           # Bidirectional traceability (auto-populated, manually verified)
-|   |   +-- VERIFICATION.md    # SPARK + test results (hand-updated per release)
-|   |-- api-docs/              # Generated Markdown API docs (via `make doc`)
-|   +-- changelogs/            # Version-specific changelogs
-|       |-- index.md           # Auto-generated index of changelogs
-|       +-- crdt-*.md          # Per-version changelogs (hand-written)
-|-- config/                    # Alire-generated Ada/GPR config (do not hand-edit)
-|-- index/                     # Local Alire crate index (release metadata)
-|-- alire/                     # Alire internal state (releases/, flags/, etc.)
-+-- tools/
-    +-- rst2md.py              # Converts gnatdoc RST output to Markdown
+src/
+|-- crdt.ads                                  -- Root package (SPARK_Mode)
+|-- crdt-lww_element_sets.ads/.adb            -- LWW set (Lamport timestamps, backwards-compat)
+|-- crdt-lww_sets.ads/.adb                    -- Generic LWW set (any clock strategy)
+|-- crdt-pn_counters.ads/.adb                 -- PN-Counter
+|-- crdt-protected.ads/.adb                   -- Thread-safe protected wrappers
+|-- crdt-rga.ads/.adb                         -- RGA sequence (Yjs engine, default)
+|-- crdt-rgas.ads/.adb                        -- Multi-RGA container
+|-- core/
+|   |-- crdt-bounded.ads                      -- Compile-time bounded wrappers (zero heap)
+|   |-- crdt-clocks.ads                       -- Clock strategy root
+|   |-- crdt-clocks-lamport.ads/.adb          -- Lamport clock strategy
+|   |-- crdt-clocks-matrix.ads/.adb           -- Matrix clock strategy
+|   |-- crdt-clocks-vector.ads/.adb           -- Vector clock strategy
+|   |-- crdt-core.ads/.adb                    -- Core types: Replica_Id, Lamport_Time, HLC_Time, VTime
+|   |-- crdt-core-leb128.ads/.adb             -- LEB128 variable-length encoding
+|   `-- crdt-hlc.ads/.adb                     -- Hybrid Logical Clock
+|-- sequences/
+|   |-- crdt-sequences.ads                    -- Sequence engine root
+|   |-- crdt-sequences-fugue.ads/.adb         -- BST anti-interleaving engine
+|   |-- crdt-sequences-naive.ads/.adb         -- Flat linked-list engine
+|   `-- crdt-sequences-yjs.ads/.adb           -- Yjs chunk engine
+|-- serialization/
+|   |-- crdt-serialization.ads/.adb           -- Protocol version router (V1/V2/V3 detection)
+|   `-- crdt-serialization-legacy.ads/.adb    -- V1 fixed-width reader
+|-- sync/
+|   |-- crdt-sync.ads                         -- Sync root (State_Vector type)
+|   |-- crdt-sync-op_based.ads/.adb           -- Op-based (CmRDT) sync
+|   |-- crdt-sync-state_based.ads/.adb        -- State-based (CvRDT) sync
+|   `-- crdt-sync-state_based-clocked.ads/.adb-- Generic clock-strategy-aware sync
+`-- tests/
+    |-- crdt-test_support.ads/.adb            -- Test runner utilities
+    |-- proof_instantiations.ads              -- SPARK proof instantiations (generic bodies)
+    |-- test_basic.ads/.adb                   -- PN+LWW+RGA+RGAs (10290 tests)
+    |-- test_clocks.ads/.adb                  -- Lamport+Vector+Matrix+Lww_Sets (10290 tests)
+    |-- test_convergence.ads/.adb             -- Merge+skew+saturation (10290 tests)
+    |-- test_crdt.adb                         -- Main test harness
+    |-- test_engines.ads/.adb                 -- Yjs+Naive+Sync (10290 tests)
+    |-- test_fuzz.ads/.adb                    -- Chaos+10k+partitions (10290 tests)
+    |-- test_gol.ads/.adb                     -- Game of Life (10290 tests)
+    |-- test_lattice.ads/.adb                 -- Lattice law check (10290 tests)
+    |-- test_rga_features.ads/.adb            -- Interleave+split+delta+GC (10290 tests)
+    `-- test_serialization.ads/.adb           -- V1+V2+byte-boundary (10290 tests)
 ```
+<!-- agents-tree:end -->
 
 ## Build System
 
@@ -86,7 +64,7 @@ Ada_CRDT/
 |--------|-------------|--------------|
 | `build` | Compile library + tests | `alr build` (filters out `.sframe` linker noise) |
 | `test` | Build + run test suite (fuzz, convergence, GoL included) | `alr build && ./test_crdt` (all tests across 9 categories) |
-| `check` | Pre-commit quality gate (ascii, changelog, links, spark-off, build, tests, SPARK proof, coverage, compliance, description) | `ascii-check` + `changelog-check` + `link-check` + `spark-off-check` + `build` + `test` + `prove` + `coverage-gate` + `compliance` + `description` in order |
+| `check` | Pre-commit quality gate (ascii, changelog, links, spark-off, build, tests, SPARK proof, coverage, compliance, description, test-count, proof-status, doc-links) | `ascii-check` + `changelog-check` + `link-check` + `spark-off-check` + `build` + `test` + `prove` + `coverage-gate` + `compliance` + `description` + `test-count` + `proof-status` + `doc-links` in order |
 | `spark-off-check` | Verify every `SPARK_Mode => Off` location is listed in the spark-coverage report | `python3 tools/gen-coverage.py --check` (pure-static, no Alire needed) |
 | `covex` | Ensure the covex (adacovex) dev dependency is built | `alr exec -- adacovex --help`; builds via `alr build` if missing |
 | `prove` | SPARK formal verification + badge regeneration | `adacovex prove --target=. --dal=C --emit-svg=docs/badges/` |
@@ -102,6 +80,11 @@ Ada_CRDT/
 | `publish` | Publish to Alire community index | Archives source, pushes to community index |
 | `demo` | Build + run Game of Life demo | `cd demo && alr build && ./demo_life` |
 | `clean` | Remove build artifacts | `alr clean; rm -rf obj/ lib/ docs/` |
+| `proof-status` | Update VC count + SPARK level in docs from gnatprove.out | `tools/update-proof-status.py` (parses obj/gnatprove/gnatprove.out) |
+| `test-count` | Update test counts in docs from test_result.md | `tools/update-test-count.py` (parses test_result.md) |
+| `agents-tree` | Regenerate AGENTS.md src/ architecture tree | `tools/gen-agents-tree.py` + `tools/agents-tree.map` |
+| `doc-links` | Regenerate AGENTS.md Documentation block from map | `tools/update-doc-links.py` + `tools/doc-links.map` |
+| `test-publish` | Dry-run showing what `make publish` would do | Prints version, action, and auth requirements |
 
 ### Alire (Ada Package Manager)
 
@@ -293,15 +276,15 @@ CRDT.Clocks.Matrix             -- explicit Matrix strategy
 - Main harness: `src/tests/test_crdt.adb` orchestrates all test modules
 - Test results written to both stdout and `test_result.md`
 - **10290 tests** across 9 categories:
-  - Basic: PN+LWW+RGA+RGAs (34 tests)
-  - Clocks: Lamport+Vector+Matrix+Lww_Sets (40 tests)
-  - Lattice Properties: law check (8 tests)
-  - RGA Features: interleave+split+delta+GC (40 tests)
-  - Serialization: V1+V2+byte-boundary (62 tests)
-  - Engines: Yjs+Naive+Sync (23 tests)
-  - Convergence: merge+skew+saturation (21 tests)
-  - Fuzz: chaos+10k+partitions (10038 tests)
-  - Game of Life: neighbors+blinker+sync+conv+mode (24 tests)
+  - Basic: PN+LWW+RGA+RGAs (10290 tests)
+  - Clocks: Lamport+Vector+Matrix+Lww_Sets (10290 tests)
+  - Lattice Properties: law check (10290 tests)
+  - RGA Features: interleave+split+delta+GC (10290 tests)
+  - Serialization: V1+V2+byte-boundary (10290 tests)
+  - Engines: Yjs+Naive+Sync (10290 tests)
+  - Convergence: merge+skew+saturation (10290 tests)
+  - Fuzz: chaos+10k+partitions (10290 tests)
+  - Game of Life: neighbors+blinker+sync+conv+mode (10290 tests)
 - Test files are `SPARK_Mode => Off` (test infrastructure is not formally proved)
 - Demo (`demo/demo_life.adb`) is also `SPARK_Mode => Off` by design -- it is
   a terminal application that instantiates generics, not a formal verification
@@ -319,6 +302,29 @@ CRDT.Clocks.Matrix             -- explicit Matrix strategy
   `make changelog-check` (`tools/check-changelog.py`) and run as part of
   `make compliance`. The format below is the single enforced format; the
   sibling `adacovex` project's changelogs use the same C#/H# style.
+
+- **Architecture tree**: `make agents-tree` regenerates the ASCII source tree
+  in this file from `tools/agents-tree.map` (add entries for new files).
+- **Doc links**: `make doc-links` regenerates the Documentation block below
+  from `tools/doc-links.map` (add entries for new docs).
+- **Quick Reference**: `make doc` also regenerates the README Quick Reference
+  table from `docs/api-docs/` via `tools/gen-quickref.py`.
+
+<!-- doc-links:begin -->
+- [API reference](docs/api-docs/index.md)
+- [DO-178C compliance](docs/compliance/index.md)
+- [PSAC (Plan for Software Aspects of Certification)](docs/compliance/PSAC.md)
+- [High-Level Requirements](docs/compliance/HLR.md)
+- [Low-Level Requirements](docs/compliance/LLR.md)
+- [Traceability matrix](docs/compliance/TRACE.md)
+- [Verification results](docs/compliance/VERIFICATION.md)
+- [Changelogs](docs/changelogs/index.md)
+- [V1->V2 Migration guide](docs/changelogs/crdt-1.4.0-migration.md)
+- [Proof ledger (gnatprove 16.1.0)](docs/proof/16.1.0-ledger.md)
+- [Readme](README.md)
+- [Contributing](CONTRIBUTING.md)
+- [Agent guide](AGENTS.md)
+<!-- doc-links:end -->
   - **Naming**: one file per released version: `crdt-1.7.0.md`,
     `crdt-1.7.1.md`, `crdt-1.8.0.md`. A patch release file sorts between the
     surrounding minors. The file is written when a release is prepared; work

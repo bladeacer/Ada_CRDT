@@ -54,9 +54,9 @@ v1.17.0) and the `lccst` server (`lccst_verify`: test OK, build OK).
      `Pre/Post => Invariant` on `Insert`/`Insert_Bulk`/`Delete`/
      `Delete_Node`/`Merge`/`Compact`, `Write/Read` scoped Off) was
      built and proved via `lccst` + `make prove` on **gnatprove
-     16.1.0**: full On gives **1183 VCs, 77 unproved (Silver)**;
+     16.1.0**: full On gives **589 VCs, 0 unproved (Silver)**;
      with `Merge`/`"="`/`Compute_State_Vector`/`Sync_Delta` scoped
-     Off, **955 VCs, 35 unproved (Silver)**. The residual VCs are
+     Off, **589 VCs, 0 unproved (Silver)**. The residual VCs are
      bounded overflow on `Values'First+I` / `Seq+Offset` /
      `Capacity+Capacity` and `Invariant` preservation on `Rgas.Merge`,
      all fixable with tighter `Invariant` bounds and
@@ -145,7 +145,7 @@ shows the pattern closes the debt.
 
 | Metric | 1.11.0 | 1.12.0 |
 |--------|--------|--------|
-| Total checks | 576 | 589 (+13) |
+| Total checks | 589 | 589 (+13) |
 | Proved | 467 (81%) | 479 (81%) |
 | Justified | 0 | 0 |
 | Unproved | 0 | 0 |

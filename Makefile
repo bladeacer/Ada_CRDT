@@ -1,4 +1,4 @@
-.PHONY: help build test check covex prove coverage-gate description verify-report compliance changelog-check ascii-check link-check spark-off-check fmt doc sbom demo bump-version release publish clean
+.PHONY: help build test check covex prove coverage-gate description verify-report compliance changelog-check ascii-check link-check spark-off-check fmt doc sbom demo bump-version release publish clean proof-status test-count agents-tree doc-links test-publish
 
 .DEFAULT_GOAL := help
 
@@ -28,6 +28,15 @@ help:
 	@echo '  sbom          Generate a proof-aware CycloneDX SBOM (sbom.json)'
 	@echo '  fmt           Format all Ada sources with gnatformat (swaps in alire-dev.toml)'
 	@echo '  demo          Build + run the Game of Life demo'
+	@echo '  proof-status  Update the VC count + SPARK level in the docs from'
+	@echo '                the current gnatprove.out (tools/update-proof-status.py)'
+	@echo '  test-count    Update the test counts in the docs from'
+	@echo '                test_result.md (tools/update-test-count.py)'
+	@echo '  agents-tree   Regenerate the AGENTS.md src/ architecture tree'
+	@echo '                (tools/gen-agents-tree.py + tools/agents-tree.map)'
+	@echo '  doc-links     Regenerate the AGENTS.md Documentation block from'
+	@echo '                tools/doc-links.map (tools/update-doc-links.py)'
+	@echo '  test-publish  Dry-run showing what make publish would do'
 	@echo '  bump-version  Bump version across alire.toml, alire-dev.toml, demo, releases, index (VERSION=x.y.z)'
 	@echo '  release       Tag, update index+releases, push. Use VERSION=x.y.z'
 	@echo '  publish       Publish to Alire community index (run after make release)'
@@ -51,7 +60,14 @@ test: build
 # output that `compliance` (verify-report) parses, so they run first;
 # `coverage-gate` compares docstring coverage against the last release tag;
 # `description` (CHECK=1) verifies the crate description stayed in sync.
+# Cheap static gates run first; the count-sync checks (test-count,
+# proof-status) verify that no live file carries a stale metric after
+# `make test` / `make prove` refreshed them -- same pattern as sibling
+# adacovex `make check`.
 check: ascii-check changelog-check link-check fmt doc spark-off-check build test prove coverage-gate compliance description
+	@echo "=== Quality gate: test counts in sync ==="; python3 tools/update-test-count.py --check
+	@echo "=== Quality gate: proof metrics in sync ==="; python3 tools/update-proof-status.py --check
+	@echo "=== Quality gate: doc links ==="; python3 tools/update-doc-links.py --check
 	@echo ""; \
 	echo "=== All pre-commit quality gates passed ==="
 	@echo "=== Quality gate: description sync ==="; python3 tools/update-description.py --check
@@ -157,10 +173,11 @@ verify-report:
 		spark_off_count="?"; generics_skipped="?"; \
 	else \
 		total=$$(awk 'BEGIN{FS="  +"}/^Total /{print $$2+0}' "$$prove_out"); \
-		proved=$$(awk 'BEGIN{FS="  +"}/^Total /{print $$4+0}' "$$prove_out"); \
+		flow=$$(awk 'BEGIN{FS="  +"}/^Total /{print $$3+0}' "$$prove_out"); \
+		provers=$$(awk 'BEGIN{FS="  +"}/^Total /{print $$4+0}' "$$prove_out"); \
 		justified=$$(awk 'BEGIN{FS="  +"}/^Total /{print $$5+0}' "$$prove_out"); \
 		unproved=$$(awk 'BEGIN{FS="  +"}/^Total /{print $$6+0}' "$$prove_out"); \
-		flow=$$(awk 'BEGIN{FS="  +"}/^Total /{print $$3+0}' "$$prove_out"); \
+		proved=$$(( total - justified - unproved )); \
 		rt_total=$$(awk 'BEGIN{FS="  +"}/^Run-time Checks /{print $$2+0}' "$$prove_out"); \
 		rt_proved=$$(awk 'BEGIN{FS="  +"}/^Run-time Checks /{print $$4+0}' "$$prove_out"); \
 		rt_justified=$$(awk 'BEGIN{FS="  +"}/^Run-time Checks /{print $$5+0}' "$$prove_out"); \
@@ -353,6 +370,29 @@ sbom: covex
 	status=$$?; \
 	$(swap-out-covex) \
 	exit $$status
+
+proof-status:
+	@python3 tools/update-proof-status.py
+
+test-count:
+	@python3 tools/update-test-count.py
+
+agents-tree:
+	@python3 tools/gen-agents-tree.py > /tmp/agents-tree.out && \
+	python3 tools/apply-agents-tree.py /tmp/agents-tree.out && \
+	rm -f /tmp/agents-tree.out
+
+doc-links:
+	@python3 tools/update-doc-links.py
+
+test-publish:
+	@version=$$(sed -n 's/^version = "\(.*\)"/\1/p' alire.toml); \
+	echo "=== test-publish dry-run ==="; \
+	echo "Version:  $$version"; \
+	echo "Action:   alr publish (auto-detects GitHub, test deps excluded)"; \
+	echo "Requires: GitHub PAT in GITHUB_TOKEN env var or gh auth token"; \
+	echo "Docs:     https://github.com/alire-project/alire/blob/master/doc/publishing.md"; \
+	echo "=== end dry-run ==="
 
 changelog-check:
 	@echo "=== Changelog format check ==="; \

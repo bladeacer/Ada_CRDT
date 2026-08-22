@@ -1,0 +1,37 @@
+src/crdt	Root package (SPARK_Mode)
+src/crdt-lww_element_sets	LWW set (Lamport timestamps, backwards-compat)
+src/crdt-lww_sets	Generic LWW set (any clock strategy)
+src/crdt-pn_counters	PN-Counter
+src/crdt-rga	RGA sequence (Yjs engine, default)
+src/crdt-rgas	Multi-RGA container
+src/crdt-protected	Thread-safe protected wrappers
+src/core/crdt-core	Core types: Replica_Id, Lamport_Time, HLC_Time, VTime
+src/core/crdt-core-leb128	LEB128 variable-length encoding
+src/core/crdt-hlc	Hybrid Logical Clock
+src/core/crdt-clocks	Clock strategy root
+src/core/crdt-clocks-lamport	Lamport clock strategy
+src/core/crdt-clocks-vector	Vector clock strategy
+src/core/crdt-clocks-matrix	Matrix clock strategy
+src/core/crdt-bounded	Compile-time bounded wrappers (zero heap)
+src/sequences/crdt-sequences	Sequence engine root
+src/sequences/crdt-sequences-yjs	Yjs chunk engine
+src/sequences/crdt-sequences-naive	Flat linked-list engine
+src/sequences/crdt-sequences-fugue	BST anti-interleaving engine
+src/serialization/crdt-serialization	Protocol version router (V1/V2/V3 detection)
+src/serialization/crdt-serialization-legacy	V1 fixed-width reader
+src/sync/crdt-sync	Sync root (State_Vector type)
+src/sync/crdt-sync-op_based	Op-based (CmRDT) sync
+src/sync/crdt-sync-state_based	State-based (CvRDT) sync
+src/sync/crdt-sync-state_based-clocked	Generic clock-strategy-aware sync
+src/tests/crdt-test_support	Test runner utilities
+src/tests/test_crdt	Main test harness
+src/tests/test_basic	PN+LWW+RGA+RGAs (34 tests)
+src/tests/test_clocks	Lamport+Vector+Matrix+Lww_Sets (40 tests)
+src/tests/test_lattice	Lattice law check (8 tests)
+src/tests/test_rga_features	Interleave+split+delta+GC (40 tests)
+src/tests/test_serialization	V1+V2+byte-boundary (62 tests)
+src/tests/test_engines	Yjs+Naive+Sync (23 tests)
+src/tests/test_convergence	Merge+skew+saturation (21 tests)
+src/tests/test_fuzz	Chaos+10k+partitions (10038 tests)
+src/tests/test_gol	Game of Life (24 tests)
+src/tests/proof_instantiations	SPARK proof instantiations (generic bodies)
