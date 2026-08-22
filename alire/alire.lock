@@ -13,9 +13,13 @@ versions = "*"
 authors = [
 "bladeacer",
 ]
-description = "Ada/SPARK coverage, proof, DO-178C compliance tool"
+auto-gpr-with = true
+description = "Ada/SPARK coverage, proof, multi-standard compliance tool"
+executables = [
+"adacovex",
+]
 licenses = "Apache-2.0"
-long-description = "Zero-dependency Ada/SPARK CLI tool for coverage analysis, proof verification,\ntest-result parsing, DO-178C DAL compliance assessment, and interactive dashboards.\n\n- Source scanning: walks .ads files, extracts subprogram declarations, docstring\n  annotations (@param, @return, @field, @formal), and HLR traceability tags\n- Proof analysis: parses GNATprove gnatprove.out summaries; assesses SPARK\n  assurance levels (Stone through Platinum)\n- Test parsing: reads markdown test results for pass/fail counts (native Ada or\n  AUnit format)\n- DAL compliance: assesses DO-178C DAL A-E criteria (HLR coverage, orphan tags,\n  test status, minimum SPARK proof level)\n- Multiple outputs: ANSI terminal report, SVG badges, Markdown reports,\n  HTML dashboard, and JSON API via built-in HTTP/1.1 server\n- Scalable: package/subprogram collections use Ada.Containers.Vectors\n  (heap-allocated, no compile-time limits)\n- No external dependencies beyond the GNAT runtime library\n- Self-assessment: 100% docstring coverage, Platinum SPARK (28/28 VCs proved),\n  DAL-C Achieved, 152/152 native tests passing\n"
+long-description = "Zero-dependency Ada/SPARK CLI tool for coverage analysis, proof verification,\ntest-result parsing, multi-standard safety-compliance assessment (DO-178C /\nISO 26262 / IEC 62304), and interactive dashboards.\n\n- Source scanning: walks .ads files, extracts subprogram declarations, docstring\n  annotations (@param, @return, @field, @formal), and HLR traceability tags\n- Proof analysis: parses GNATprove gnatprove.out summaries; assesses SPARK\n  assurance levels (Stone through Platinum)\n- Test parsing: reads markdown test results for pass/fail counts (native Ada or\n  AUnit format)\n- DAL compliance: assesses DO-178C DAL A-E criteria (HLR coverage, orphan tags,\n  test status, minimum SPARK proof level), re-labelled for ISO 26262\n  (ASIL A-D/QM) and IEC 62304 (safety classes A-C) via --dal / --asil / --class\n- Differential assessment: --compare-base / --coverage-delta snapshot a base\n  revision on git, Mercurial, Subversion, Fossil, or jj without touching the\n  working tree\n- Multiple outputs: ANSI terminal report, SVG badges, Markdown reports,\n  HTML dashboard, JSON API via a built-in HTTP/1.1 server, and a proof-aware\n  SBOM (CycloneDX / SPDX / Markdown)\n- Result caching: a content-addressed on-disk cache serves unchanged scan,\n  proof, test, and manifest results without re-running the work\n- Tooling: `status` reports the toolchain + VCS state, `man` installs a local\n  man page, and the `prove` subcommand resolves gnatprove at run time\n- Scalable: package/subprogram collections use Ada.Containers.Vectors\n  (heap-allocated, no compile-time limits)\n- Zero library dependencies: uses only the GNAT runtime library. gnatprove is\n  NOT a declared dependency -- the prove subcommand resolves it at run time\n  (per-project manifest, PATH, cached toolchain, or download), so the covex\n  crate installs and builds with no toolchain beyond the GNAT compiler\n-  Self-assessment: 100% docstring coverage, Platinum SPARK (408/408 VCs proved),\n  DAL-C / ASIL B / Class A Achieved, 666/666 native tests passing\n"
 maintainers = [
 "bladeacer <wg.nick.exe@gmail.com>",
 ]
@@ -29,14 +33,26 @@ project-files = [
 tags = [
 "ada",
 "spark",
-"coverage",
+"formal-verify",
+"cli",
+"gnatprove",
+"sbom",
+"tests",
+"code-coverage",
 "do-178c",
+"iso-26262",
+"iec-62304",
+"asil",
 "compliance",
+"developer-tools",
 ]
-version = "1.1.0"
+version = "1.14.0"
 website = "https://github.com/bladeacer/adacovex"
+[solution.state.release.environment]
+[solution.state.release.environment.PATH]
+prepend = "${CRATE_ROOT}/bin"
 [solution.state.release.origin]
-commit = "a4295f2577456bdfe23850b7339298b6518803f6"
+commit = "6816c1e867c0a07fbb6f1011d149e505c4410960"
 url = "git+https://github.com/bladeacer/adacovex"
 [[solution.state]]
 crate = "gnatdoc_bin"
@@ -123,7 +139,7 @@ crate = "gnatprove"
 fulfilment = "solved"
 pinned = false
 transitivity = "direct"
-versions = "^15.1.0"
+versions = "^16.1.0"
 [solution.state.release]
 authors = [
 "AdaCore",
@@ -131,7 +147,7 @@ authors = [
 auto-gpr-with = false
 description = "Automatic formal verification of SPARK code"
 licenses = "GPL-3.0-or-later"
-long-description = "GNATprove, which provides automatic formal verification of SPARK code, is based on the [open-source](https://github.com/AdaCore/spark2014) [SPARK Pro](https://www.adacore.com/sparkpro) by [AdaCore](https://www.adacore.com).\nThe [SPARK Pro User's Guide](https://docs.adacore.com/spark2014-docs/html/ug/index.html) provides extensive documentation on how to use GNATprove.\nNote that because this version of GNATprove is built from an intermediate commit of SPARK Pro, it is not representative of any specific SPARK Pro release, and the SPARK Pro documentation may describe features or capabilities that are not yet available in this version of GNATprove.\n\nTo use GNATprove, simply add it to your Alire project using\n\n    alr with gnatprove\n\nThen, configure your environment by running:\n\n    eval \"$( alr printenv )\"\n\nYou will then be able to run GNATprove:\n\n    gnatprove\n\nFor more details on getting started using GNATprove, see [Getting Started with SPARK](https://docs.adacore.com/spark2014-docs/html/ug/en/getting_started.html) from the [SPARK Pro User's Guide](https://docs.adacore.com/spark2014-docs/html/ug/index.html).\n\nTo get started with the SPARK language, see the [Introduction to SPARK](https://learn.adacore.com/courses/intro-to-spark/index.html) course on [learn.adacore.com](https://learn.adacore.com/index.html).\n"
+long-description = "GNATprove, which provides automatic formal verification of SPARK code, is based on the [open-source](https://github.com/AdaCore/spark2014) [SPARK Pro](https://www.adacore.com/sparkpro) by [AdaCore](https://www.adacore.com).\nThe [SPARK Pro User's Guide](https://docs.adacore.com/spark2014-docs/html/ug/index.html) provides extensive documentation on how to use GNATprove.\nNote that because this version of GNATprove is built from an intermediate commit of SPARK Pro, it is not representative of any specific SPARK Pro release, and the SPARK Pro documentation may describe features or capabilities that are not yet available in this version of GNATprove.\n\nTo use GNATprove, simply add it to your Alire project using\n\n    alr with gnatprove\n\nYou will then be able to run GNATprove:\n\n    alr gnatprove\n\nFor more details on getting started using GNATprove, see [Getting Started with SPARK](https://docs.adacore.com/spark2014-docs/html/ug/en/getting_started.html) from the [SPARK Pro User's Guide](https://docs.adacore.com/spark2014-docs/html/ug/index.html).\n\nTo get started with the SPARK language, see the [Introduction to SPARK](https://learn.adacore.com/courses/intro-to-spark/index.html) course on [learn.adacore.com](https://learn.adacore.com/index.html).\n"
 maintainers = [
 "Fabien Chouteau <chouteau@adacore.com>",
 "CÃ©sar Sagaert <sagaert@adacore.com>",
@@ -141,7 +157,7 @@ maintainers-logins = [
 "AldanTanneo",
 ]
 name = "gnatprove"
-version = "15.1.0"
+version = "16.1.0"
 website = "https://docs.adacore.com/spark2014-docs/html/ug/index.html"
 [solution.state.release.configuration]
 auto_gpr_with = true
@@ -156,7 +172,7 @@ prepend = "${CRATE_ROOT}/bin"
 [solution.state.release.origin]
 binary = true
 hashes = [
-"sha256:aad9a73f600d3008f33141a6cd4c5314d4c210e8928edc172c23c76104ddf7b2",
+"sha256:82528bef29857e239373fcc36732837d743f5a00805d502c70455422ffc97191",
 ]
-url = "https://github.com/alire-project/GNAT-FSF-builds/releases/download/gnatprove-15.1.0-1/gnatprove-x86_64-linux-15.1.0-1.tar.gz"
+url = "https://github.com/alire-project/GNAT-FSF-builds/releases/download/gnatprove-16.1.0-1/gnatprove-x86_64-linux-16.1.0-1.tar.gz"
 
