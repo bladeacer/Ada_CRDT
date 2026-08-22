@@ -93,16 +93,14 @@ All core specs use `SPARK_Mode` (On) at package level. The following packages ha
 
 ### `src/sequences/crdt-sequences-naive.adb`
 
-- Line 189: `function Element (Container : RGA; Position : Cursor) return Element_Type with SPARK_Mode => Off is`
+- Line 191: `function Element (Container : RGA; Position : Cursor) return Element_Type with SPARK_Mode => Off is`
 
-- Line 205: `function Get (R : RGA; Pos : Positive) return Element_Type with SPARK_Mode => Off is`
+- Line 207: `function Get (R : RGA; Pos : Positive) return Element_Type with SPARK_Mode => Off is`
 
-- Line 340: `function "=" (Left, Right : RGA) return Boolean with SPARK_Mode => Off is`
-
-- Line 391: `procedure Write_RGA (Stream : access Ada.Streams.Root_Stream_Type'Class; Item : RGA) with SPARK_Mode => Off is`
+- Line 404: `procedure Write_RGA (Stream : access Ada.Streams.Root_Stream_Type'Class; Item : RGA) with SPARK_Mode => Off is`
   - Justification: Serialization
 
-- Line 409: `procedure Read_RGA (Stream : access Ada.Streams.Root_Stream_Type'Class; Item : out RGA) with SPARK_Mode => Off is`
+- Line 422: `procedure Read_RGA (Stream : access Ada.Streams.Root_Stream_Type'Class; Item : out RGA) with SPARK_Mode => Off is`
 
 
 ### `src/sequences/crdt-sequences-yjs.adb`

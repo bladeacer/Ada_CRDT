@@ -35,3 +35,6 @@ maintainers-logins = ["bladeacer"]
 licenses = "MIT"
 website = "https://github.com/bladeacer/ada_crdt"
 tags = ["crdt", "spark", "ada"]
+[origin]
+commit = "3dfcdbceddc19399a994314c03b2eb8e090933ed"
+url = "git+https://github.com/bladeacer/ada_crdt.git"

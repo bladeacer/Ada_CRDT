@@ -155,15 +155,17 @@ is
       Steps : Natural := 0;
    begin
       loop
-         pragma Loop_Invariant (Cur in 0 .. R.Capacity and then P in 1 .. Natural'Last and then Steps <= R.Capacity);
+         pragma Loop_Invariant (Cur in 0 .. R.Capacity and then P in 1 .. Pos and then Steps <= R.Capacity and then Steps <= Pos);
          pragma Loop_Variant (Increases => Steps);
-         exit when Cur = 0 or Steps >= R.Capacity;
+         exit when Cur = 0 or Steps >= R.Capacity or Steps >= Pos;
          if P = 1 then
             return Cur;
          end if;
          P := P - 1;
          Cur := R.Items (Cur).Next;
-         Steps := Steps + 1;
+         if Steps < Natural'Last then
+            Steps := Steps + 1;
+         end if;
       end loop;
       return 0;
    end Find_Pos;
@@ -337,12 +339,19 @@ is
       end loop;
    end Merge;
 
-   function "=" (Left, Right : RGA) return Boolean with SPARK_Mode => Off is
+   function "=" (Left, Right : RGA) return Boolean is
+      subtype Loop_Counter is Natural range 0 .. 200;
       L_Idx : Natural := Left.Head;
       R_Idx : Natural := Right.Head;
+      Steps : Loop_Counter := 0;
    begin
+      if not Invariant (Left) or not Invariant (Right) then
+         return False;
+      end if;
       loop
-         pragma Loop_Invariant (L_Idx in 0 .. Left.Capacity and then R_Idx in 0 .. Right.Capacity);
+         pragma Loop_Invariant (L_Idx in 0 .. Left.Capacity and then R_Idx in 0 .. Right.Capacity and then Invariant (Left) and then Invariant (Right) and then Steps <= 200);
+         pragma Loop_Variant (Increases => Steps);
+         exit when Steps >= 200 or else (Steps > Left.Capacity and then Steps > Right.Capacity);
          if L_Idx = 0 and R_Idx = 0 then
             return True;
          end if;
@@ -354,7 +363,11 @@ is
          end if;
          L_Idx := Left.Items (L_Idx).Next;
          R_Idx := Right.Items (R_Idx).Next;
+         if Steps < 200 then
+            Steps := Steps + 1;
+         end if;
       end loop;
+      return False;
    end "=";
 
    procedure Compact (R : in out RGA) is
