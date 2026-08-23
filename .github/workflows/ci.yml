@@ -25,6 +25,14 @@ jobs:
           gnat-version: 15.2.1
           build: false
           prove: true
+          # Loop unrolling off: keeps GNATprove's purely-informational
+          # "cannot unroll loop (too many loop iterations)" notices out of
+          # the log (Find_Actor / Value / LEB128 and the generic
+          # instantiations emit them); proof-neutral: 589/589 VCs proved.
+          prove-no-loop-unrolling: true
+          # Quiet (benign-info suppression) is the default; CI passes
+          # --verbose so its output stays authoritative.
+          verbose: true
 
   native-tests:
     name: Build + native test suite

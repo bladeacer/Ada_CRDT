@@ -124,7 +124,7 @@ prove: covex
 	@$(swap-in-covex) \
 	force=""; \
 	if [ ! -f obj/gnatprove/gnatprove.out ]; then force="--force"; fi; \
-	SOURCE_DATE_EPOCH=$$(git show -s --format=%ct HEAD 2>/dev/null || echo 0) $(ADACOVEX_BIN) prove --target=. --dal=C --emit-svg=docs/badges/ $$force; \
+	SOURCE_DATE_EPOCH=$$(git show -s --format=%ct HEAD 2>/dev/null || echo 0) $(ADACOVEX_BIN) prove --target=. --dal=C --emit-svg=docs/badges/ --no-loop-unrolling $$force; \
 	status=$$?; \
 	$(swap-out-covex) \
 	exit $$status

@@ -42,6 +42,10 @@ jobs:
           gnat-version: 15.2.1
           build: true
           prove: true
+          prove-no-loop-unrolling: true
+          # Quiet (benign-info suppression) is the default; CI passes
+          # --verbose so its output stays authoritative.
+          verbose: true
           require-spark: Platinum
           require-docstrings: 100
           require-tests: 10290
