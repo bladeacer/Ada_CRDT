@@ -39,6 +39,27 @@ the controlled technical-names list.
      `RGA`, `Yjs`, `Fugue`, `SPARK`). Writers must add a new term to this list
      before they use it.
 
+### C3: SPARK_Mode => Off Audit and New-Code Policy
+
+A full audit of every `SPARK_Mode => Off` scope confirms all 34 remaining
+locations are necessary. They fall into four impure categories that SPARK cannot
+analyse: stream I/O (`Ada.Streams`), wall-clock access (`Ada.Calendar.Clock`),
+random number generation (`Ada.Numerics.Discrete_Random`), and access-type
+manipulation in the sequence engine bodies (`Rga`, `Yjs`, `Fugue`). The Naive
+engine `Element` and `Get` were reviewed for promotion to `On`; they stay `Off`
+because proving them needs contract work that links `Find_Pos` to the
+visible-element count, which is out of scope for this release. `AGENTS.md` now
+requires all new code to be fully SPARK-proven and forbids new `SPARK_Mode =>
+Off` scopes except for the established impure categories, each with an inline
+justification comment and a matching spark-coverage entry.
+
+   - **Audit result**: 34 `SPARK_Mode => Off` scopes, all mandatory (no
+     removable redundancy -- a body must restate `Off` when its spec declares it).
+   - **Policy**: new subprograms are SPARK-proven by default. A new `Off` scope
+     is allowed only for stream I/O, wall-clock, RNG, or access types, and must
+     carry an inline justification, appear in `docs/api-docs/crdt-spark-coverage.md`,
+     and stay the documented minimum.
+
 ## Test Suite
 
 10290 tests passing across 9 categories (unchanged from 1.12.0).

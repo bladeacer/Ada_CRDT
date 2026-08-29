@@ -443,6 +443,16 @@ whatever level the proof campaign actually attains.
   - `Ada.Calendar.Clock` (wall-clock) -- HLC `Create`/`Tick`/`Recv`
   - Stream I/O -- Write/Read serialization routines
   - Access types -- RGA/Naive/Fugue engine bodies
+- New code must be fully SPARK-proven. Do not introduce new `SPARK_Mode => Off`
+  scopes. The only accepted `Off` categories are the established impure
+  operations listed above (stream I/O, wall-clock, RNG, access types). Any new
+  `Off` must: (1) carry an inline justification comment, (2) appear in
+  `docs/api-docs/crdt-spark-coverage.md` (regenerate with `make doc` or
+  `python3 tools/gen-coverage.py`), and (3) stay the documented minimum. Prefer
+  a SPARK-friendly redesign (for example a buffer-based encoder over
+  `Ada.Streams`) to a new `Off` scope. When a spec declares `SPARK_Mode => Off`,
+  the matching body must also declare it -- SPARK requires the body to restate
+  `Off`, so removing a body annotation alone does not turn a subprogram `On`.
 
 ### DO-178C Artifacts
 
