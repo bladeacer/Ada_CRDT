@@ -1,9 +1,9 @@
 --  SPARK proof instantiations.
 --
---  GNATprove does not analyze generic units directly: each generic body is
---  only analyzed when instantiated.  This package instantiates every CRDT
+--  GNATprove does not analyse generic units directly.  Each generic body is
+--  analysed only when instantiated.  This package instantiates every CRDT
 --  generic with representative formals so that the bodies are proved under
---  SPARK_Mode => On.  It is a proof-only unit: it adds no public API and is
+--  SPARK_Mode => On.  It is a proof-only unit that adds no public API and is
 --  not used at run time.
 with CRDT.Clocks;
 with CRDT.Clocks.Vector;

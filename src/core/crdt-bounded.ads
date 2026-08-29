@@ -3,7 +3,7 @@
 --  Critical for mission-critical Ada/SPARK environments where
 --  heap allocation is restricted to prevent fragmentation and OOM.
 --
---  All types in CRDT natively use bounded storage; this package
+--  All types in CRDT natively use bounded storage. This package
 --  provides convenient renamings and documentation.
 with CRDT.Core;
 with CRDT.Pn_Counters;

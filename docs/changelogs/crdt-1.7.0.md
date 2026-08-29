@@ -2,13 +2,13 @@
 
 Date: _2026-07-25_
 
-Clock strategy selection (Lamport, Vector, Matrix), V3 wire protocol with
-clock-kind discriminator, clocked sync layer, generic LWW sets, SPARK proof
-expansion, and documentation modernization. `CRDT.Clocks` introduces three
-interchangeable clock strategies, `CRDT.Lww_Sets` is a new generic LWW set
-over any strategy, and `CRDT.Sync.State_Based.Clocked` replaces the hardcoded
-VTime + HLC sync path. Canonical repository moved from Codeberg to GitHub due
-to TOS changes on AI-assisted code.
+This release adds clock strategy selection (Lamport, Vector, Matrix), a V3 wire
+protocol with clock-kind discriminator, a clocked sync layer, generic LWW sets,
+SPARK proof expansion, and documentation modernisation. `CRDT.Clocks`
+introduces three interchangeable clock strategies, `CRDT.Lww_Sets` is a new
+generic LWW set over any strategy, and `CRDT.Sync.State_Based.Clocked` replaces
+the hardcoded VTime + HLC sync path. The canonical repository moved from
+Codeberg to GitHub because of TOS changes on AI-assisted code.
 
 ## Changes
 
@@ -28,12 +28,13 @@ hierarchy:
 
 Each strategy provides a uniform interface: `Clock_Time` type, comparison
 operators (`<`, `=`, `>`), `Max`, `Increment`, `Merge`, and
-`Write_Clock`/`Read_Clock` for serialization.
+`Write_Clock`/`Read_Clock` for serialisation.
 
 ### C2: V3 Wire Protocol
 
 `Protocol_Version` bumped to 3. New `CRDT.Clocks.Clock_Kind` enum embedded in
-V3 headers for auto-detection of the clock strategy used during serialization.
+V3 headers for auto-detection of
+the clock strategy used during serialisation.
 `Read_Header` detects V1/V2/V3 transparently.
 
 - Legacy types (`LWW_Element_Sets`, `RGA`, `PN_Counters`) continue writing V2
@@ -56,8 +57,8 @@ package S is new CRDT.Lww_Sets (Integer, 100, V.Clock_Time,
   Read_Clock  => V.Read_Clock);
 ```
 
-`CRDT.Lww_Element_Sets` (Lamport-only) is now **deprecated** -- retained for
-backward compatibility but no new features will be added.
+`CRDT.Lww_Element_Sets` (Lamport-only) is now **deprecated**. It is retained for
+backward compatibility. No new features will be added.
 
 ### C4: Clocked State-Based Sync
 
@@ -92,8 +93,8 @@ with the 'C' key. Status bar displays the active strategy.
   `docs/api-docs/` and vendored `vt100/`).
 - **README**: Restructured with Quick Reference table, Roadmap section, wire
   protocol V3 documentation, API doc links above each code example, and
-  deprecation notices. Examples are illustrative; generated API docs are
-  authoritative.
+deprecation notices. Examples are illustrative. Generated API docs are
+authoritative.
 
 ### C8: Compliance
 
@@ -118,9 +119,9 @@ strategies.
 
 ## Traceability
 
-24 HLR tags (HLR-CORE-CLOCKS and HLR-CORE-CLOCKS-MATRIX added for clock
-strategy selection, HLR-PROTO-LEB128 documented); all others unchanged from
-1.6.0.
+24 HLR tags are present (HLR-CORE-CLOCKS and HLR-CORE-CLOCKS-MATRIX added for
+clock strategy selection, HLR-PROTO-LEB128 documented). All others are unchanged
+from 1.6.0.
 
 ## Breaking Changes
 

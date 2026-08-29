@@ -130,7 +130,7 @@ end record;
 
 | Parameter | Description |
 |-----------|-------------|
-| `Position` | Cursor to check. |
+| `Position` | Cursor to examine. |
 
 **Returns:** True if the cursor is not at the end.
 
@@ -139,7 +139,7 @@ end record;
 | Parameter | Description |
 |-----------|-------------|
 | `Container` | The sequence container. |
-| `Position` | Cursor to check. |
+| `Position` | Cursor to examine. |
 
 **Returns:** True if the cursor is within bounds.
 
@@ -172,7 +172,7 @@ end record;
 | Parameter | Description |
 |-----------|-------------|
 | `Count` | Number of entries written to SV. |
-| `R` | The sequence to analyze. |
+| `R` | The sequence to analyse. |
 | `SV` | Output array of per-replica max seq values. |
 
 ### procedure Delete (R : CRDT.Sequences.Yjs.RGA; Pos : Standard.Positive)
@@ -225,7 +225,7 @@ end record;
 
 | Parameter | Description |
 |-----------|-------------|
-| `Item` | Deserialized RGA. |
+| `Item` | Deserialised RGA. |
 | `Stream` | Input stream. |
 
 ### procedure Sync_Delta (Target : CRDT.Sequences.Yjs.RGA; Source : CRDT.Sequences.Yjs.RGA; Remote_SV : CRDT.Sequences.Yjs.Replica_Max_Seq_Array; SV_Count : Standard.Natural)

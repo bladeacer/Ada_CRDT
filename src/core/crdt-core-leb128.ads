@@ -1,7 +1,7 @@
 --  LEB128 variable-length integer encoding for compact wire protocol.
 --  Small values (0-127) encode as a single byte instead of 4 (Natural'Write),
 --  dramatically reducing bandwidth for the many single-digit fields
---  in CRDT serialization (protocol version, counts, lengths).
+--  in CRDT serialisation (protocol version, counts, lengths).
 --
 --  Two interfaces:
 --    * Buffer-based (SPARK_Mode => On, provably safe)
@@ -25,7 +25,7 @@ is
    --  Encode Value as LEB128 bytes into Buffer starting at Index.
    --  Index is advanced past the written bytes.
    --  @param Buffer  Output byte buffer.
-   --  @param Index   Start position; updated to one past the last written byte.
+   --  @param Index   Start position. Updated to one past the last written byte.
    --  @param Value   Integer to encode (0 .. Natural'Last).
    procedure Encode (Buffer : in out Byte_Array; Index : in out Stream_Element_Offset; Value : Natural)
    with SPARK_Mode, Pre => Index in Buffer'Range and then Buffer'Length >= Max_LEB128_Bytes and then Index <= Buffer'Last - (Max_LEB128_Bytes - 1), Post => Index > Index'Old;
@@ -33,7 +33,7 @@ is
    --  Decode a LEB128-encoded Natural from Buffer starting at Index.
    --  Index is advanced past the consumed bytes.
    --  @param Buffer  Input byte buffer.
-   --  @param Index   Start position; updated to one past the last read byte.
+   --  @param Index   Start position. Updated to one past the last read byte.
    --  @param Value   Decoded integer.
    procedure Decode (Buffer : Byte_Array; Index : in out Stream_Element_Offset; Value : out Natural)
    with SPARK_Mode, Pre => Index in Buffer'Range and then Buffer'Length >= Max_LEB128_Bytes and then Index <= Buffer'Last - (Max_LEB128_Bytes - 1), Post => Index > Index'Old;

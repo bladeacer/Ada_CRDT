@@ -27,23 +27,23 @@ package CRDT.Sequences.Naive with SPARK_Mode is
    type RGA (Capacity : Positive) is private;
 
    --  Structural invariant of the RGA. See the private part for the
-   --  definition; exposed so public operations can state Pre/Post that keep
-   --  the engine structurally safe at every entry/exit.
-   --  @param R  The sequence to check.
+   --  definition.  It is exposed so public operations can state Pre/Post that
+   --  keep the engine structurally safe at every entry and exit.
+   --  @param R  The sequence to examine.
    --  @return True when the RGA satisfies its structural invariant.
    function Invariant (R : RGA) return Boolean;
 
    --  Standard Ada iterator support
    type Cursor is private;
 
-   --  Check if cursor points to a valid element.
-   --  @param Position  Cursor to check.
+   --  Report whether the cursor points to a valid element.
+   --  @param Position  Cursor to examine.
    --  @return True if the cursor is not at the end.
    function Has_Element (Position : Cursor) return Boolean;
 
-   --  Check if cursor is valid within a specific container.
+   --  Report whether the cursor is valid within a specific container.
    --  @param Container  The sequence container.
-   --  @param Position   Cursor to check.
+   --  @param Position   Cursor to examine.
    --  @return True if the cursor is within bounds.
    function Has_Element (Container : RGA; Position : Cursor) return Boolean;
 
@@ -114,8 +114,8 @@ package CRDT.Sequences.Naive with SPARK_Mode is
    procedure Delete_Node (R : in out RGA; Id : Node_Id)
    with Pre => Invariant (R), Post => Invariant (R);
 
-   --  Convergent merge: insert all Source items not in Target,
-   --  preserving causal order by Node_Id.
+   --  Convergent merge: insert all Source items not in Target.
+   --  Preserve causal order by Node_Id.
    --  @param Target  The sequence to merge into.
    --  @param Source  The sequence to merge from.
    procedure Merge (Target : in out RGA; Source : RGA)
@@ -127,19 +127,19 @@ package CRDT.Sequences.Naive with SPARK_Mode is
    --  @return True if both sequences are identical.
    function "=" (Left, Right : RGA) return Boolean;
 
-   --  Physically remove all tombstoned items, reclaiming slots.
+   --  Physically remove all tombstoned items and reclaim slots.
    --  @param R  The sequence to compact.
    procedure Compact (R : in out RGA)
    with Pre => Invariant (R), Post => Invariant (R);
 
-   --  Serialize the RGA to a stream.
+   --  Serialise the RGA to a stream.
    --  @param Stream  Output stream.
    --  @param Item    RGA to serialize.
    procedure Write_RGA (Stream : access Ada.Streams.Root_Stream_Type'Class; Item : RGA);
 
-   --  Deserialize the RGA from a stream.
+   --  Deserialise the RGA from a stream.
    --  @param Stream  Input stream.
-   --  @param Item    Deserialized RGA.
+   --  @param Item    Deserialised RGA.
    procedure Read_RGA (Stream : access Ada.Streams.Root_Stream_Type'Class; Item : out RGA);
 
 private
@@ -170,14 +170,14 @@ private
    for RGA'Read use Read_RGA;
 
    --  Expression functions for SPARK visibility. See public specs for docs.
-   --  @param Position  Cursor to check.
+   --  @param Position  Cursor to examine.
    --  @return True if the cursor is not at the end.
    function Has_Element (Position : Cursor) return Boolean
    is (Position.Pos in 1 .. Position.Total);
 
    --  Expression functions for SPARK visibility. See public specs for docs.
    --  @param Container  The sequence container.
-   --  @param Position   Cursor to check.
+   --  @param Position   Cursor to examine.
    --  @return True if the cursor is within bounds.
    function Has_Element (Container : RGA; Position : Cursor) return Boolean
    is (Position.Pos in 1 .. Container.Total);

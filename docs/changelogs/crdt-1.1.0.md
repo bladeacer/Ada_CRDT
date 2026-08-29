@@ -2,17 +2,16 @@
 
 Date: _2026-06-02_
 
-Alire release with packaging fixes and platform compatibility improvements.
+This Alire release adds packaging fixes and platform compatibility improvements.
 The `alr publish` workflow now registers the crate correctly in the community
-index, and the Makefile gains `release`, `publish`, and `test-publish`
-targets. No API or wire-format changes from 1.0.0.
+index. The Makefile gains `release`, `publish`, and `test-publish` targets. The
+API and wire format are unchanged from 1.0.0.
 
 ## Changes
 
 ### C1: Alire Deployment Fixes
 
-Fixed `alr publish` workflow to correctly register the crate in the community
-index.
+Fixed the `alr publish` workflow to register the crate in the community index.
 
 ### C2: Makefile Automation
 
@@ -28,7 +27,8 @@ No API or wire-format changes from 1.0.0. This is a drop-in replacement.
 
 ## Test Suite
 
-No new tests added; suite unchanged from 1.0.0 (8000+ unit tests).
+No new tests were added. The suite is unchanged from 1.0.0 (over 8000 unit
+tests).
 
 ## Proof Results
 

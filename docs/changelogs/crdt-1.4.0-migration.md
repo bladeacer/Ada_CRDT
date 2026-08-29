@@ -7,8 +7,8 @@ _Applies to CRDT >= 1.4.0_
 CRDT 1.0.0 and 1.1.0 serialised all integer values (header fields, node IDs,
 lengths) using Ada's fixed 4-byte `Natural'Write` encoding (**V1 protocol**).
 Starting with 1.2.0, the library switched to variable-length LEB128 encoding
-(**V2 protocol**) for space efficiency  --  but V1 data could not yet be read.
-Starting with 1.4.0, the read path supports both formats via auto-detection.
+(**V2 protocol**) for space efficiency. V1 data could not yet be read. Starting
+with 1.4.0, the read path supports both formats via auto-detection.
 
 ## Auto-Detection
 

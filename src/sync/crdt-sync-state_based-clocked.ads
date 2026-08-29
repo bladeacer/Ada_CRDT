@@ -43,7 +43,7 @@ package CRDT.Sync.State_Based.Clocked with SPARK_Mode is
 
    --  Create initial state where every replica clock is default-initialised.
    --  @param Config  Sync configuration.
-   --  @return  Freshly initialized replica state.
+   --  @return  Freshly initialised replica state.
    function Create (Config : Sync_Config) return Replica_State;
 
    --  Merge remote state into local state using element-wise Max.
@@ -53,14 +53,13 @@ package CRDT.Sync.State_Based.Clocked with SPARK_Mode is
    procedure Merge (Local : in out Replica_State; Remote : Replica_State)
    with Pre => Local.Max_Replicas = Remote.Max_Replicas, Depends => (Local => (Local, Remote));
 
-   --  Compute delta: how many local clocks are ahead of the remote's clock.
-   --  Counts entries in Local.Clocks that exceed Remote_SV.
+   --  Compute the delta.  Count the local clocks that exceed Remote_SV.
    --  @param Local      Local replica state.
    --  @param Remote_SV  Remote clock timestamp.
    --  @return  Count of replicas where local clock is ahead of remote.
    function Compute_Delta (Local : Replica_State; Remote_SV : Clock_Time) return Natural;
 
-   --  Check if a state vector has advanced past a given clock timestamp.
+   --  Report whether a state vector has advanced past a given clock timestamp.
    --  @param SV  State vector to check.
    --  @param TS  Clock timestamp to compare against.
    --  @return  True if any entry in the SV is at or past TS.

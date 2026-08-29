@@ -2,10 +2,10 @@
 
 Date: _2026-06-02_
 
-Initial stable release of the CRDT library for Ada/SPARK. Provides
-PN-Counters, LWW-Element-Sets, RGA sequences with three backend engines,
-operation- and state-based synchronization, thread-safe protected wrappers,
-and a V1 wire protocol. Backed by 8000+ unit tests covering convergence,
+This is the first stable release of the CRDT library for Ada/SPARK. It provides
+PN-Counters, LWW-Element-Sets, and RGA sequences with three backend engines.
+It provides operation- and state-based synchronisation, thread-safe protected
+wrappers, and a V1 wire protocol. Over 8000 unit tests cover convergence,
 causality, merge, and GC.
 
 ## Changes
@@ -27,8 +27,8 @@ undo-capable engine with operation buffers.
 
 ### C4: Synchronization Engines
 
-Operation-based (Op-Based) synchronization provides reliable channel sync with
-GC and compaction. State-based (State-Based) synchronization enables
+Operation-based (Op-Based) synchronisation provides reliable channel sync with
+GC and compaction. State-based (State-Based) synchronisation enables
 delta-state exchange over lossy channels. Hybrid Logical Clock (HLC) provides
 causal ordering with physical-clock integration.
 
@@ -49,14 +49,14 @@ SPARK analysis is included with partial proof coverage.
 
 ## Test Suite
 
-8000+ unit tests covering convergence, causality, merge, and GC. Known gaps:
-serialization exercises V1 only, no fuzz testing, and `SPARK_Mode` is Off on
-all package bodies.
+Over 8000 unit tests cover convergence, causality, merge, and GC. Known gaps
+remain. The serialisation tests exercise V1 only and omit fuzz testing.
+`SPARK_Mode` is Off on all package bodies.
 
 ## Proof Results
 
 SPARK proof results were not tracked for this version. `SPARK_Mode` was Off on
-all package bodies; preconditions and loop invariants were absent.
+all package bodies. Preconditions and loop invariants were absent.
 
 ## Traceability
 

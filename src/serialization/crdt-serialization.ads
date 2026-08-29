@@ -1,11 +1,9 @@
---  Protocol version router and canonical deserialization dispatcher.
---  Auto-detects V1 (fixed-width Natural), V2 (LEB128), and V3
---  (LEB128 + clock kind discriminator) wire formats by inspecting
---  the first header bytes, then routes subsequent field reads through
---  the correct decoder.
+--  Protocol version router and canonical deserialisation dispatcher.
+--  Auto-detect V1, V2, and V3 wire formats by inspecting the first
+--  header bytes.  Route the subsequent field reads through the correct decoder.
 --
---  This allows users of old library versions to serialise data that
---  newer library versions can seamlessly read and auto-migrate.
+--  This allows users of old library versions to serialise data.
+--  Newer library versions can read and auto-migrate it.
 --
 --  Requirements traceability:
 --  - HLR-PROTO-HEADER: Read wire-format protocol header
@@ -19,20 +17,20 @@ is
 
    type Protocol_Kind is (Proto_V1, Proto_V2, Proto_V3);
 
-   --  Read the wire-format header (version + clock_kind (V3) + Total + Count).
-   --  Auto-detects V1 vs V2 vs V3 by inspecting the first header bytes.
-   --  For V3 streams, the clock kind byte is read and returned; for
-   --  V1/V2 the Clock_Kind output is set to Lamport (backwards compat).
-   --  After this call the stream is positioned just after the header,
-   --  ready for item-by-item deserialization.
-   --  Raises Constraint_Error for unsupported protocol versions.
-   --  Raises End_Error on empty stream.
+   --  Read the wire-format header (version + clock_kind (V3) + Total + Count)
+   --  and auto-detect V1, V2, and V3 by inspecting the first header bytes.
+   --  For V3 streams, read and return the clock kind byte, and for V1/V2
+   --  streams, set the Clock_Kind output to Lamport (backward compatibility).
+   --  After this call the stream is positioned after the header, ready for
+   --  item-by-item deserialisation.
+   --  Raise Constraint_Error for unsupported protocol versions and End_Error
+   --  on empty streams.
    --  @param Stream     Input stream positioned at start of a CRDT payload.
    --  @param Kind       Detected protocol version (V1, V2, or V3).
    --  @param Total      Total element count from header.
    --  @param Count      Entry/item count from header.
-   --  @param Clock_Kind Clock strategy used for serialization (V3 only;
-   --                    Lamport for V1/V2).
+   --  @param Clock_Kind Clock strategy used for serialisation (V3 only).
+   --                    Lamport is used for V1/V2.
    procedure Read_Header (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Kind : out Protocol_Kind; Total : out Natural; Count : out Natural; Clock_Kind : out CRDT.Clocks.Clock_Kind)
    with SPARK_Mode => Off;
 
@@ -54,12 +52,12 @@ is
    with SPARK_Mode => Off;
 
    --  Migrate a header from any protocol version to V3.
-   --  Reads the version-agnostic header from Source and writes a
+   --  Read the version-agnostic header from Source and write a
    --  V3-encoded header (version 3 + clock kind + LEB128 Total +
    --  LEB128 Count) to Dest.  V1/V2 data is auto-detected and
-   --  promoted to V3.  V3 data is passed through (clock kind is
-   --  preserved from the source).
-   --  After this call Source is positioned just after the original header
+   --  promoted to V3, and V3 data passes through with its clock kind
+   --  preserved from the source.
+   --  After this call Source is positioned after the original header
    --  and Dest has a fresh V3 header ready for field writes.
    --  @param Source     Input stream with V1, V2, or V3 payload.
    --  @param Dest       Output stream for V3-encoded header.
@@ -78,7 +76,7 @@ is
    with SPARK_Mode => Off;
 
    --  Migrate a header from any protocol version to V2.
-   --  Reads the version-agnostic header from Source and writes a
+   --  Read the version-agnostic header from Source and write a
    --  V2-encoded header (LEB128 Protocol_Version + LEB128 Total +
    --  LEB128 Count) to Dest.  After this call:
    --     * Source is positioned just after the original header

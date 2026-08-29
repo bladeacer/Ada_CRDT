@@ -2,9 +2,9 @@
 
 Date: _2026-07-30_
 
-Correctness, consistency, and compliance fixes. Real `Compute_Delta`
-implementation in both sync engines, documentation corrections for protocol
-versioning, and build-system hardening.
+This release fixes correctness, consistency, and compliance. Both sync engines
+gain a real `Compute_Delta` implementation. Documentation corrections cover
+protocol versioning. Build-system hardening is included.
 
 ## Changes
 
@@ -24,8 +24,8 @@ The `Post => Compute_Delta'Result = 0` contract is replaced with
 
 ### C2: Backward Compatibility Documentation Fix
 
-`AGENTS.md` stated that "V1 readers can read V2 data" -- this is physically
-impossible since V1 only understands fixed-width `Natural'Read`. Corrected to
+`AGENTS.md` stated that "V1 readers can read V2 data". This is physically
+impossible because V1 only understands fixed-width `Natural'Read`. Corrected to
 "V2 readers can read V1 data (backward compatible)", matching the actual
 `Read_Header` auto-detection logic.
 
@@ -42,7 +42,7 @@ aspect form for consistency.
 
 ### C5: Unused Import Removed
 
-Removed `with Ada.Calendar;` from `src/sync/crdt-sync-state_based.ads` -- the
+Removed `with Ada.Calendar;` from `src/sync/crdt-sync-state_based.ads`. The
 package does not directly reference any `Ada.Calendar` entity (HLC internals
 are encapsulated).
 
@@ -78,8 +78,7 @@ for live numbers, falling back to a placeholder if the file is absent.
 
 The `demo` target in `Makefile` used raw `stty -isig`/`stty isig` outside a
 TTY which would fail in CI or non-interactive shells. Wrapped with
-`2>/dev/null` and `|| true` fallbacks to handle non-TTY environments
-gracefully.
+`2>/dev/null` and `|| true` fallbacks to handle non-TTY environments.
 
 ### C10: verify-report Atomicity
 
@@ -98,7 +97,7 @@ file. Now uses a PID-suffixed temp file (`index_file.$$.tmp`) and checks
 
 ## Traceability
 
-24 HLR tags (unchanged); serialization HLR wording updated for V3.
+24 HLR tags are unchanged. The serialisation HLR wording is updated for V3.
 
 ## Breaking Changes
 

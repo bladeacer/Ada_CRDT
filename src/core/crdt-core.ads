@@ -112,7 +112,7 @@ is
    function New_Replica_Id return Replica_Id
    with SPARK_Mode => Off;
 
-   --  Wire protocol version for all serialized CRDT state.
+   --  Wire protocol version for all serialised CRDT state.
    --  Increment when making breaking changes to the binary format.
    Protocol_Version : constant Natural := 3;
 

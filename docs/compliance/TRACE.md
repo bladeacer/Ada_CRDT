@@ -1,8 +1,7 @@
 # Traceability Matrix
 
-Auto-generated.  Run `make compliance` to verify.
-
-Source: HLR tags in `.ads` files + LLR mapping in `LLR.md`.
+This matrix is auto-generated. Run `make compliance` to verify it. The
+source is the HLR tags in `.ads` files plus the LLR mapping in `LLR.md`.
 
 ## HLR -> Source Files
 

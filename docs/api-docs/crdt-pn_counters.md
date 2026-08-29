@@ -135,7 +135,7 @@ end record;
 
 | Parameter | Description |
 |-----------|-------------|
-| `Item` | Counter to serialize. |
+| `Item` | Counter to serialise. |
 | `Stream` | Output stream to write to. |
 
 ---

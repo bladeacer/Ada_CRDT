@@ -3,9 +3,9 @@
 --    * State_Based (CvRDT): full state merge with delta compression
 --    * Op_Based (CmRDT)   : granular operation broadcast with ack/GC
 --
---  By separating the storage engine (Sequences.*) from the sync layer,
---  Ada's generic instantiation ensures unused code paths are optimized away,
---  maximizing performance and gnatprove compatibility.
+--  Separate the storage engine (Sequences.*) from the sync layer.
+--  Ada's generic instantiation removes unused code paths and optimises
+--  performance and gnatprove compatibility.
 with CRDT.Core;
 
 package CRDT.Sync

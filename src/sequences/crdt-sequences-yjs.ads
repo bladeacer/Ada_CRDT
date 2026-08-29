@@ -46,14 +46,14 @@ package CRDT.Sequences.Yjs with SPARK_Mode is
 
    type Cursor is private;
 
-   --  Check if cursor points to a valid element.
-   --  @param Position  Cursor to check.
+   --  Report whether the cursor points to a valid element.
+   --  @param Position  Cursor to examine.
    --  @return True if the cursor is not at the end.
    function Has_Element (Position : Cursor) return Boolean;
 
-   --  Check if cursor is valid within a specific container.
+   --  Report whether the cursor is valid within a specific container.
    --  @param Container  The sequence container.
-   --  @param Position   Cursor to check.
+   --  @param Position   Cursor to examine.
    --  @return True if the cursor is within bounds.
    function Has_Element (Container : RGA; Position : Cursor) return Boolean;
 
@@ -119,8 +119,8 @@ package CRDT.Sequences.Yjs with SPARK_Mode is
    --  @param Id  Node identifier of the item to delete.
    procedure Delete_Node (R : in out RGA; Id : Node_Id);
 
-   --  Convergent merge: insert all Source items not in Target,
-   --  preserving causal order by Node_Id.
+   --  Convergent merge: insert all Source items not in Target.
+   --  Preserve causal order by Node_Id.
    --  @param Target  The sequence to merge into.
    --  @param Source  The sequence to merge from.
    procedure Merge (Target : in out RGA; Source : RGA);
@@ -144,13 +144,14 @@ package CRDT.Sequences.Yjs with SPARK_Mode is
    --  Array of per-replica max-sequence entries.
    type Replica_Max_Seq_Array is array (Positive range <>) of Replica_Max_Seq;
 
-   --  Compute state vector: max seq per replica for delta sync.
-   --  @param R      The sequence to analyze.
+   --  Compute the state vector.  Record the maximum sequence number per
+   --  replica for delta sync.
+   --  @param R      The sequence to analyse.
    --  @param SV     Output array of per-replica max seq values.
    --  @param Count  Number of entries written to SV.
    procedure Compute_State_Vector (R : RGA; SV : out Replica_Max_Seq_Array; Count : out Natural);
 
-   --  Delta-sync: merge only items newer than remote state vector.
+   --  Delta-sync: merge only items that are newer than the remote state vector.
    --  @param Target    The sequence to merge into.
    --  @param Source    The sequence to merge from.
    --  @param Remote_SV State vector of the remote peer.
@@ -159,7 +160,7 @@ package CRDT.Sequences.Yjs with SPARK_Mode is
 
    --  Tombstone Garbage Collection
 
-   --  Physically remove all tombstoned items, reclaiming slots.
+   --  Physically remove all tombstoned items and reclaim slots.
    --  @param R  The sequence to compact.
    procedure Compact (R : in out RGA);
 
@@ -170,14 +171,14 @@ package CRDT.Sequences.Yjs with SPARK_Mode is
    --  Each Item: [Node_Id] [Len : Natural] [Deleted : Boolean]
    --    [Content : Element_Type array of length Len]
 
-   --  Serialize the RGA to a stream.
+   --  Serialise the RGA to a stream.
    --  @param Stream  Output stream.
    --  @param Item    RGA to serialize.
    procedure Write_RGA (Stream : access Ada.Streams.Root_Stream_Type'Class; Item : RGA);
 
-   --  Deserialize the RGA from a stream.
+   --  Deserialise the RGA from a stream.
    --  @param Stream  Input stream.
-   --  @param Item    Deserialized RGA.
+   --  @param Item    Deserialised RGA.
    procedure Read_RGA (Stream : access Ada.Streams.Root_Stream_Type'Class; Item : out RGA);
 
 private

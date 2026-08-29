@@ -42,7 +42,7 @@ end record;
 |-----------|-------------|
 | `Config` | Sync configuration. |
 
-**Returns:** Freshly initialized replica state.
+**Returns:** Freshly initialised replica state.
 
 ### function Is_Ahead (SV : CRDT.Core.VTime; TS : CRDT.Core.Lamport_Time) return Standard.Boolean `[Post]`
 

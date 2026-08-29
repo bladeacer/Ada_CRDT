@@ -484,7 +484,7 @@ ascii-check:
 	extensions="ads adb md py toml gpr yaml yml"; \
 	error=0; \
 	for ext in $$extensions; do \
-		files=$$(find . -name "*.$$ext" -not -path "./.git/*" -not -path "./alire/*" -not -path "./config/*" -not -path "./obj/*" 2>/dev/null); \
+		files=$$(find . -name "*.$$ext" -not -path "./.git/*" -not -path "./alire/*" -not -path "./config/*" -not -path "./obj/*" -not -path "./skills/*" 2>/dev/null); \
 		for f in $$files; do \
 			case "$$f" in *vt100*|*README.md|*docs/api-docs/*) continue;; esac; \
 	if LC_ALL=C grep -q '[^ -~	]' "$$f" 2>/dev/null; then \

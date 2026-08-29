@@ -57,7 +57,7 @@ end record;
 |-----------|-------------|
 | `Config` | Sync configuration. |
 
-**Returns:** Freshly initialized replica state.
+**Returns:** Freshly initialised replica state.
 
 ### function Is_Ahead (SV : CRDT.Sync.State_Based.Clocked.Clock_Time; TS : CRDT.Sync.State_Based.Clocked.Clock_Time) return Standard.Boolean
 

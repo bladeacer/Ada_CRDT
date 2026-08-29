@@ -2,7 +2,7 @@
 
 Vector clock strategy.
 Wraps CRDT.Core.VTime with uniform comparison, merge, increment, and I/O.
-Each replica tracks its own logical counter; causal ordering is determined
+Each replica tracks its own logical counter. Causal ordering is determined
 by element-wise comparison of all counters.
 Recommended default for production use.
 

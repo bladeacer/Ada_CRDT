@@ -5,7 +5,7 @@
 --
 --  Industry equivalence: Yjs/YATA algorithm.
 --  Supports structural splitting, state vector delta sync,
---  tombstone garbage collection, and protocol-versioned serialization.
+--  tombstone garbage collection, and protocol-versioned serialisation.
 --
 --  @formal Element_Type  The type of elements stored in the sequence.
 --  @formal Max_Items     Maximum number of internal linked-list nodes.
@@ -107,7 +107,7 @@ package CRDT.Rga with SPARK_Mode is
    type Replica_Max_Seq_Array is array (Positive range <>) of Replica_Max_Seq;
 
    --  Compute state vector: max seq per replica for delta sync.
-   --  @param R      The sequence to analyze.
+   --  @param R      The sequence to analyse.
    --  @param SV     Output array of per-replica max seq values.
    --  @param Count  Number of entries written to SV.
    procedure Compute_State_Vector (R : RGA; SV : out Replica_Max_Seq_Array; Count : out Natural);
@@ -132,14 +132,14 @@ package CRDT.Rga with SPARK_Mode is
    --  Each Item: [Node_Id] [Len : Natural] [Deleted : Boolean]
    --    [Content : Element_Type array of length Len]
 
-   --  Serialize the RGA to a stream.
+   --  Serialise the RGA to a stream.
    --  @param Stream  Output stream.
-   --  @param Item    RGA to serialize.
+   --  @param Item    RGA to serialise.
    procedure Write_RGA (Stream : access Ada.Streams.Root_Stream_Type'Class; Item : RGA);
 
-   --  Deserialize the RGA from a stream.
+   --  Deserialise the RGA from a stream.
    --  @param Stream  Input stream.
-   --  @param Item    Deserialized RGA.
+   --  @param Item    Deserialised RGA.
    procedure Read_RGA (Stream : access Ada.Streams.Root_Stream_Type'Class; Item : out RGA);
 
 private

@@ -2,11 +2,11 @@
 
 Date: _2026-08-12_
 
-Build-system tooling integration, a full SPARK proof restoration pass, and a
-CI/consumability fix for adacovex. SPARK Platinum is restored across all
-SPARK-analyzable units with 0 unproved verification conditions and justified
-VCs trimmed to 42, and the project now drives the adacovex tool through the
-standard `covex` dev dependency rather than a hard-coded sibling checkout.
+This release integrates build-system tooling, restores SPARK proof fully, and
+fixes adacovex CI/consumability. SPARK Platinum is restored across all
+SPARK-analyzable units with 0 unproved verification conditions. Justified VCs
+are trimmed to 42. The project now drives adacovex through the standard `covex`
+dev dependency instead of a hard-coded sibling checkout.
 
 ## Changes
 
@@ -35,13 +35,13 @@ GitHub Action.
 - `alire.toml` is restored to the clean publishing manifest: it carried the
   full dev toolchain (`gnatprove`, `gnatdoc_bin`, `gnatformat_bin`, `covex`)
   plus a `[[pins]] covex = { path = "../adacovex" }`. In a fresh checkout or
-  in CI that path does not exist, so Alire aborted loading the workspace and
+  in CI, that path does not exist. Alire aborted loading the workspace.
   **every CI step that touched the manifest failed** (`alr build`, and the
   adacovex action's `Run GNATprove` -- which resolves `gnatprove` via the
   target manifest -- died with `Pin path is not a valid directory`).
 - `alire-dev.toml` now declares `covex = "*"` (a normal index dependency)
   instead of pinning it to `../adacovex`. The path pin resolved only on a
-  machine with the sibling checkout; removing it lets `alr exec` (and
+  machine with the sibling checkout. Removing it lets `alr exec` (and
   adacovex's `prove` dev-manifest swap) load the workspace in CI and in
   consumer checkouts.
 - Hardened the Makefile's manifest-detection greps (`swap-in-covex` / `fmt`)
@@ -63,8 +63,8 @@ engine. This commit series touched: `src/sequences/crdt-sequences-naive.adb`,
 Added and tightened contracts to discharge proof obligations:
 
 - **LWW_Clocked_Set** (`crdt-lww_sets.ads`): `Add`/`Remove`/`Merge`
-  post-conditions now also bound `Remove_Count (S) <= S.Capacity`; `Clear`'s
-  `Depends` clause tightened to `(S => S)`.
+  post-conditions now also bound `Remove_Count (S) <= S.Capacity`. `Clear`'s
+  `Depends` clause is tightened to `(S => S)`.
 - **RGA / Pn_Counters**: added `Pre => Index <= RS.Count`,
   `Pre => Size (RS) < RS.Count`, and `Type_Invariant => Sz <= Count` clauses
   to narrow the proof obligations on indexed access.
@@ -103,13 +103,13 @@ now proven outright:
     private-part expression functions so SPARK can unfold them inside the
     precondition.
 
-Proof state: **584 VCs -- 435 proved, 42 justified, 0 unproved** (justified
+Proof state: 584 VCs. 435 are proved, 42 justified, and 0 unproved (justified
 down from 44). The 42 remaining justified VCs are documented false positives
-that cannot be discharged without changing behaviour or public contracts: HLC
-`Log` advancement against the wall clock (4), bounded PN-Counter arithmetic
-(4), LWW set capacity bounds (4), Naive engine structural bounds and
-linked-list traversal termination (17), deliberate accessor range checks (2),
-and stream-attribute `not null`/invariant checks (11).
+that cannot be discharged without changing behaviour or public contracts. HLC
+`Log` advancement against the wall clock (4), bounded PN-Counter arithmetic (4),
+LWW set capacity bounds (4), Naive engine structural bounds and linked-list
+traversal termination (17), deliberate accessor range checks (2), and
+stream-attribute `not null`/invariant checks (11).
 
 ### C8: Python Tooling Typing Refactor
 
@@ -144,7 +144,7 @@ current proof and test state (updated `make sbom` output).
 ### C13: Badge Regeneration
 
 `docs/badges/*.svg`: regenerated with text-shadow removed from SVG badges for
-crisper rendering; the adacovex badge step now produces clean SVG artifacts.
+crisper rendering. The adacovex badge step now produces clean SVG artifacts.
 
 ## Fixes
 
@@ -176,13 +176,13 @@ Fixed stale documentation/Quick-Reference links.
 | Termination | 68 (63 proved) |
 | Analyzed + skipped units | 152 analyzed, 97 skipped (10 generic, 97 SPARK_Mode => Off) |
 
-SPARK assurance: **Stone + Bronze + Silver + Gold + Platinum** -- all
-SPARK-analyzable units fully proved with 0 unproved verification conditions.
+SPARK assurance is **Stone + Bronze + Silver + Gold + Platinum**. All
+SPARK-analyzable units are fully proved with 0 unproved verification conditions.
 
 ## Traceability
 
-24 HLR tags (unchanged); compliance index corrected. All changes are covered
-by the existing HLR set -- no new HLRs added in this release.
+24 HLR tags are unchanged. The compliance index is corrected. All changes are
+covered by the existing HLR set. No new HLRs are added in this release.
 
 ## Breaking Changes
 

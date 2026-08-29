@@ -2,20 +2,19 @@
 
 Date: _2026-06-04_
 
-Protocol migration, SPARK proof hardening, and fuzz testing. `Read_Header`
-now transparently detects V1 (fixed-width) vs V2 (LEB128) wire formats by
-inspecting the first 4 header bytes, so existing V1 data upgrades without any
-migration steps. 10,000+ chaos iterations cover clock skew, out-of-order
-delivery, partition merges, and bit-flip injection, and unproved checks drop
-from 36 to 0.
+This release adds protocol migration, SPARK proof hardening, and fuzz testing.
+`Read_Header` detects V1 and V2 wire formats by inspecting the first 4 header
+bytes, and existing V1 data upgrades without migration steps. Over 10,000
+chaos iterations cover clock skew, out-of-order delivery, partition merges,
+and bit-flip injection, and unproved checks drop from 36 to 0.
 
 ## Changes
 
 ### C1: Protocol Migration -- V1 to V2 Auto-Detection
 
-`Read_Header` now transparently detects V1 (fixed 4-byte `Natural'Read`) vs
-V2 (LEB128) wire formats by inspecting the first 4 header bytes. Users with
-existing V1-format serialized data can upgrade without any migration steps.
+`Read_Header` now detects V1 (fixed 4-byte `Natural'Read`) and V2 (LEB128) wire
+formats by inspecting the first 4 header bytes. Users with existing V1-format
+serialised data can upgrade without any migration steps.
 
 ### C2: Fuzz Testing
 
@@ -45,23 +44,22 @@ links.
 
 ### C7: SPARK_Mode Restructuring
 
-Removed factored `SPARK_Mode => Off` from all non-test body packages;
-remaining Off annotations are scoped to individual subprograms using RNG or
+Removed factored `SPARK_Mode => Off` from all non-test body packages.
+Remaining Off annotations are scoped to individual subprograms using RNG or
 wall-clock time.
 
 ### C8: Wire-Format Migration Guide
 
-Reading V1 data is automatic: `Read_Header` detects V1 vs V2 and dispatches
-`Read_Natural` accordingly, so existing reader code requires zero changes.
-The library always writes V2 (LEB128); use
-`CRDT.Serialization.Legacy.Read_Natural_V1` to write V1 for legacy peers (not
-recommended). See `docs/changelogs/crdt-1.4.0-migration.md` for a worked
-example.
+Reading V1 data is automatic. `Read_Header` detects V1 and V2 and dispatches
+`Read_Natural` accordingly. Existing reader code needs no changes. The library
+always writes V2 (LEB128). Use `CRDT.Serialization.Legacy.Read_Natural_V1` to
+write V1 for legacy peers (not recommended). See
+`docs/changelogs/crdt-1.4.0-migration.md` for a worked example.
 
 ## Test Suite
 
-10,000+ fuzz iterations added on top of the existing suite; tests reorganized
-into 8 group packages with an auto-counted summary table.
+Over 10,000 fuzz iterations are added on top of the existing suite. Tests are
+reorganised into 8 group packages with an auto-counted summary table.
 
 ## Proof Results
 
@@ -79,8 +77,8 @@ No HLR tags yet -- DO-178C traceability was introduced in 1.5.0.
 
 ## Breaking Changes
 
-None. V1 protocol data is read transparently; no source-code changes needed.
-All V2 data continues to work unchanged. Rebuild your project with
+None. V1 protocol data is read transparently. No source-code changes are
+needed. All V2 data continues to work unchanged. Rebuild your project with
 `alr update crdt`.
 
 ## Version

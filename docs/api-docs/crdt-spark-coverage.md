@@ -115,15 +115,15 @@ All core specs use `SPARK_Mode` (On) at package level. The following packages ha
 
 ### `src/serialization/crdt-serialization.ads`
 
-- Line 37: `with SPARK_Mode => Off;`
+- Line 35: `with SPARK_Mode => Off;`
 
-- Line 45: `with SPARK_Mode => Off;`
+- Line 43: `with SPARK_Mode => Off;`
 
-- Line 54: `with SPARK_Mode => Off;`
+- Line 52: `with SPARK_Mode => Off;`
 
-- Line 78: `with SPARK_Mode => Off;`
+- Line 76: `with SPARK_Mode => Off;`
 
-- Line 93: `with SPARK_Mode => Off;`
+- Line 91: `with SPARK_Mode => Off;`
 
 
 ## Public vs Private Interface Count

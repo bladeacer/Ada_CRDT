@@ -31,7 +31,7 @@ is
 
    --  Create initial state for a replica.
    --  @param Config  Sync configuration.
-   --  @return  Freshly initialized replica state.
+   --  @return  Freshly initialised replica state.
    function Create (Config : Sync_Config) return Replica_State;
 
    --  Merge received remote state into local state.
@@ -40,15 +40,15 @@ is
    procedure Merge (Local : in out Replica_State; Remote : Replica_State)
    with Depends => (Local => (Local, Remote));
 
-   --  Compute delta: how many replicas the remote is behind on.
-   --  Counts indices where the local vector clock entry exceeds the remote's.
+   --  Compute the delta.  Count the replicas where the local vector clock
+   --  entry exceeds the remote entry.
    --  @param Local      Local replica state.
    --  @param Remote_SV  Remote state vector.
    --  @return  Count of replicas where local is ahead of remote.
    function Compute_Delta (Local : Replica_State; Remote_SV : Core.VTime) return Natural
    with Post => Compute_Delta'Result <= Local.Max_Replicas;
 
-   --  Check if a state vector has advanced past a given Lamport timestamp.
+   --  Report whether a state vector has advanced past a given Lamport timestamp.
    --  @param SV  State vector to check.
    --  @param TS  Lamport timestamp to compare against.
    --  @return  True if the SV has entry at or past TS.

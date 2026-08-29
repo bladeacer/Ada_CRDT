@@ -2,10 +2,10 @@
 
 Date: _2026-06-03_
 
-Documentation overhaul, improved docstrings, and Game of Life stability fixes.
-Doc badges are generated inline, RST-to-Markdown conversion handles nested
-package hierarchies, and the demo no longer enters an infinite loop when
-switching between concurrent modes under state-based sync.
+This release overhauls documentation, improves docstrings, and fixes Game of
+Life stability. Doc badges are generated inline. RST-to-Markdown conversion
+handles nested package hierarchies. The demo no longer enters an infinite loop
+when switching between concurrent modes under state-based sync.
 
 ## Changes
 
@@ -15,13 +15,13 @@ Inline badges in generated docs for SPARK proof coverage and test status.
 
 ### C2: Docstring Improvements
 
-Param/return annotations on all public subprograms, meaningful top-level
-package descriptions, and consistent formatting.
+All public subprograms now carry param/return annotations. Top-level package
+descriptions are meaningful and consistently formatted.
 
 ### C3: Documentation Generation Fixes
 
 RST-to-Markdown conversion now handles nested package hierarchies and
-cross-references correctly.
+cross-references.
 
 ### C4: Release Packaging
 
@@ -36,7 +36,7 @@ under state-based sync.
 
 ## Test Suite
 
-No new tests added; suite unchanged from 1.2.0.
+No new tests were added. The suite is unchanged from 1.2.0.
 
 ## Proof Results
 

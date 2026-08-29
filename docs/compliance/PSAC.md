@@ -5,11 +5,12 @@
 ### 1.1 Purpose
 
 This document is the Plan for Software Aspects of Certification (PSAC) for
-the Ada_CRDT library, a Conflict-Free Replicated Data Types (CRDT) library
-written in Ada/SPARK.  It defines the software life cycle, the standards,
-the development and verification environment, the configuration management
-practices, and the certification evidence produced for development
-assurance at Level C (DAL-C) per RTCA DO-178C / EUROCAE ED-12C.
+the Ada_CRDT library. Ada_CRDT is a Conflict-Free Replicated Data Types
+(CRDT) library written in Ada/SPARK. The PSAC defines the software life
+cycle, the standards, and the development and verification environment. It
+also defines the configuration management practices and the certification
+evidence for development assurance at Level C (DAL-C) per RTCA DO-178C /
+EUROCAE ED-12C.
 
 ### 1.2 Applicable Documents
 
@@ -27,11 +28,10 @@ assurance at Level C (DAL-C) per RTCA DO-178C / EUROCAE ED-12C.
 
 ### 1.3 Software Level
 
-The software is targeted at **DAL-C** (Development Assurance Level C).  At
-this level a software failure may cause passenger inconvenience but NOT
-injury or loss of life.  DAL-A and DAL-B are explicitly out of scope; no
-separate verification team, MC/DC coverage, or object code analysis is
-performed.
+The software targets **DAL-C** (Development Assurance Level C). At this
+level, a software failure may cause passenger inconvenience but not injury
+or loss of life. DAL-A and DAL-B are explicitly out of scope. No separate
+verification team, MC/DC coverage, or object code analysis is performed.
 
 ## 2. System Overview
 
@@ -45,10 +45,10 @@ Ada_CRDT is a library of Conflict-Free Replicated Data Types, including:
 - State-based and operation-based synchronization layers
 - Thread-safe protected wrappers and heap-free bounded wrappers
 
-The library is designed for replicas that exchange state or operations
-over a network and must converge to the same value without a central
-coordinator.  All containers use pre-allocated bounded storage sized at
-instantiation time; there is no heap allocation for CRDT data.
+The library supports replicas that exchange state or operations over a
+network. The replicas converge to the same value without a central
+coordinator. All containers use pre-allocated bounded storage sized at
+instantiation time. There is no heap allocation for CRDT data.
 
 ## 3. Software Life Cycle
 
@@ -56,11 +56,11 @@ The project follows a V-style life cycle tailored for a library crate:
 
 1.  **Planning**: This PSAC, `HLR.md`, and `LLR.md` define requirements
     and verification strategy.
-2.  **Requirements**: High-level requirements are stated in `HLR.md` and
-    tagged in source `.ads` files (`--  - HLR-XXXX`).  Low-level
-    requirements in `LLR.md` map each HLR to Ada subprograms.
-3.  **Design and implementation**: Ada 2012 with SPARK contracts
-    (pre/post, depends, type invariants) written in the package specs.
+2.  **Requirements**: `HLR.md` states the high-level requirements. Source
+    `.ads` files tag them as `--  - HLR-XXXX`. `LLR.md` maps each HLR to Ada
+    subprograms.
+3.  **Design and implementation**: The package specs contain Ada 2012 code
+    with SPARK contracts (pre/post, depends, type invariants).
 4.  **Verification**: Formal proof with GNATprove (primary evidence) plus
     a runtime test harness (10290 test cases across 9 categories).
 5.  **Release**: Versioned changelogs, tag-based releases, and automated
@@ -80,27 +80,27 @@ The project follows a V-style life cycle tailored for a library crate:
 | Build/verification automation | `Makefile` |
 | Version control | git |
 
-All project tools are listed in the project manifest (`alire.toml`,
-`alire-dev.toml` for development-only dependencies) and pinned by Alire
+All project tools are listed in the project manifest (`alire.toml`).
+`alire-dev.toml` lists development-only dependencies. Alire pins the tools
 where the toolchain allows.
 
 ## 5. Software Standards
 
 ### 5.1 Requirements Standards
 
-- High-level requirements use the form `HLR-XXXX` and appear in both
+- High-level requirements use the form `HLR-XXXX`. They appear in
   `HLR.md` and as tags in `.ads` file headers.
-- Low-level requirements use the form `LLR-XXXX`, trace to a parent HLR,
-  and identify the implementing Ada subprograms.
-- Every source HLR tag must have a matching entry in `HLR.md`, and every
-  `HLR.md` entry must have a matching source tag.  This is verified
-  automatically by `make compliance`.
+- Low-level requirements use the form `LLR-XXXX`. They trace to a parent
+  HLR and identify the implementing Ada subprograms.
+- Every source HLR tag must have a matching entry in `HLR.md`. Every
+  `HLR.md` entry must have a matching source tag. `make compliance`
+  verifies this automatically.
 
 ### 5.2 Design Standards
 
 - Hierarchical Ada package structure rooted at `CRDT`.
-- PascalCase types and subprograms; snake_case source files matching child
-  package names.
+- Types and subprograms use PascalCase. Source files use snake_case and
+  match child package names.
 - Private interface items carry docstring warnings that they are not part
   of the stable public API.
 
@@ -117,37 +117,40 @@ where the toolchain allows.
 
 ### 6.1 Formal Proof (Primary Evidence)
 
-- **SPARK Gold is always targeted**: full absence-of-runtime-errors
-  (AoRTE) proved for all SPARK-analyzable code, plus key functional
-  contracts (pre/post, depends, type invariants) on core packages.
-- **SPARK Platinum is a best-effort ideal** above Gold: full functional
-  requirements across all SPARK-analyzable units, reflecting the current
-  release's proof state rather than a permanent guarantee.
-- Generics (8 units: `Rga`, `Lww_Element_Sets`, `Lww_Sets`,
-  `Sequences.*`) and platform dependencies (wall clock, RNG, stream I/O)
-  are excluded from formal proof by design; their `SPARK_Mode => Off`
-  locations are documented in `docs/api-docs/crdt-spark-coverage.md`.
+- **SPARK Gold is always targeted**: SPARK proves full absence of runtime
+  errors (AoRTE) for all SPARK-analyzable code. It also proves key
+  functional contracts (pre/post, depends, type invariants) on core
+  packages.
+- **SPARK Platinum is a best-effort ideal** above Gold. It covers full
+  functional requirements across all SPARK-analyzable units. It reflects the
+  current release's proof state rather than a permanent guarantee.
+- Generics (8 units: `Rga`, `Lww_Element_Sets`, `Lww_Sets`, `Sequences.*`)
+  are excluded from formal proof by design. Platform dependencies (wall
+  clock, RNG, stream I/O) are also excluded by design. Their
+  `SPARK_Mode => Off` locations are documented in
+  `docs/api-docs/crdt-spark-coverage.md`.
 - Current proof statistics are maintained in
   `docs/compliance/VERIFICATION.md` (auto-generated by
   `make verify-report`).
 
 ### 6.2 Runtime Testing
 
-- The test harness (`src/tests/`, driven by `src/tests/test_crdt.adb`) runs 10290
-  test cases across 9 categories: basic, clocks, lattice properties, RGA
-  features, serialization, engines, convergence, fuzz, and Game of Life.
-- Test modules follow a common runner pattern (`RunR.Check`) with no
-  external test framework; results are written to `test_result.md`.
+- The test harness (`src/tests/`, driven by `src/tests/test_crdt.adb`) runs
+  10290 test cases. The cases span 9 categories: basic, clocks, lattice
+  properties, RGA features, serialization, engines, convergence, fuzz, and
+  Game of Life.
+- Test modules follow a common runner pattern (`RunR.Check`). They use no
+  external test framework. The results are written to `test_result.md`.
 - Fuzz and partition tests exercise convergence and serialization under
   adversarial scenarios.
 
 ### 6.3 SPARK vs. Testing at DAL-C
 
-At DAL-C, SPARK proof is accepted as verification evidence and replaces
-unit testing for proved subprograms.  Requirements-based test coverage
-targets are less stringent than at DAL-A/B.  Test coverage targets for
-SPARK-proved code are therefore defined by the proof campaign rather than
-by runtime coverage measurement.
+At DAL-C, SPARK proof is accepted as verification evidence. It replaces
+unit testing for proved subprograms. Requirements-based test coverage
+targets are less stringent than at DAL-A/B. Test coverage targets for
+SPARK-proved code follow the proof campaign, not runtime coverage
+measurement.
 
 ## 7. Configuration Management
 
@@ -157,31 +160,29 @@ by runtime coverage measurement.
   `release` and `publish` targets.
 - Per-version changelogs are maintained in `docs/changelogs/` and
   auto-indexed by `make doc`.
-- The wire protocol is versioned (`Protocol_Version`); V2 readers can
-  read V1 data, and V3 readers can read all V1, V2, and V3 data.  The
-  V1 -> V2 migration is documented in
+- The wire protocol is versioned (`Protocol_Version`). V2 readers can read
+  V1 data. V3 readers can read all V1, V2, and V3 data. The V1 to V2
+  migration is documented in
   `docs/changelogs/crdt-1.4.0-migration.md`.
 
 ## 8. Quality Assurance
 
-- `make compliance` validates HLR/LLR/traceability consistency, checks
-  that all compliance artifacts exist, and verifies that README Quick
+- `make compliance` validates HLR/LLR/traceability consistency. It checks
+  that all compliance artifacts exist. It verifies that README Quick
   Reference links resolve.
-- `make verify-report` regenerates verification results deterministically
-  (content hashing instead of timestamps) so that repeated runs are
+- `make verify-report` regenerates verification results deterministically.
+  It uses content hashing instead of timestamps. Repeated runs are
   reproducible.
-- `make ascii-check` enforces the ASCII-only charset across all source
-  and documentation files.
-- CI-equivalent local gates: `make verify` runs the full quality gate
-  (format, lint, test, build) before release.
+- CI-equivalent local gates: `make verify` runs the full quality gate. The
+  gate covers format, lint, test, and build before release.
 
 ## 9. Certification Liaison
 
 Tool qualification at DAL-C is limited to TQL-4 (Development Tool level
-per DO-330 where applicable) for GNAT/SPARK, which is generally satisfied
-by the tools' track record.  No separate verification team is required at
-DAL-C.  Questions about this PSAC or the certification evidence should be
-directed to the project maintainers.
+per DO-330 where applicable) for GNAT/SPARK. The tools' track record
+generally satisfies this level. No separate verification team is required at
+DAL-C. Direct questions about this PSAC or the certification evidence to the
+project maintainers.
 
 ## 10. References
 

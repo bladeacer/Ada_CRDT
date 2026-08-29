@@ -65,9 +65,9 @@ is
          --  @param Source  Set to merge from.
          procedure Merge (Source : LWW_Pkg.LWW_Element_Set);
 
-         --  Check if an element is present.
-         --  @param E  Element to check.
-         --  @return True if element is in the set.
+         --  Report whether an element is present.
+         --  @param E  Element to look up.
+         --  @return True when the element is in the set.
          function Contains (E : Element_Type) return Boolean;
 
          --  Take an atomic snapshot.

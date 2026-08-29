@@ -1,6 +1,6 @@
 --  Hybrid Logical Clock (HLC) implementation.
 --  Combines physical wall-clock time with a logical counter
---  to ensure causality is preserved even when physical clocks drift.
+--  to preserve causality even when physical clocks drift.
 --
 --  Usage:
 --     Clock : HLC.Instance := HLC.Create (Node => 1);
@@ -29,16 +29,16 @@ is
 
    --  Create a new HLC instance for the given node.
    --  @param Node  Replica identifier.
-   --  @return  Initialized HLC clock.
+   --  @return  Initialised HLC clock.
    function Create (Node : Core.Replica_Id) return Instance;
 
-   --  Advance the local clock. Call before attaching a timestamp
+   --  Advance the local clock before attaching a timestamp
    --  to an outgoing message or event.
    --  @param Clock  HLC instance to tick.
    procedure Tick (Clock : in out Instance);
 
    --  Merge with a received remote timestamp.
-   --  Ensures the local clock always advances past the received value,
+   --  The local clock always advances past the received value,
    --  preserving causal ordering across replicas.
    --  @param Clock   Local HLC instance.
    --  @param Remote  Timestamp received from a remote peer.

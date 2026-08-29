@@ -19,7 +19,7 @@ executables = [
 "adacovex",
 ]
 licenses = "Apache-2.0"
-long-description = "Zero-dependency Ada/SPARK CLI tool for coverage analysis, proof verification,\ntest-result parsing, multi-standard safety-compliance assessment (DO-178C /\nISO 26262 / IEC 62304), and interactive dashboards.\n\n- Source scanning: walks .ads files, extracts subprogram declarations, docstring\n  annotations (@param, @return, @field, @formal), and HLR traceability tags\n- Proof analysis: parses GNATprove gnatprove.out summaries; assesses SPARK\n  assurance levels (Stone through Platinum)\n- Test parsing: reads markdown test results for pass/fail counts (native Ada or\n  AUnit format)\n- DAL compliance: assesses DO-178C DAL A-E criteria (HLR coverage, orphan tags,\n  test status, minimum SPARK proof level), re-labelled for ISO 26262\n  (ASIL A-D/QM) and IEC 62304 (safety classes A-C) via --dal / --asil / --class\n- Differential assessment: --compare-base / --coverage-delta snapshot a base\n  revision on git, Mercurial, Subversion, Fossil, or jj without touching the\n  working tree\n- Multiple outputs: ANSI terminal report, SVG badges, Markdown reports,\n  HTML dashboard, JSON API via a built-in HTTP/1.1 server, and a proof-aware\n  SBOM (CycloneDX / SPDX / Markdown)\n- Result caching: a content-addressed on-disk cache serves unchanged scan,\n  proof, test, and manifest results without re-running the work\n- Tooling: `status` reports the toolchain + VCS state, `man` installs a local\n  man page, and the `prove` subcommand resolves gnatprove at run time\n- Scalable: package/subprogram collections use Ada.Containers.Vectors\n  (heap-allocated, no compile-time limits)\n- Zero library dependencies: uses only the GNAT runtime library. gnatprove is\n  NOT a declared dependency -- the prove subcommand resolves it at run time\n  (per-project manifest, PATH, cached toolchain, or download), so the covex\n  crate installs and builds with no toolchain beyond the GNAT compiler\n-  Self-assessment: 100% docstring coverage, Platinum SPARK (408/408 VCs proved),\n  DAL-C / ASIL B / Class A Achieved, 666/666 native tests passing\n"
+long-description = "Zero-dependency Ada/SPARK CLI tool for coverage analysis, proof verification,\ntest-result parsing, multi-standard safety-compliance assessment (DO-178C /\nISO 26262 / IEC 62304), and interactive dashboards.\n\n- Source scanning: walks .ads files, extracts subprogram declarations, docstring\n  annotations (@param, @return, @field, @formal), and HLR traceability tags\n- Proof analysis: parses GNATprove gnatprove.out summaries; assesses SPARK\n  assurance levels (Stone through Platinum)\n- Test parsing: reads markdown test results for pass/fail counts (native Ada or\n  AUnit format)\n- DAL compliance: assesses DO-178C DAL A-E criteria (HLR coverage, orphan tags,\n  test status, minimum SPARK proof level), re-labelled for ISO 26262\n  (ASIL A-D/QM) and IEC 62304 (safety classes A-C) via --dal / --asil / --class\n- Differential assessment: --compare-base / --coverage-delta snapshot a base\n  revision on git, Mercurial, Subversion, Fossil, or jj without touching the\n  working tree\n- Multiple outputs: ANSI terminal report, SVG badges, Markdown reports,\n  HTML dashboard, JSON API via a built-in HTTP/1.1 server, and a proof-aware\n  SBOM (CycloneDX / SPDX / Markdown)\n- Result caching: a content-addressed on-disk cache serves unchanged scan,\n  proof, test, and manifest results without re-running the work\n- Tooling: `status` reports the toolchain + VCS state, `man` installs a local\n  man page, and the `prove` subcommand resolves gnatprove at run time\n- Scalable: package/subprogram collections use Ada.Containers.Vectors\n  (heap-allocated, no compile-time limits)\n- Zero library dependencies: uses only the GNAT runtime library. gnatprove is\n  NOT a declared dependency -- the prove subcommand resolves it at run time\n  (per-project manifest, PATH, cached toolchain, or download), so the covex\n  crate installs and builds with no toolchain beyond the GNAT compiler\n-  Self-assessment: 100% docstring coverage, Platinum SPARK (720/720 VCs proved),\n  DAL-C / ASIL B / Class A Achieved, 850/850 native tests passing\n"
 maintainers = [
 "bladeacer <wg.nick.exe@gmail.com>",
 ]
@@ -46,13 +46,13 @@ tags = [
 "compliance",
 "developer-tools",
 ]
-version = "1.14.0"
+version = "1.17.0"
 website = "https://github.com/bladeacer/adacovex"
 [solution.state.release.environment]
 [solution.state.release.environment.PATH]
 prepend = "${CRATE_ROOT}/bin"
 [solution.state.release.origin]
-commit = "6816c1e867c0a07fbb6f1011d149e505c4410960"
+commit = "6b67ee223dd5b353a043ddb01c62a79cd616fad1"
 url = "git+https://github.com/bladeacer/adacovex"
 [[solution.state]]
 crate = "gnatdoc_bin"

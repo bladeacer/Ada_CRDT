@@ -2,11 +2,11 @@
 
 Date: _2026-06-09_
 
-Demo stability improvements, docstring rendering fix, LEB128 unit tests, and
-expanded SPARK coverage. The LEB128 buffer primitives are fully proved (46
-checks), bringing the entire production codebase to 0 unproved for the first
-time. The Game of Life demo's mode switch and Yjs merge path are restructured
-to eliminate the position-based interleaving bug.
+This release improves demo stability, fixes docstring rendering, adds LEB128
+unit tests, and expands SPARK coverage. The LEB128 buffer primitives are fully
+proved (46 checks). The entire production codebase reaches 0 unproved for the
+first time. The Game of Life demo's mode switch and Yjs merge path are
+restructured to remove the position-based interleaving bug.
 
 ## Changes
 
@@ -25,8 +25,8 @@ Trivially proved (0 checks).
 ### C3: SPARK Coverage -- CRDT.Core.LEB128 (fully proved)
 
 Buffer-based `Encode`/`Decode` primitives with `SPARK_Mode`, Pre/Post
-contracts, bounded for-loops, and unrolled decode path -- all 46 checks proved
-(29 Decode + 17 Encode).
+contracts, bounded for-loops, and unrolled decode path. All 46 checks are
+proved (29 Decode + 17 Encode).
 
 Decode was restructured from a 5-iteration loop to explicit nested
 if-then-else to eliminate loop invariants. Encode uses a byte-by-byte copy
@@ -38,13 +38,13 @@ now fully provably safe, completing the serialization proof goals.
 
 ### C4: Demo -- Mode Switch No Longer Speed-Ups
 
-Removed force-unpause (`S.N1.Paused := False` etc.) from the M-key mode
-switch handler. Previously each switch burst all 3 nodes into simultaneous
-evolution; repeated switches compounded the effect. Now sync happens for
-display conversion only -- nodes keep their individual pause states.
+Removed force-unpause (`S.N1.Paused := False`) from the M-key mode switch
+handler. Previously each switch burst all 3 nodes into simultaneous evolution.
+Repeated switches compounded the effect. Sync now happens for display
+conversion only. Nodes keep their individual pause states.
 
-Removed `S.Gen := 0` from mode switch -- the generation counter tracks
-actual evolution without jumping back to zero on display-mode change.
+Removed `S.Gen := 0` from the mode switch. The generation counter tracks actual
+evolution without jumping back to zero on display-mode change.
 
 ### C5: Demo -- Yjs-Mode Refactored to Use Matrix Cells
 
@@ -59,7 +59,8 @@ interleaving bug where Yjs merge would scramble column-to-character mapping.
 ### C6: API Docs -- @param Descriptions Now Render
 
 `package_to_ads_path` in `tools/rst2md.py` only searched `src/<flat>.ads` and
-wrongly resolved subdirectory packages (e.g. `CRDT.Core` to `src/crdt.ads`).
+wrongly resolved subdirectory packages (for example `CRDT.Core` to
+`src/crdt.ads`).
 Fixed by walking `src/` subdirectories recursively. All existing
 `@param`/`@return` docstrings now appear correctly in the generated Markdown.
 
@@ -87,14 +88,14 @@ demo-stability and docstring-rendering cases.
 
 The 10 previously unproved LEB128 checks (overflow/range on 64-bit arithmetic)
 were resolved by restructuring the Decode loop into explicit nested
-if-then-else and replacing slice-assignment overflow with `'Succ`-based index
-advancement in Encode. All 269 SPARK checks are now fully proved -- the first
-time the entire production codebase has reached 0 unproved.
+if-then-else. Slice-assignment overflow is replaced with `'Succ`-based index
+advancement in Encode. All 269 SPARK checks are now fully proved. This is the
+first time the entire production codebase has reached 0 unproved.
 
 ## Traceability
 
-22 HLR tags (HLR-PROTO-LEB128 added for the fully-proved LEB128 encoding
-requirement); all others unchanged from 1.5.0.
+22 HLR tags are present (HLR-PROTO-LEB128 added for the fully-proved LEB128
+encoding requirement). All others are unchanged from 1.5.0.
 
 ## Breaking Changes
 

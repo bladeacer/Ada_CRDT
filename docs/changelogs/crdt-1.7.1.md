@@ -2,10 +2,10 @@
 
 Date: _2026-07-26_
 
-Deterministic verification reports, gnatformat integration, and build-system
-cleanup. `make verify-report` now hashes input artifacts for reproducible
-output, `make fmt` formats all Ada sources via a transactional manifest swap,
-and the dead `test-fuzz` alias is removed.
+This release adds deterministic verification reports, gnatformat integration,
+and build-system cleanup. `make verify-report` now hashes input artifacts for
+reproducible output. `make fmt` formats all Ada sources via a transactional
+manifest swap. The dead `test-fuzz` alias is removed.
 
 ## Changes
 
@@ -18,14 +18,14 @@ keyword-lower).
 
 `make fmt` formats all Ada sources via
 `alr exec -- gnatformat -P crdt.gpr -U` with a transactional `alire.toml`
-swap -- `alire.toml` is backed up, replaced with `alire-dev.toml` for the
+swap. `alire.toml` is backed up, replaced with `alire-dev.toml` for the
 duration of the command, and restored on exit.
 
 ### C2: Deterministic Verification Reports
 
 `make verify-report` now uses `sha256sum` of input artifacts
-(`obj/gnatprove/gnatprove.out` + `test_result.md`) instead of `$(date)`, so
-repeated runs produce identical output as long as the inputs haven't changed.
+(`obj/gnatprove/gnatprove.out` + `test_result.md`) instead of `$(date)`.
+Repeated runs produce identical output when the inputs have not changed.
 
 ### C3: Non-Deterministic index.md Fix
 
@@ -56,7 +56,7 @@ version-pin-to-published pattern.
 ### H1: Dead `test-fuzz` Target Removed
 
 `test-fuzz` was a bare alias for `run` with misleading help text ("Run chaos
-fuzzing"). Fuzz tests are part of the standard test suite; the alias has been
+fuzzing"). Fuzz tests are part of the standard test suite. The alias has been
 removed.
 
 ## Test Suite

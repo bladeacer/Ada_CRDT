@@ -53,12 +53,12 @@ package CRDT.Lww_Element_Sets with SPARK_Mode is
    function Remove_Count (S : LWW_Element_Set) return Natural
    with Post => Remove_Count'Result <= S.Capacity;
 
-   --  Check if an element is currently in the set.
-   --  Returns True if the element's add timestamp
+   --  Report whether an element is currently in the set.
+   --  Return True when the element's add timestamp
    --  exceeds its remove timestamp.
    --  @param S  The set to query.
    --  @param E  The element to look up.
-   --  @return True if element is considered present.
+   --  @return True when the element is considered present.
    function Contains (S : LWW_Element_Set; E : Element_Type) return Boolean;
 
    --  Add an element with the given Lamport timestamp.
@@ -87,12 +87,12 @@ package CRDT.Lww_Element_Sets with SPARK_Mode is
    procedure Clear (S : in out LWW_Element_Set)
    with Post => Add_Count (S) = 0 and then Remove_Count (S) = 0, Depends => (S => null);
 
-   --  Serialize set to stream (V2: LEB128-encoded sizes + canonical element stream).
+   --  Serialise set to stream (V2: LEB128-encoded sizes + canonical element stream).
    --  @param Stream  Output stream to write to.
-   --  @param Item    Set to serialize.
+   --  @param Item    Set to serialise.
    procedure Write_LWW_Element_Set (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : LWW_Element_Set);
 
-   --  Deserialize set from stream (auto-detects V1 vs V2).
+   --  Deserialise set from stream (auto-detects V1 vs V2).
    --  @param Stream  Input stream to read from.
    --  @param Item    Set to populate from stream data.
    procedure Read_LWW_Element_Set (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : out LWW_Element_Set);

@@ -111,7 +111,7 @@ end record;
 
 | Parameter | Description |
 |-----------|-------------|
-| `Position` | Cursor to check. |
+| `Position` | Cursor to examine. |
 
 **Returns:** True if the cursor is not at the end.
 
@@ -120,7 +120,7 @@ end record;
 | Parameter | Description |
 |-----------|-------------|
 | `Container` | The sequence container. |
-| `Position` | Cursor to check. |
+| `Position` | Cursor to examine. |
 
 **Returns:** True if the cursor is within bounds.
 
@@ -198,7 +198,7 @@ end record;
 
 | Parameter | Description |
 |-----------|-------------|
-| `Item` | Deserialized RGA. |
+| `Item` | Deserialised RGA. |
 | `Stream` | Input stream. |
 
 ### procedure Write_RGA (Stream : Ada.Streams.Root_Stream_Type; Item : CRDT.Sequences.Fugue.RGA)

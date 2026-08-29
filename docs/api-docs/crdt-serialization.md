@@ -1,6 +1,6 @@
 # CRDT.Serialization
 
-Protocol version router and canonical deserialization dispatcher. Auto-detects V1 (fixed-width Natural), V2 (LEB128), and V3 (LEB128 + clock kind discriminator) wire formats by inspecting the first header bytes, then routes subsequent field reads through the correct decoder. This allows users of old library versions to serialise data that newer library versions can seamlessly read and auto-migrate. Requirements traceability: - HLR-PROTO-HEADER: Read wire-format protocol header - HLR-PROTO-DISPATCH: Version-aware field reading
+Protocol version router and canonical deserialisation dispatcher. Auto-detect V1, V2, and V3 wire formats by inspecting the first header bytes. Route the subsequent field reads through the correct decoder. This allows users of old library versions to serialise data. Newer library versions can read and auto-migrate it. Requirements traceability: - HLR-PROTO-HEADER: Read wire-format protocol header - HLR-PROTO-DISPATCH: Version-aware field reading
 
 > **Note:** All items in this package are public.
 
@@ -39,7 +39,7 @@ type Protocol_Kind is (Proto_V1, Proto_V2, Proto_V3);
 
 | Parameter | Description |
 |-----------|-------------|
-| `Clock_Kind` | Clock strategy used for serialization (V3 only; |
+| `Clock_Kind` | Clock strategy used for serialisation (V3 only). |
 | `Count` | Entry/item count from header. |
 | `Kind` | Detected protocol version (V1, V2, or V3). |
 | `Stream` | Input stream positioned at start of a CRDT payload. |

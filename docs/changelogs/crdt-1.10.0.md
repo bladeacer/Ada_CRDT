@@ -2,25 +2,24 @@
 
 Date: _2026-08-17_
 
-Full SPARK proof completion: every previously justified (false-positive
-annotated) check is now proved outright, eliminating the last 42 justified
-VCs. The core library reaches **576 checks -- 467 proved, 0 justified, 0
-unproved**, with functional contracts grown to 88/88. This release also fixes
-`make doc` (dev-manifest swap for gnatdoc), `make clean` (no longer deletes
-the hand-maintained TRACE.md), and `make prove` (forces a fresh gnatprove run
-when the proof output is missing).
+This release completes the full SPARK proof. Every previously justified
+(false-positive annotated) check is now proved outright, which eliminates the
+last 42 justified VCs and takes the core library to 576 checks (467 proved, 0
+justified, 0 unproved). It also fixes `make doc`, stops `make clean` from
+deleting the hand-maintained TRACE.md, and makes `make prove` run gnatprove
+when the proof output is missing.
 
 ## Changes
 
 ### C1: All Justified Checks Now Proved
 
 Every `pragma Annotate (GNATprove, False_Positive, ...)` remaining after 1.9.0
-has been eliminated -- the 42 justified VCs from 1.9.0 are all discharged as
+has been eliminated. The 42 justified VCs from 1.9.0 are all discharged as
 real proofs, giving **576 total checks, 467 proved, 0 justified, 0 unproved**
 (down from 584/435/42/0 in 1.9.0).
 
 - **HLC** (`src/core/crdt-hlc.adb`): the four "HLC Log bounded in practice"
-  overflow justifications are replaced with saturating arithmetic, e.g.
+  overflow justifications are replaced with saturating arithmetic, for example
   `Clock.Log := (if Clock.Log = Natural'Last then Natural'Last else Clock.Log + 1)`
   in `Tick` and all three `Recv` branches.
 - **PN-Counter** (`src/crdt-pn_counters.adb`): the four "Counter_Range /
@@ -31,7 +30,7 @@ real proofs, giving **576 total checks, 467 proved, 0 justified, 0 unproved**
   capacity guards (`if S.Add_Size < S.Capacity` / `if S.Remove_Size <
   S.Capacity`) in `Add` and `Remove`.
 - **Naive engine** (`src/sequences/crdt-sequences-naive.*`): all
-  `Always_Terminates` false positives are removed; the linked-list traversals
+  `Always_Terminates` false positives are removed. The linked-list traversals
   (`Find_Last`, `Find_Node`, `Find_Insertion_Before`, `Find_Pos`) now carry a
   bounded `Steps` counter with `Loop_Variant (Increases => Steps)` and
   `exit when ... or else Steps >= R.Capacity` so SPARK proves termination
@@ -53,13 +52,13 @@ false-positive annotations.
 
 ### C3: Stream Access Parameter Relaxation
 
-All serialization `Read_*` / `Write_*` stream parameters changed from
+All serialisation `Read_*` / `Write_*` stream parameters changed from
 `not null access Ada.Streams.Root_Stream_Type'Class` to plain
 `access Ada.Streams.Root_Stream_Type'Class` in `Rga`, `Lww_Sets`, and the Yjs,
 Naive, and Fugue engines. The 11 "null exclusion check might fail" stream
 justifications from 1.9.0 disappear: the plain access type carries no null
 exclusion, so there is no check to justify. The Ada runtime always passes a
-non-null stream to `'Read`/`'Write` attributes, so behavior is unchanged.
+non-null stream to `'Read`/`'Write` attributes, so behaviour is unchanged.
 
 ### C4: Release Metadata Completion
 
@@ -94,7 +93,7 @@ the crate, runs the SPARK proof gate via the `bladeacer/adacovex@v1` action
 (Platinum, 100% docstrings, 10290 tests, 0 unproved), and generates the
 proof-aware SBOM. The release artifacts (source archive, SBOM, test results)
 are attested with Sigstore `actions/attest@v4` and published via
-`gh release create` with changelog links and the attestation URL; the release
+`gh release create` with changelog links and the attestation URL. The release
 also updates the floating `v#` / `v#.#` / `latest` tags. Issue templates are
 now enforced via `.github/ISSUE_TEMPLATE/config.yml` (blank issues disabled),
 and a `.github/PULL_REQUEST_TEMPLATE.md` guides PRs through the DO-178C and
@@ -111,7 +110,7 @@ Platinum, DAL-C Achieved).
 ### H1: make doc Fixed
 
 The `doc` / `api-docs` target ran `alr exec -- gnatdoc` against the clean
-publishing manifest (`alire.toml`), which does not declare `gnatdoc_bin` --
+publishing manifest (`alire.toml`), which does not declare `gnatdoc_bin`.
 `make doc` failed with "Executable not found in PATH when spawning: gnatdoc".
 The target now swaps `alire-dev.toml` over `alire.toml` for the gnatdoc
 invocation and restores the clean manifest afterwards, using the same
@@ -154,15 +153,15 @@ projects with proof output in place).
 | Analyzed units | 152 analyzed | 149 analyzed |
 
 SPARK assurance remains **Stone + Bronze + Silver + Gold + Platinum** across
-all SPARK-analyzable units; generics (10 units) and platform dependencies
-(100 `SPARK_Mode => Off` locations: wall clock, RNG, stream I/O, test
-harness) remain excluded by design.
+all SPARK-analyzable units. Generics (10 units) and platform dependencies (100
+`SPARK_Mode => Off` locations: wall clock, RNG, stream I/O, test harness)
+remain excluded by design.
 
 ## Traceability
 
-24 HLR tags (unchanged); compliance artifacts regenerated with the new proof
-statistics. All changes are covered by the existing HLR set -- no new HLRs
-added in this release.
+24 HLR tags are unchanged. The compliance artifacts are regenerated with the
+new proof statistics. All changes are covered by the existing HLR set. No new
+HLRs are added in this release.
 
 ## Breaking Changes
 

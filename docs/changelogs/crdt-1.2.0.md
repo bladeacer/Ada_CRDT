@@ -2,20 +2,20 @@
 
 Date: _2026-06-03_
 
-LEB128 wire protocol, Conway Game of Life demo, and expanded test coverage.
-Variable-length integer encoding replaces fixed 4-byte `Natural'Write`,
-reducing serialized payload size for typical CRDT values by 50 to 75%. The
-monolithic test file is split into per-category packages with per-category
-Markdown reports and an aggregated `test_result.md`.
+This release adds the LEB128 wire protocol, a Conway Game of Life demo, and
+expanded test coverage. Variable-length integer encoding replaces fixed 4-byte
+`Natural'Write`. It reduces the serialised payload size for typical CRDT values
+by 50 to 75%. The monolithic test file is split into per-category packages with
+per-category Markdown reports and an aggregated `test_result.md`.
 
 ## Changes
 
 ### C1: LEB128 Wire Protocol
 
-Variable-length integer encoding replaces fixed 4-byte `Natural'Write`,
-reducing serialized payload size for typical CRDT values by 50 to 75%.
-Reading V1-format data is NOT yet supported (V1 to V2 migration added in
-1.4.0).
+Variable-length integer encoding replaces fixed 4-byte `Natural'Write`. It
+reduces the serialised payload size for typical CRDT values by 50 to 75%.
+Reading V1-format data is not yet supported. The V1 to V2 migration is added in
+1.4.0.
 
 ### C2: Conway Game of Life Demo
 
@@ -62,9 +62,9 @@ No HLR tags -- DO-178C traceability was introduced in 1.5.0.
 
 ## Breaking Changes
 
-None. New serialized data uses LEB128 (V2) format; old V1-format data cannot
-be read by this version (upgrade to 1.4.0 for automatic V1 compatibility).
-All APIs remain backward compatible at the Ada source level.
+None. New serialised data uses LEB128 (V2) format. Old V1-format data cannot
+be read by this version. Upgrade to 1.4.0 for automatic V1 compatibility. All
+APIs remain backward compatible at the Ada source level.
 
 ## Version
 

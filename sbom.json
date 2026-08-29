@@ -3,30 +3,34 @@
   "specVersion": "1.5",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-08-22T08:09:02",
+    "timestamp": "2026-08-23T00:14:42",
     "tools": [
-      {"vendor": "bladeacer", "name": "adacovex", "version": "1.17.0"}
+      {"vendor": "bladeacer", "name": "adacovex", "version": "1.35.0"}
     ],
     "component": {
       "type": "application",
       "bom-ref": "pkg:alire/crdt@1.12.0",
       "name": "crdt",
       "version": "1.12.0",
+      "language": "Ada; Python; C",
       "purl": "pkg:alire/crdt@1.12.0",
       "licenses": [{"license": {"id": "MIT"}}],
       "description": "CRDT library for Ada/SPARK",
+      "externalReferences": [{"url": "https://github.com/bladeacer/ada_crdt", "type": "website"}],
       "properties": [{"name": "adacovex:proof_level", "value": "Platinum"}, {"name": "adacovex:standard", "value": "DO-178C"}, {"name": "adacovex:dal_target", "value": "DAL-C"}, {"name": "adacovex:level", "value": "DAL-C"}]
       }
   },
   "components": [
     {
       "type": "library",
-      "bom-ref": "pkg:alire/covex@1.14.0",
+      "bom-ref": "pkg:alire/covex@1.17.0",
       "name": "covex",
-      "version": "1.14.0",
-      "purl": "pkg:alire/covex@1.14.0",
+      "version": "1.17.0",
+      "language": "Ada",
+      "purl": "pkg:alire/covex@1.17.0",
       "licenses": [{"license": {"id": "Apache-2.0"}}],
       "description": "Ada/SPARK coverage, proof, multi-standard compliance tool",
+      "externalReferences": [{"url": "https://github.com/bladeacer/adacovex", "type": "website"}],
       "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "base"}]
       },
     {
@@ -34,9 +38,11 @@
       "bom-ref": "pkg:alire/gnatdoc_bin@26.0.0",
       "name": "gnatdoc_bin",
       "version": "26.0.0",
+      "language": "Ada",
       "purl": "pkg:alire/gnatdoc_bin@26.0.0",
       "licenses": [{"license": {"id": "GPL-3.0-or-later WITH GCC-exception-3.1"}}],
       "description": "GNAT Documentation Generation Tool - Binary Release",
+      "externalReferences": [{"url": "https://github.com/AdaCore/gnatdoc", "type": "website"}],
       "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "base"}]
       },
     {
@@ -44,9 +50,11 @@
       "bom-ref": "pkg:alire/gnatformat_bin@26.0.0",
       "name": "gnatformat_bin",
       "version": "26.0.0",
+      "language": "Ada",
       "purl": "pkg:alire/gnatformat_bin@26.0.0",
       "licenses": [{"license": {"id": "GPL-3.0-or-later WITH GCC-exception-3.1"}}],
       "description": "GNAT code formatter for the Ada language - Binary Release",
+      "externalReferences": [{"url": "https://github.com/AdaCore/gnatformat", "type": "website"}],
       "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "base"}]
       },
     {
@@ -54,15 +62,18 @@
       "bom-ref": "pkg:alire/gnatprove@16.1.0",
       "name": "gnatprove",
       "version": "16.1.0",
+      "language": "Ada",
       "purl": "pkg:alire/gnatprove@16.1.0",
       "licenses": [{"license": {"id": "GPL-3.0-or-later"}}],
       "description": "Automatic formal verification of SPARK code",
+      "externalReferences": [{"url": "https://docs.adacore.com/spark2014-docs/html/ug/index.html", "type": "website"}],
       "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "base"}]
       },
     {
       "type": "library",
       "bom-ref": "pkg:gpr/vt100",
       "name": "vt100",
+      "language": "Ada",
       "purl": "pkg:gpr/vt100",
       "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "vendored"}]
       },
@@ -73,7 +84,7 @@
       "version": "4.4.1",
       "purl": "pkg:generic/make",
       "description": "System tool referenced by the project (dev dependency)",
-      "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "dev"}]
+      "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "system"}]
       },
     {
       "type": "library",
@@ -82,7 +93,7 @@
       "version": "2.1.1",
       "purl": "pkg:generic/alr",
       "description": "System tool referenced by the project (dev dependency)",
-      "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "dev"}]
+      "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "system"}]
       },
     {
       "type": "library",
@@ -91,7 +102,7 @@
       "version": "3.14.7",
       "purl": "pkg:generic/python3",
       "description": "System tool referenced by the project (dev dependency)",
-      "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "dev"}]
+      "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "system"}]
       },
     {
       "type": "library",
@@ -100,7 +111,7 @@
       "version": "2.55.0",
       "purl": "pkg:generic/git",
       "description": "System tool referenced by the project (dev dependency)",
-      "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "dev"}]
+      "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "system"}]
       },
     {
       "type": "library",
@@ -109,13 +120,40 @@
       "version": "5.3.15(1)-release",
       "purl": "pkg:generic/bash",
       "description": "System tool referenced by the project (dev dependency)",
-      "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "dev"}]
+      "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "system"}]
+      },
+    {
+      "type": "library",
+      "bom-ref": "pkg:generic/npm",
+      "name": "npm",
+      "version": "11.19.0",
+      "purl": "pkg:generic/npm",
+      "description": "System tool referenced by the project (dev dependency)",
+      "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "system"}]
+      },
+    {
+      "type": "library",
+      "bom-ref": "pkg:generic/go",
+      "name": "go",
+      "version": "1.27.0-X",
+      "purl": "pkg:generic/go",
+      "description": "System tool referenced by the project (dev dependency)",
+      "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "system"}]
+      },
+    {
+      "type": "library",
+      "bom-ref": "pkg:generic/node",
+      "name": "node",
+      "version": "26.7.0",
+      "purl": "pkg:generic/node",
+      "description": "System tool referenced by the project (dev dependency)",
+      "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "system"}]
       }
   ],
   "dependencies": [
     {
       "ref": "pkg:alire/crdt@1.12.0",
-      "dependsOn": ["pkg:alire/covex@1.14.0", "pkg:alire/gnatdoc_bin@26.0.0", "pkg:alire/gnatformat_bin@26.0.0", "pkg:alire/gnatprove@16.1.0", "pkg:gpr/vt100", "pkg:generic/make", "pkg:generic/alr", "pkg:generic/python3", "pkg:generic/git", "pkg:generic/bash"]
+      "dependsOn": ["pkg:alire/covex@1.17.0", "pkg:alire/gnatdoc_bin@26.0.0", "pkg:alire/gnatformat_bin@26.0.0", "pkg:alire/gnatprove@16.1.0", "pkg:gpr/vt100", "pkg:generic/make", "pkg:generic/alr", "pkg:generic/python3", "pkg:generic/git", "pkg:generic/bash", "pkg:generic/npm", "pkg:generic/go", "pkg:generic/node"]
     }
   ]
 }

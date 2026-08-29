@@ -1,6 +1,6 @@
 # CRDT.Rga
 
-Replicated Growable Array (RGA) - default Yjs-style chunk-based engine. Contiguous elements written by the same replica are stored in sized blocks (Max_Stride), dramatically reducing allocation overhead vs. per-character nodes. Default sequence engine for CRDT. Industry equivalence: Yjs/YATA algorithm. Supports structural splitting, state vector delta sync, tombstone garbage collection, and protocol-versioned serialization.
+Replicated Growable Array (RGA) - default Yjs-style chunk-based engine. Contiguous elements written by the same replica are stored in sized blocks (Max_Stride), dramatically reducing allocation overhead vs. per-character nodes. Default sequence engine for CRDT. Industry equivalence: Yjs/YATA algorithm. Supports structural splitting, state vector delta sync, tombstone garbage collection, and protocol-versioned serialisation.
 
 > **Note:** 23 public item(s) shown below; 4 private internal item(s) are in the `private` section.
 
@@ -129,7 +129,7 @@ end record;
 | Parameter | Description |
 |-----------|-------------|
 | `Count` | Number of entries written to SV. |
-| `R` | The sequence to analyze. |
+| `R` | The sequence to analyse. |
 | `SV` | Output array of per-replica max seq values. |
 
 ### procedure Delete (R : CRDT.Rga.RGA; Pos : Standard.Positive)
@@ -175,7 +175,7 @@ end record;
 
 | Parameter | Description |
 |-----------|-------------|
-| `Item` | Deserialized RGA. |
+| `Item` | Deserialised RGA. |
 | `Stream` | Input stream. |
 
 ### procedure Sync_Delta (Target : CRDT.Rga.RGA; Source : CRDT.Rga.RGA; Remote_SV : CRDT.Rga.Replica_Max_Seq_Array; SV_Count : Standard.Natural)
@@ -191,7 +191,7 @@ end record;
 
 | Parameter | Description |
 |-----------|-------------|
-| `Item` | RGA to serialize. |
+| `Item` | RGA to serialise. |
 | `Stream` | Output stream. |
 
 ---

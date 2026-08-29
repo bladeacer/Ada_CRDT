@@ -49,7 +49,7 @@ end record;
 | `E` | The element to look up. |
 | `S` | The set to query. |
 
-**Returns:** True if element is considered present.
+**Returns:** True when the element is considered present.
 
 ### function Remove_Count (S : CRDT.Lww_Element_Sets.LWW_Element_Set) return Standard.Natural `[Post]`
 
@@ -101,7 +101,7 @@ end record;
 
 | Parameter | Description |
 |-----------|-------------|
-| `Item` | Set to serialize. |
+| `Item` | Set to serialise. |
 | `Stream` | Output stream to write to. |
 
 ---

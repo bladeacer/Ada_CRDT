@@ -8,7 +8,7 @@ package CRDT.Clocks
   with SPARK_Mode
 is
 
-   --  Identifies which clock strategy serialized data uses.
+   --  Identifies which clock strategy serialised data uses.
    --  Embedded in V3 wire protocol header for auto-detection.
    --  Prefix avoids ambiguity with child package names.
    --  @field Clock_Lamport  Lamport logical clock (lightweight, total order).

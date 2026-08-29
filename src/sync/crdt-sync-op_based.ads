@@ -80,7 +80,7 @@ is
    procedure Acknowledge (Log : in out Op_Log; Up_To_Seq : Natural)
    with Post => Log_GC (Log) <= Log_Count (Log), Depends => (Log => (Log, Up_To_Seq));
 
-   --  Compact the log, physically removing acknowledged operations.
+   --  Compact the log and physically remove acknowledged operations.
    --  @param Log  Operation log to compact.
    procedure Compact (Log : in out Op_Log)
    with Post => Log_GC (Log) = 0 and then Log_Count (Log) <= Log.Capacity, Depends => (Log => Log);

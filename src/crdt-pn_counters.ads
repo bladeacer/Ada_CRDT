@@ -35,13 +35,13 @@ is
 
    pragma Warnings (Off, "unused variable");
 
-   --  Check if increment is possible (always True for unbounded counters).
+   --  Report whether an increment is possible (always True for unbounded counters).
    --  @param C   The counter.
    --  @param By  Amount to increment.
    --  @return    Always True.
    function Can_Increment (C : PN_Counter; By : Counter_Range := 1) return Boolean;
 
-   --  Check if decrement is possible (always True for unbounded counters).
+   --  Report whether a decrement is possible (always True for unbounded counters).
    --  @param C   The counter.
    --  @param By  Amount to decrement.
    --  @return    Always True.
@@ -72,12 +72,12 @@ is
    procedure Merge (Target : in out PN_Counter; Source : PN_Counter)
    with Post => Entry_Count (Target) <= Target.Max_Actors, Depends => (Target => (Target, Source));
 
-   --  Serialize counter to stream (V2: LEB128-encoded).
+   --  Serialise counter to stream (V2: LEB128-encoded).
    --  @param Stream  Output stream to write to.
-   --  @param Item    Counter to serialize.
+   --  @param Item    Counter to serialise.
    procedure Write_PN_Counter (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : PN_Counter);
 
-   --  Deserialize counter from stream (auto-detects V1 vs V2).
+   --  Deserialise counter from stream (auto-detects V1 vs V2).
    --  @param Stream  Input stream to read from.
    --  @param Item    Counter to populate from stream data.
    procedure Read_PN_Counter (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : out PN_Counter);

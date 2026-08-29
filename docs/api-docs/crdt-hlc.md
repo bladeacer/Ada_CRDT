@@ -57,7 +57,7 @@ end record;
 |-----------|-------------|
 | `Node` | Replica identifier. |
 
-**Returns:** Initialized HLC clock.
+**Returns:** Initialised HLC clock.
 
 ### function Now (Clock : CRDT.HLC.Instance) return CRDT.HLC.HLC_Time
 

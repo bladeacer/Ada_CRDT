@@ -1,4 +1,4 @@
---  Legacy V1 fixed-width deserialization mechanisms.
+--  Legacy V1 fixed-width deserialisation mechanisms.
 --  Protocol V1 used 4-byte Natural'Read for all integer fields.
 --  These routines are kept isolated here so they do not clutter
 --  the main production code path.

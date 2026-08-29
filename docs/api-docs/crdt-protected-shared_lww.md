@@ -60,13 +60,13 @@ Merge another set's state into this one.
          function Contains (E : Element_Type) return Boolean;
 ```
 
-Check if an element is present.
+Report whether an element is present.
 
 | Parameter | Description |
 |-----------|-------------|
-| `E` | Element to check. |
+| `E` | Element to look up. |
 
-**Returns:** True if element is in the set.
+**Returns:** True when the element is in the set.
 
 #### function Snapshot
 

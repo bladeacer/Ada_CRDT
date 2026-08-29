@@ -2,11 +2,12 @@
 
 Date: _2026-06-08_
 
-SPARK Gold & Platinum formal verification, DO-178C compliance artifacts, and a
-protocol migration utility. Postconditions cover all 35 core subprograms,
-explicit `Depends` contracts are added on every SPARK-analysed procedure with
-`in out` parameters, and 21 HLR tags establish requirements traceability.
-`CRDT.Serialization.Migrate_Header` enables bulk V1/V2 header migration.
+This release adds SPARK Gold and Platinum formal verification, DO-178C
+compliance artefacts, and a protocol migration utility. Postconditions cover
+all 35 core subprograms, and explicit `Depends` contracts are added to every
+SPARK-analysed procedure with `in out` parameters. 21 HLR tags establish
+requirements traceability, and `CRDT.Serialization.Migrate_Header` enables
+bulk V1/V2 header migration.
 
 ## Changes
 

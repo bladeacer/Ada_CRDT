@@ -1,8 +1,8 @@
 # Low-Level Requirements
 
-Each LLR traces to its parent HLR and identifies the Ada subprogram(s)
-that implement it.  SPARK contracts (pre/post/depends) serve as
-object-code-level formal verification of these requirements.
+Each LLR traces to its parent HLR. It identifies the Ada subprogram(s)
+that implement it. SPARK contracts (pre/post/depends) give object-code-level
+formal verification of these requirements.
 
 ## LLR-CORE-TS  --  Lamport Time Operations
 
