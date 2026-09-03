@@ -3,9 +3,9 @@
   "specVersion": "1.5",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-08-29T10:30:11",
+    "timestamp": "2026-08-31T20:43:54",
     "tools": [
-      {"vendor": "bladeacer", "name": "adacovex", "version": "1.36.0"}
+      {"vendor": "bladeacer", "name": "adacovex", "version": "1.40.0"}
     ],
     "component": {
       "type": "application",
@@ -31,7 +31,7 @@
       "licenses": [{"license": {"id": "Apache-2.0"}}],
       "description": "Ada/SPARK coverage, proof, multi-standard compliance tool",
       "externalReferences": [{"url": "https://github.com/bladeacer/adacovex", "type": "website"}],
-      "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "base"}]
+      "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "dev"}]
       },
     {
       "type": "library",
@@ -43,7 +43,7 @@
       "licenses": [{"license": {"id": "GPL-3.0-or-later WITH GCC-exception-3.1"}}],
       "description": "GNAT Documentation Generation Tool - Binary Release",
       "externalReferences": [{"url": "https://github.com/AdaCore/gnatdoc", "type": "website"}],
-      "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "base"}]
+      "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "dev"}]
       },
     {
       "type": "library",
@@ -55,7 +55,7 @@
       "licenses": [{"license": {"id": "GPL-3.0-or-later WITH GCC-exception-3.1"}}],
       "description": "GNAT code formatter for the Ada language - Binary Release",
       "externalReferences": [{"url": "https://github.com/AdaCore/gnatformat", "type": "website"}],
-      "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "base"}]
+      "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "dev"}]
       },
     {
       "type": "library",
@@ -67,7 +67,7 @@
       "licenses": [{"license": {"id": "GPL-3.0-or-later"}}],
       "description": "Automatic formal verification of SPARK code",
       "externalReferences": [{"url": "https://docs.adacore.com/spark2014-docs/html/ug/index.html", "type": "website"}],
-      "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "base"}]
+      "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "dev"}]
       },
     {
       "type": "library",
