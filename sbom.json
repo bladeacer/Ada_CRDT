@@ -3,17 +3,17 @@
   "specVersion": "1.5",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-09-26T09:49:38",
+    "timestamp": "2026-09-26T13:52:07",
     "tools": [
       {"vendor": "bladeacer", "name": "adacovex", "version": "1.52.0"}
     ],
     "component": {
       "type": "application",
-      "bom-ref": "pkg:alire/crdt@1.13.0",
+      "bom-ref": "pkg:alire/crdt@1.14.0",
       "name": "crdt",
-      "version": "1.13.0",
+      "version": "1.14.0",
       "language": "Ada; Python; C",
-      "purl": "pkg:alire/crdt@1.13.0",
+      "purl": "pkg:alire/crdt@1.14.0",
       "licenses": [{"license": {"id": "MIT"}}],
       "description": "CRDT library for Ada/SPARK",
       "externalReferences": [{"url": "https://github.com/bladeacer/ada_crdt", "type": "website"}],
@@ -161,7 +161,7 @@
   ],
   "dependencies": [
     {
-      "ref": "pkg:alire/crdt@1.13.0",
+      "ref": "pkg:alire/crdt@1.14.0",
       "dependsOn": ["pkg:gpr/vt100", "pkg:alire/gnatprove", "pkg:alire/gnatdoc_bin", "pkg:alire/gnatformat_bin", "pkg:alire/covex", "pkg:pypi/sphinx@9.1.0", "pkg:pypi/myst-parser@5.1.0", "pkg:pypi/furo@2025.12.19", "pkg:generic/python", "pkg:generic/make", "pkg:generic/alr", "pkg:generic/python3", "pkg:generic/git", "pkg:generic/npm", "pkg:generic/bash"]
     }
   ]

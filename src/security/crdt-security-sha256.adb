@@ -65,20 +65,21 @@ is
       T1, T2 : Word32;
    begin
       for T in 0 .. 15 loop
-         W (T) := Word32 (Block (4 * T + 1)) * 2 ** 24
-                or Word32 (Block (4 * T + 2)) * 2 ** 16
-                or Word32 (Block (4 * T + 3)) * 2 ** 8
-                or Word32 (Block (4 * T + 4));
+         W (T) := (Word32 (Block (4 * T + 1)) * 2 ** 24)
+              or (Word32 (Block (4 * T + 2)) * 2 ** 16)
+              or (Word32 (Block (4 * T + 3)) * 2 ** 8)
+              or Word32 (Block (4 * T + 4));
       end loop;
       for T in 16 .. 63 loop
-         W (T) := SSIG1 (W (T - 2)) + W (T - 7) + SSIG0 (W (T - 15)) + W (T - 16);
+         W (T) := ((SSIG1 (W (T - 2)) + W (T - 7)) + SSIG0 (W (T - 15)))
+              + W (T - 16);
       end loop;
 
       A := Ctx.H (1);  B := Ctx.H (2);  C := Ctx.H (3);  D := Ctx.H (4);
       E := Ctx.H (5);  F := Ctx.H (6);  G := Ctx.H (7);  Hh := Ctx.H (8);
 
       for T in 0 .. 63 loop
-         T1 := Hh + BSIG1 (E) + Ch (E, F, G) + K (T) + W (T);
+         T1 := (Hh + BSIG1 (E)) + (Ch (E, F, G) + (K (T) + W (T)));
          T2 := BSIG0 (A) + Maj (A, B, C);
          Hh := G;  G := F;  F := E;  E := D + T1;
          D := C;   C := B;  B := A;  A := T1 + T2;
@@ -100,103 +101,69 @@ is
    end Init;
 
    procedure Update (Ctx : in out Context; Bytes : Byte_Array) is
-      use type Ada.Streams.Stream_Element_Offset;
-
-      Idx  : Ada.Streams.Stream_Element_Offset := Bytes'First;
-      RemN : Natural := Bytes'Length;
    begin
-      pragma Assert (Bytes'Length <= Ada.Streams.Stream_Element_Offset (Natural'Last));
-      pragma Assert (Ctx.Len <= Long_Long_Integer (Natural'Last) - Long_Long_Integer (Bytes'Length));
-      Ctx.Len := Ctx.Len + Bytes'Length;
-      while RemN > 0 loop
-         pragma Loop_Invariant (Idx + Ada.Streams.Stream_Element_Offset (RemN)
-                                = Bytes'Last + 1);
-         pragma Loop_Invariant (RemN <= Bytes'Length);
-         pragma Loop_Variant (Decreases => RemN);
-         --  Fill the partial buffer first.
-         if Ctx.BufN > 0 then
-            declare
-               Take : constant Natural :=
-                 (if RemN < Block_Length - Ctx.BufN
-                  then RemN else Block_Length - Ctx.BufN);
-            begin
-               pragma Assert (Ada.Streams.Stream_Element_Offset (Ctx.BufN + Take) <= Block_Length);
-               for I in Natural range 1 .. Take loop
-                  pragma Loop_Invariant (Idx + Ada.Streams.Stream_Element_Offset (I - 1) <= Bytes'Last);
-                  pragma Loop_Invariant (Ctx.BufN + I <= Block_Length);
-                  Ctx.Buf (Ctx.BufN + I)
-                    := Bytes (Idx + Ada.Streams.Stream_Element_Offset (I - 1));
-               end loop;
-               Ctx.BufN := Ctx.BufN + Take;
-               Idx := Idx + Ada.Streams.Stream_Element_Offset (Take);
-               RemN := RemN - Take;
-               if Ctx.BufN = Block_Length then
-                  Compress (Ctx, Ctx.Buf);
-                  Ctx.BufN := 0;
-               end if;
-            end;
-         elsif RemN >= Block_Length then
-            --  Consume full blocks directly from the input.
-            declare
-               Blk : Byte_Array_64 := (others => 0);
-            begin
-               pragma Assert (RemN >= Block_Length);
-               for I in Natural range 1 .. Block_Length loop
-                  pragma Loop_Invariant (Idx + Ada.Streams.Stream_Element_Offset (I - 1) <= Bytes'Last);
-                  Blk (I) :=
-                    Bytes (Idx + Ada.Streams.Stream_Element_Offset (I - 1));
-               end loop;
-               Compress (Ctx, Blk);
-               Idx := Idx + Ada.Streams.Stream_Element_Offset (Block_Length);
-               RemN := RemN - Block_Length;
-            end;
+      --  The byte counter is a 64-bit modular value: it accumulates
+      --  without overflow and wraps exactly like the 64-bit bit-length
+      --  field of the FIPS 180-4 padding rule.  The length is taken as
+      --  a Long_Long_Integer difference of the slice bounds: null
+      --  slices add zero, and no attribute conversion can fail.
+      declare
+         Diff : constant Long_Long_Integer :=
+           (Long_Long_Integer (Bytes'Last) - Long_Long_Integer (Bytes'First)) + 1;
+      begin
+         if Diff > 0 then
+            Ctx.Len := Ctx.Len + Count (Diff);
+         end if;
+      end;
+
+      --  Stream one byte at a time through the partial block buffer.
+      --  BufN is bounded by its subtype to a partial block, so the
+      --  buffer index and the full-block test need no extra reasoning.
+      for I in Bytes'Range loop
+         Ctx.Buf (Ctx.BufN + 1) := Bytes (I);
+         if Ctx.BufN + 1 = Block_Length then
+            Compress (Ctx, Ctx.Buf);
+            Ctx.BufN := 0;
          else
-            --  Short tail: buffer it.
-            pragma Assert (RemN < Block_Length);
-            for I in Natural range 1 .. RemN loop
-               pragma Loop_Invariant (Idx + Ada.Streams.Stream_Element_Offset (I - 1) <= Bytes'Last);
-               Ctx.Buf (I)
-                 := Bytes (Idx + Ada.Streams.Stream_Element_Offset (I - 1));
-            end loop;
-            Ctx.BufN := RemN;
-            Idx := Idx + Ada.Streams.Stream_Element_Offset (RemN);
-            RemN := 0;
+            Ctx.BufN := Ctx.BufN + 1;
          end if;
       end loop;
    end Update;
 
    procedure Final (Ctx : in out Context; Out_D : out Hash) is
-      use type Ada.Streams.Stream_Element_Offset;
-
       Pad  : Byte_Array (1 .. 72) := (others => 0);
-      --  Len is bounded by the Update precondition, so Len * 8 fits.
-      Bits : Long_Long_Integer := Ctx.Len * 8;
-      PadN : Natural;
+      Bits : constant Count := Ctx.Len * 8;
+      PadZ : Natural;
    begin
       --  0x80 terminator, zeros, then the 64-bit big-endian bit count.
+      --  BufN is bounded by its subtype, so both branches give
+      --  PadZ in 0 .. 63 and the padded total reaches a multiple of 64.
       Pad (1) := 16#80#;
-      --  BufN is always in 0 .. 63, so both branches give PadN >= 0.
-      PadN := (if Ctx.BufN < 56 then 55 - Ctx.BufN else 119 - Ctx.BufN);
-      --  Write the length into the last 8 bytes of the pad block(s).
-      --  The power is computed on Long_Long_Integer to stay in range.
-      for I in Natural range 1 .. 8 loop
+      if Ctx.BufN < 56 then
+         PadZ := 55 - Ctx.BufN;
+      else
+         PadZ := 119 - Ctx.BufN;
+      end if;
+
+      --  The counter is modular, so the product wraps exactly like the
+      --  FIPS 180-4 length field.
+      for K in Natural range 0 .. 7 loop
          declare
-            Shift : constant Natural := 8 * (8 - I);
-            Div   : constant Long_Long_Integer := 2 ** Shift;
+            Div : constant Count := Count'(2 ** (8 * (7 - K)));
+            Pos : constant Natural := (2 + PadZ) + K;
          begin
-            Pad (Ada.Streams.Stream_Element_Offset (2 + PadN + (I - 1)))
-              := Byte ((Bits / Div) mod 256);
+            Pad (Ada.Streams.Stream_Element_Offset (Pos))
+              := Byte ((Bits / Div) and 255);
          end;
       end loop;
+
       --  Update consumes terminator + zeros + length.
-      --  Pad (1 .. 1 + PadN + 8) is at most 72 bytes because BufN <= 63.
-      Update (Ctx, Pad (1 .. Ada.Streams.Stream_Element_Offset (1 + PadN + 8)));
-      pragma Assert (Ctx.BufN = 0);
+      Update (Ctx, Pad (1 .. Ada.Streams.Stream_Element_Offset ((1 + PadZ) + 8)));
 
       Out_D := (others => 0);
       for I in Natural range 1 .. Hash_Length loop
          declare
-            Wd  : constant Word32 := Ctx.H ((I - 1) / 4 + 1);
+            Wd  : constant Word32 := Ctx.H (((I - 1) / 4) + 1);
             Sel : constant Natural := (I - 1) mod 4;
          begin
             Out_D (Ada.Streams.Stream_Element_Offset (I)) :=

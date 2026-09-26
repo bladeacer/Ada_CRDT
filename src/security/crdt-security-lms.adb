@@ -35,9 +35,12 @@ is
 
    --  Coefficient extraction: the i-th w-bit digit of S
    --  (RFC 8554 section 3.1.3).  W = 8, so one byte per digit.
+   --  The precondition uses the bound difference, not 'Length: the
+   --  internal Last - First + 1 of the attribute cannot be proved
+   --  against the base type for an unconstrained array.
    function Coef (S : Byte_Array; Idx : Natural) return Natural
    is (Natural (S (S'First + Ada.Streams.Stream_Element_Offset (Idx))))
-   with Pre => Ada.Streams.Stream_Element_Offset (Idx) < S'Length;
+   with Pre => Ada.Streams.Stream_Element_Offset (Idx) <= (S'Last - S'First);
 
    function Hash_LMS_Node
      (I    : Byte_Array;
@@ -166,28 +169,25 @@ is
    end Node_Hash;
 
    --  Parse a 4-byte big-endian unsigned integer at a byte offset.
-   --  Modular arithmetic on Unsigned_32 cannot overflow, and the final
-   --  conversion to Natural is exact because the value is < 2**32 and
-   --  Natural covers 0 .. 2**31 - 1 on 32-bit... which is not enough,
-   --  so the top byte is masked to 127 first? No: keep Long_Long_Integer
-   --  accumulation in strict byte-sequential order so every partial sum
-   --  is provably bounded by the next power of two.
-   function U32_At (S : Byte_Array; Off : Natural) return Natural
-   with Pre => S'Length >= 4 and then Off <= Natural'Last - 4
-               and then Ada.Streams.Stream_Element_Offset (Off) + 4 <= S'Length
+   --  The result is Long_Long_Integer because a full 32-bit unsigned
+   --  value does not fit in Natural on every supported target; callers
+   --  narrow it to Natural once a range check has bounded the value.
+   --  The four bytes are read with explicit constants: no loop and no
+   --  loop invariant, so the prover needs only linear arithmetic.
+   function U32_At (S : Byte_Array; Off : Natural) return Long_Long_Integer
+   with Pre => (S'Last - S'First) >= 3
+               and then Ada.Streams.Stream_Element_Offset (Off)
+                        <= (S'Last - S'First) - 3,
+        Post => U32_At'Result in 0 .. 2 ** 32 - 1
    is
-      use type Ada.Streams.Stream_Element_Offset;
       Base : constant Ada.Streams.Stream_Element_Offset :=
         S'First + Ada.Streams.Stream_Element_Offset (Off);
-      Sum  : Long_Long_Integer := 0;
+      B0 : constant Long_Long_Integer := Long_Long_Integer (S (Base));
+      B1 : constant Long_Long_Integer := Long_Long_Integer (S (Base + 1));
+      B2 : constant Long_Long_Integer := Long_Long_Integer (S (Base + 2));
+      B3 : constant Long_Long_Integer := Long_Long_Integer (S (Base + 3));
    begin
-      for K in Natural range 0 .. 3 loop
-         pragma Loop_Invariant (Sum in 0 .. 2 ** (8 * K) - 1);
-         Sum := Sum * 2 ** 8
-              + Long_Long_Integer (S (Base + Ada.Streams.Stream_Element_Offset (K)));
-         pragma Assert (Sum in 0 .. 2 ** (8 * (K + 1)) - 1);
-      end loop;
-      return Natural (Sum);
+      return ((B0 * 256 + B1) * 256 + B2) * 256 + B3;
    end U32_At;
 
    procedure Compute_KC
@@ -199,10 +199,10 @@ is
       Kc       : out N_String;
       Valid    : out Boolean)
    is
-      Sig_Type : Natural;
-      C        : N_String := (others => 0);
-      Y        : OTS_Private_Key := (others => (others => 0));
-      Q_Hash   : N_String := (others => 0);
+      Sig_Type : Long_Long_Integer;
+      C        : N_String;
+      Y        : OTS_Private_Key;
+      Q_Hash   : N_String;
    begin
       Kc := (others => 0);
       Valid := False;
@@ -213,7 +213,7 @@ is
          return;
       end if;
       Sig_Type := U32_At (Sig, 0);
-      if Sig_Type /= Pub_Type then
+      if Sig_Type /= Long_Long_Integer (Pub_Type) then
          return;
       end if;
 
@@ -226,7 +226,7 @@ is
          for J in 0 .. P - 1 loop
             Y (J) := Sig
               (Base + Ada.Streams.Stream_Element_Offset (N_Length * (J + 1))
-               .. Base + Ada.Streams.Stream_Element_Offset (N_Length * (J + 2)) - 1);
+               .. (Base + Ada.Streams.Stream_Element_Offset (N_Length * (J + 2))) - 1);
          end loop;
       end;
 
@@ -274,12 +274,11 @@ is
                A : constant Natural := Coef (Qc, J);
                Z : N_String := Y (J);
             begin
-               --  Chain from digit a up to 2^w - 1 (= 255 for W8).
-               if A <= 255 then
-                  for Step in A + 1 .. 255 loop
-                     Z := Chain_Step (I, Q, J, Step, Z);
-                  end loop;
-               end if;
+            --  Chain from digit a up to 2^w - 1 (= 255 for W8).
+            --  A is a byte value, so A + 1 .. 255 is empty when A = 255.
+            for Step in A + 1 .. 255 loop
+               Z := Chain_Step (I, Q, J, Step, Z);
+            end loop;
                Rest (Ada.Streams.Stream_Element_Offset (J * N_Length + 1)
                      .. Ada.Streams.Stream_Element_Offset ((J + 1) * N_Length)) := Z;
             end;
@@ -304,7 +303,7 @@ is
       Sig        : OTS_Signature;
       Expected_K : N_String) return Boolean
    is
-      Kc    : N_String := (others => 0);
+      Kc    : N_String;
       Valid : Boolean;
       use type N_String;
    begin
@@ -318,32 +317,32 @@ is
       Sig     : LMS_Signature) return Boolean
    is
       --  Layout: u32str (q) || lmots_signature || u32str (type) || path.
+      Q_Val    : Long_Long_Integer;
+      Sig_Type : Long_Long_Integer;
       Q        : Natural;
-      Sig_Type : Natural;
-      Ots_Type : Natural;
       Path     : array (0 .. H - 1) of N_String := (others => (others => 0));
       Node_Num : Natural;
       T        : N_String;
-      Kc       : N_String := (others => 0);
+      Kc       : N_String;
       Valid    : Boolean;
    begin
       if Sig'Length /= LMS_Signature'Length then
          return False;
       end if;
 
-      Q        := U32_At (Sig, 0);
+      Q_Val    := U32_At (Sig, 0);
       Sig_Type := U32_At (Sig, 4 + OTS_Signature'Length);
-      Ots_Type := Pub.OTS_Type;
 
-      if Sig_Type /= LMS_SHA256_M32_H5 then
+      if Sig_Type /= Long_Long_Integer (LMS_SHA256_M32_H5) then
          return False;
       end if;
-      if Ots_Type /= LMOTS_SHA256_N32_W8 then
+      if Pub.OTS_Type /= LMOTS_SHA256_N32_W8 then
          return False;
       end if;
-      if Q >= 2 ** H then
+      if Q_Val >= Long_Long_Integer (2 ** H) then
          return False;
       end if;
+      Q := Natural (Q_Val);
 
       --  Parse the authentication path.
       declare
@@ -353,9 +352,9 @@ is
       begin
          for J in 0 .. H - 1 loop
             Path (J) := Sig
-              (Sig'First + Path_Off + Ada.Streams.Stream_Element_Offset (J * N_Length)
-               .. Sig'First + Path_Off
-                  + Ada.Streams.Stream_Element_Offset ((J + 1) * N_Length) - 1);
+              ((Sig'First + Path_Off) + Ada.Streams.Stream_Element_Offset (J * N_Length)
+               .. ((Sig'First + Path_Off)
+                   + Ada.Streams.Stream_Element_Offset ((J + 1) * N_Length)) - 1);
          end loop;
       end;
 
@@ -363,7 +362,7 @@ is
       declare
          I : constant Byte_Array := Pub.I;
       begin
-         Compute_KC (Ots_Type, I, Q, Message,
+         Compute_KC (Pub.OTS_Type, I, Q, Message,
                      Sig (Sig'First + 4 .. Sig'First + 3 + OTS_Signature'Length),
                      Kc, Valid);
          if not Valid then
