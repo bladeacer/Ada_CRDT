@@ -65,8 +65,8 @@ derived from the changelog files present, not from git tags.
 ## Local equivalents
 
 Every CI gate has a local `make` target. `make check` runs the full local
-quality gate in the same order as CI. See the [Makefile targets
-table](../AGENTS.md) in AGENTS.md.
+quality gate in the same order as CI. See the Makefile targets table in
+[AGENTS.md](https://github.com/bladeacer/Ada_CRDT/blob/main/AGENTS.md).
 
 | CI job | Local target |
 |--------|--------------|

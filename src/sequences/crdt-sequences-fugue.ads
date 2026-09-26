@@ -120,6 +120,14 @@ package CRDT.Sequences.Fugue with SPARK_Mode is
    function "=" (Left, Right : RGA) return Boolean;
 
    --  Physically remove all tombstoned items and reclaim slots.
+   --  Deleted nodes are unlinked from the BST (in-order sequence and
+   --  Node_Id ordering are preserved) and returned to the free list for
+   --  reuse by later Insert/Merge calls.
+   --  Limit: call Compact only when no peer can still deliver a Delete
+   --  or Merge for a removed Node_Id.  A later Delete_Node for a node
+   --  reclaimed here does nothing, and a later Merge re-inserts the
+   --  deleted item as alive, which breaks convergence until all peers
+   --  compact in the same causal round.
    --  @param R  The sequence to compact.
    procedure Compact (R : in out RGA);
 

@@ -85,14 +85,46 @@ is
    procedure Compact (Log : in out Op_Log)
    with Post => Log_GC (Log) = 0 and then Log_Count (Log) <= Log.Capacity, Depends => (Log => Log);
 
+   --  Raise the acknowledgement watermark only when every peer has
+   --  confirmed delivery up to From_Seq.  The watermark moves to the
+   --  smallest per-peer watermark that is still greater than the
+   --  current one, so the causal prefix up to that point is safe to
+   --  purge (every peer delivered it).
+   --  @param Log        Operation log to update.
+   --  @param Peer       Peer whose watermark to record.
+   --  @param From_Seq   The peer confirmed delivery up to this Seq.
+   procedure Acknowledge_From (Log : in out Op_Log; Peer : Core.Replica_Id; From_Seq : Natural)
+   with Depends => (Log => (Log, Peer, From_Seq));
+
+   --  Physically remove the acknowledged prefix from the log now.
+   --  Unlike Compact, the GC watermark stays raised, so the causal
+   --  history below the watermark is not re-read by Get (which serves
+   --  only unacknowledged operations either way).  Call this when a
+   -- bounded history window is required instead of Compact's
+   -- ack-then-reset cycle.
+   --  @param Log  Operation log to purge.
+   procedure Purge_Acknowledged (Log : in out Op_Log)
+   with Post => Log_GC (Log) <= Log_Count (Log) and then Log_Count (Log) <= Log.Capacity, Depends => (Log => Log);
+
+   --  Smallest Seq that is still unacknowledged by at least one peer
+   --  (the purge frontier).  0 when every logged operation is
+   --  acknowledged by every peer.
+   --  @param Log  Operation log to query.
+   --  @return The purge frontier sequence number.
+   function Min_Unacked_Seq (Log : Op_Log) return Natural;
+
 private
 
    type Op_Array is array (Positive range <>) of Operation;
 
    type Op_Log (Capacity : Positive) is record
-      Ops   : Op_Array (1 .. Capacity);
-      Count : Natural := 0;
-      GC    : Natural := 0;
+      Ops       : Op_Array (1 .. Capacity);
+      Count     : Natural := 0;
+      GC        : Natural := 0;
+      --  Highest Seq each peer has confirmed.  Causal-history purge
+      --  uses the minimum across peers as the safe purge frontier.
+      --  May change between minor versions (internal state).
+      Peer_Acks : Core.VTime (1 .. 8) := (others => 0);
    end record
    with Type_Invariant => GC <= Count and then Count <= Capacity;
 

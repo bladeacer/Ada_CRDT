@@ -2,7 +2,7 @@
 
 Operation-Based (CmRDT) sync engine. Replicas broadcast granular, immutable mutation events. Downstream operations must be applied exactly once. Network trait: Hyper-low bandwidth consumption, ideal for ordered delivery channels (WebSockets, TCP/TLS streams). Requirements traceability: - HLR-SYNC-OP: Operation-based sync with bounded log - HLR-SYNC-ACK: Acknowledge + compact processed operations
 
-> **Note:** 13 public item(s) shown below; 2 private internal item(s) are in the `private` section.
+> **Note:** 16 public item(s) shown below; 2 private internal item(s) are in the `private` section.
 
 ## Types
 
@@ -25,6 +25,7 @@ type Op_Log (Capacity : Positive) is record
 Ops   : Op_Array (1 .. Capacity);
 Count : Natural := 0;
 GC    : Natural := 0;
+Peer_Acks : Core.VTime (1 .. 8) := (others => 0);
 end record;
 ```
 
@@ -111,6 +112,14 @@ end record;
 
 **Returns:** Number of acknowledged (GC'd) entries.
 
+### function Min_Unacked_Seq (Log : CRDT.Sync.Op_Based.Op_Log) return Standard.Natural
+
+| Parameter | Description |
+|-----------|-------------|
+| `Log` | Operation log to query. |
+
+**Returns:** The purge frontier sequence number.
+
 ### function Size (Log : CRDT.Sync.Op_Based.Op_Log) return Standard.Natural
 
 | Parameter | Description |
@@ -128,6 +137,14 @@ end record;
 | `Log` | Operation log to modify. |
 | `Up_To_Seq` | Acknowledge all operations with Seq <= this. |
 
+### procedure Acknowledge_From (Log : CRDT.Sync.Op_Based.Op_Log; Peer : CRDT.Core.Replica_Id; From_Seq : Standard.Natural) `[Depends]`
+
+| Parameter | Description |
+|-----------|-------------|
+| `From_Seq` | The peer confirmed delivery up to this Seq. |
+| `Log` | Operation log to update. |
+| `Peer` | Peer whose watermark to record. |
+
 ### procedure Append (Log : CRDT.Sync.Op_Based.Op_Log; Op : CRDT.Sync.Op_Based.Operation) `[Post]` `[Depends]`
 
 | Parameter | Description |
@@ -140,6 +157,12 @@ end record;
 | Parameter | Description |
 |-----------|-------------|
 | `Log` | Operation log to compact. |
+
+### procedure Purge_Acknowledged (Log : CRDT.Sync.Op_Based.Op_Log) `[Post]` `[Depends]`
+
+| Parameter | Description |
+|-----------|-------------|
+| `Log` | Operation log to purge. |
 
 ---
 

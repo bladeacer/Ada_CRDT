@@ -286,11 +286,125 @@ is
       end loop;
    end "=";
 
-   procedure Compact (R : in out RGA) is
+   --  Unlink node Idx from the BST and return it to the free list.
+   --  Standard binary-search-tree deletion: a node with two children is
+   --  replaced by its in-order successor node (contents swapped), which
+   --  has at most one child.  Iterative, no recursion, no rebalancing:
+   --  the tree shape may degrade but the in-order sequence is preserved,
+   --  which is the only property Merge, Get, and iterators rely on.
+   procedure Unlink_Node (R : in out RGA; Idx : Natural) is
+      Target : Natural := Idx;
+      Child  : Natural;
+      Sub    : Natural;
    begin
-      -- Fugue GC: traverse and unlink deleted nodes
-      -- For simplicity, flag only (real GC would need tree rebalancing)
-      null;
+      --  If the target has two children, find its in-order successor
+      --  (leftmost node of the right subtree), swap the contents, and
+      --  delete the successor instead (it has at most one child).
+      if R.Items (Target).Left /= 0 and then R.Items (Target).Right /= 0 then
+         Sub := R.Items (Target).Right;
+         while R.Items (Sub).Left /= 0 loop
+            Sub := R.Items (Sub).Left;
+         end loop;
+         --  Swap payload contents (links keep their positions).
+         declare
+            Tmp : constant RGA_Item := R.Items (Target);
+         begin
+            R.Items (Target) := R.Items (Sub);
+            R.Items (Sub) := Tmp;
+         end;
+         --  Restore the swapped link fields so each node keeps its
+         --  place in the tree; only payload (Id, Value, Deleted)
+         --  moved between Target and Sub.
+         declare
+            T_Par : constant Natural := R.Items (Target).Parent;
+            T_L   : constant Natural := R.Items (Target).Left;
+            T_R   : constant Natural := R.Items (Target).Right;
+            S_Par : constant Natural := R.Items (Sub).Parent;
+            S_L   : constant Natural := R.Items (Sub).Left;
+            S_R   : constant Natural := R.Items (Sub).Right;
+         begin
+            R.Items (Target).Parent := T_Par;
+            R.Items (Target).Left := T_L;
+            R.Items (Target).Right := T_R;
+            R.Items (Sub).Parent := S_Par;
+            R.Items (Sub).Left := S_L;
+            R.Items (Sub).Right := S_R;
+         end;
+         --  Fix the children's parent pointers after the swap.
+         if R.Items (Target).Left /= 0 then
+            R.Items (R.Items (Target).Left).Parent := Target;
+         end if;
+         if R.Items (Target).Right /= 0 then
+            R.Items (R.Items (Target).Right).Parent := Target;
+         end if;
+         if R.Items (Sub).Left /= 0 then
+            R.Items (R.Items (Sub).Left).Parent := Sub;
+         end if;
+         if R.Items (Sub).Right /= 0 then
+            R.Items (R.Items (Sub).Right).Parent := Sub;
+         end if;
+         Target := Sub;
+      end if;
+
+      --  Now the target has at most one child: splice it out.
+      if R.Items (Target).Left /= 0 then
+         Child := R.Items (Target).Left;
+      else
+         Child := R.Items (Target).Right;
+      end if;
+
+      declare
+         Par : constant Natural := R.Items (Target).Parent;
+      begin
+         if Child /= 0 then
+            R.Items (Child).Parent := Par;
+         end if;
+         if Par = 0 then
+            R.Root := Child;
+         elsif R.Items (Par).Left = Target then
+            R.Items (Par).Left := Child;
+         else
+            R.Items (Par).Right := Child;
+         end if;
+      end;
+
+      --  Return the node to the free list (right pointer is the chain).
+      R.Items (Target).Deleted := False;
+      R.Items (Target).Id := Node_Id'(Replica => 1, Seq => 0, Depth => 0);
+      R.Items (Target).Parent := 0;
+      R.Items (Target).Left := 0;
+      R.Items (Target).Right := R.Free;
+      R.Free := Target;
+   end Unlink_Node;
+
+   procedure Compact (R : in out RGA) is
+      Cur   : Natural;
+      Nxt   : Natural;
+      Guard : Natural := 0;
+   begin
+      --  Collect the nodes to remove first: unlinking swaps contents
+      --  and rewrites links, so a live traversal during unlinking
+      --  would visit shifted nodes.  Two passes keep it correct.
+      --  Pass 1: unlink every deleted node by identity.
+      for I in 1 .. R.Count loop
+         if R.Items (I).Deleted then
+            Unlink_Node (R, I);
+         end if;
+      end loop;
+      --  Pass 2: reclaim the unlinked (free-list) nodes.
+      Cur := R.Free;
+      while Cur /= 0 and then Guard < R.Capacity loop
+         Nxt := R.Items (Cur).Right;
+         if R.Total > 0 then
+            R.Total := R.Total - 1;
+         end if;
+         Cur := Nxt;
+         Guard := Guard + 1;
+      end loop;
+      --  Clear stale root/parent links pointing at freed slots.
+      if R.Root /= 0 and then R.Items (R.Root).Parent = R.Root then
+         R.Items (R.Root).Parent := 0;
+      end if;
    end Compact;
 
    procedure Write_RGA (Stream : access Ada.Streams.Root_Stream_Type'Class; Item : RGA) is
