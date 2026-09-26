@@ -10,6 +10,7 @@ with Test_Engines;
 with Test_Convergence;
 with Test_Fuzz;
 with Test_GoL;
+with Test_Security;
 
 procedure Test_Crdt is
 
@@ -22,6 +23,7 @@ procedure Test_Crdt is
    R_Convergence   : Runner;
    R_Fuzz          : Runner;
    R_GoL           : Runner;
+   R_Security      : Runner;
 
    Total_Passed : Natural := 0;
    Total_Failed : Natural := 0;
@@ -87,6 +89,7 @@ begin
    Test_Convergence.Run (R_Convergence);
    Test_Fuzz.Run (R_Fuzz);
    Test_GoL.Run (R_GoL);
+   Test_Security.Run (R_Security);
 
    New_Line;
    Put_Line ("==============================================");
@@ -103,10 +106,11 @@ begin
    Write_Row (Standard_Output, "Convergence", R_Convergence, "merge+skew+saturation");
    Write_Row (Standard_Output, "Fuzz", R_Fuzz, "chaos+10k+partitions");
    Write_Row (Standard_Output, "Game of Life", R_GoL, "neighbors+blinker+sync+conv+mode");
+   Write_Row (Standard_Output, "Security", R_Security, "sha256+hmac+lms");
    HR;
 
-   Total_Passed := R_Basic.Passed + R_Clocks.Passed + R_Lattice.Passed + R_RGA_Features.Passed + R_Serialization.Passed + R_Engines.Passed + R_Convergence.Passed + R_Fuzz.Passed + R_GoL.Passed;
-   Total_Failed := R_Basic.Failed + R_Clocks.Failed + R_Lattice.Failed + R_RGA_Features.Failed + R_Serialization.Failed + R_Engines.Failed + R_Convergence.Failed + R_Fuzz.Failed + R_GoL.Failed;
+   Total_Passed := R_Basic.Passed + R_Clocks.Passed + R_Lattice.Passed + R_RGA_Features.Passed + R_Serialization.Passed + R_Engines.Passed + R_Convergence.Passed + R_Fuzz.Passed + R_GoL.Passed + R_Security.Passed;
+   Total_Failed := R_Basic.Failed + R_Clocks.Failed + R_Lattice.Failed + R_RGA_Features.Failed + R_Serialization.Failed + R_Engines.Failed + R_Convergence.Failed + R_Fuzz.Failed + R_GoL.Failed + R_Security.Failed;
 
    --  Also write to file for README integration
    declare
@@ -123,6 +127,7 @@ begin
       Write_Row (F, "Convergence", R_Convergence, "merge+skew+saturation");
       Write_Row (F, "Fuzz", R_Fuzz, "chaos+10k+partitions");
       Write_Row (F, "Game of Life", R_GoL, "neighbors+blinker+sync+conv+mode");
+      Write_Row (F, "Security", R_Security, "sha256+hmac+lms");
       HR (F);
       New_Line (F);
       Put_Line (F, "  Passed:" & Natural'Image (Total_Passed) & "  Failed:" & Natural'Image (Total_Failed));

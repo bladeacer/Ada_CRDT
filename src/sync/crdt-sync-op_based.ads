@@ -85,30 +85,36 @@ is
    procedure Compact (Log : in out Op_Log)
    with Post => Log_GC (Log) = 0 and then Log_Count (Log) <= Log.Capacity, Depends => (Log => Log);
 
-   --  Raise the acknowledgement watermark only when every peer has
-   --  confirmed delivery up to From_Seq.  The watermark moves to the
-   --  smallest per-peer watermark that is still greater than the
-   --  current one, so the causal prefix up to that point is safe to
-   --  purge (every peer delivered it).
+   --  Raise the acknowledgement watermark for one peer and move the
+   --  purge frontier to the smallest registered-peer watermark.  The
+   --  causal prefix up to the frontier is safe to purge because every
+   --  registered peer has confirmed delivery of it.
+   --  Contract: call this for every live peer.  A peer registers on
+   --  its first call; peers outside the fixed 8-slot table are
+   --  ignored.  Retiring a peer means the application keeps
+   --  acknowledging on its behalf or rebuilds the log.
    --  @param Log        Operation log to update.
    --  @param Peer       Peer whose watermark to record.
    --  @param From_Seq   The peer confirmed delivery up to this Seq.
    procedure Acknowledge_From (Log : in out Op_Log; Peer : Core.Replica_Id; From_Seq : Natural)
    with Depends => (Log => (Log, Peer, From_Seq));
 
-   --  Physically remove the acknowledged prefix from the log now.
-   --  Unlike Compact, the GC watermark stays raised, so the causal
-   --  history below the watermark is not re-read by Get (which serves
-   --  only unacknowledged operations either way).  Call this when a
-   -- bounded history window is required instead of Compact's
-   -- ack-then-reset cycle.
+   --  Physically remove every operation acknowledged by all
+   --  registered peers.  Purge recomputes the causal frontier from the
+   --  per-peer watermark table itself (the minimum over registered
+   --  peers), releases that prefix, and compacts the storage.  It is
+   --  the companion of Acknowledge_From for callers that want the
+   --  frontier to be derived from the peer table rather than from the
+   --  GC marker, and it leaves the watermark table intact so the
+   --  frontier keeps advancing monotonically.
    --  @param Log  Operation log to purge.
    procedure Purge_Acknowledged (Log : in out Op_Log)
-   with Post => Log_GC (Log) <= Log_Count (Log) and then Log_Count (Log) <= Log.Capacity, Depends => (Log => Log);
+   with Post => Log_GC (Log) = 0 and then Log_Count (Log) <= Log.Capacity, Depends => (Log => Log);
 
-   --  Smallest Seq that is still unacknowledged by at least one peer
-   --  (the purge frontier).  0 when every logged operation is
-   --  acknowledged by every peer.
+   --  Smallest Seq that is still unacknowledged by at least one
+   --  registered peer (the purge frontier).  0 when no peer has
+   --  registered or when every logged operation is acknowledged by
+   --  every registered peer.
    --  @param Log  Operation log to query.
    --  @return The purge frontier sequence number.
    function Min_Unacked_Seq (Log : Op_Log) return Natural;
@@ -117,14 +123,20 @@ private
 
    type Op_Array is array (Positive range <>) of Operation;
 
+   --  Registered-peer flags (fixed 8-peer table).
+   type Boolean_Array is array (Positive range <>) of Boolean;
+
    type Op_Log (Capacity : Positive) is record
-      Ops       : Op_Array (1 .. Capacity);
-      Count     : Natural := 0;
-      GC        : Natural := 0;
-      --  Highest Seq each peer has confirmed.  Causal-history purge
-      --  uses the minimum across peers as the safe purge frontier.
-      --  May change between minor versions (internal state).
-      Peer_Acks : Core.VTime (1 .. 8) := (others => 0);
+      Ops   : Op_Array (1 .. Capacity);
+      Count : Natural := 0;
+      GC    : Natural := 0;
+      --  Highest Seq each registered peer has confirmed, and which
+      --  slots are registered.  Causal-history purge uses the minimum
+      --  over registered peers as the purge frontier.  A peer becomes
+      --  registered on its first Acknowledge_From call.  May change
+      --  between minor versions (internal state).
+      Peer_Acks   : Core.VTime (1 .. 8) := (others => 0);
+      Peer_Active : Boolean_Array (1 .. 8) := (others => False);
    end record
    with Type_Invariant => GC <= Count and then Count <= Capacity;
 

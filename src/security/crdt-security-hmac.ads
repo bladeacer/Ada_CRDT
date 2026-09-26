@@ -16,6 +16,9 @@ package CRDT.Security.HMAC
   with SPARK_Mode
 is
 
+   use type Ada.Streams.Stream_Element;
+   use type Ada.Streams.Stream_Element_Array;
+
    --  HMAC tag length in bytes (full SHA-256 output).
    Tag_Length : constant := 32;
 
@@ -43,6 +46,7 @@ is
    --  @param Right  Expected tag.
    --  @return True when both tags are identical.
    function Equal (Left, Right : Tag) return Boolean
-   with Post => Equal'Result = (for all I in Tag'Range => Left (I) = Right (I));
+   with Post =>
+     Equal'Result = (for all I in Tag'Range => Left (I) = Right (I));
 
 end CRDT.Security.HMAC;

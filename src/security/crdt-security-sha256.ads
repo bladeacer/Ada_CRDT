@@ -9,6 +9,7 @@
 --  - HLR-SEC-SHA256: SHA-256 hash for integrity and signatures
 
 with Ada.Streams;
+with Interfaces;
 
 package CRDT.Security.SHA256
   with SPARK_Mode
@@ -38,7 +39,10 @@ is
    procedure Init (Ctx : out Context)
    with Post => Ctx = Initial_Context;
 
-   --  Feed bytes into the streaming context.
+   --  Feed bytes into the streaming context.  Accepts input of any
+   --  length: the internal byte counter is a 64-bit modular value, so
+   --  it wraps exactly like the 64-bit bit-length field of the
+   --  SHA-256 padding rule and can never overflow.
    --  @param Ctx    Context to update.
    --  @param Bytes  Input bytes.
    procedure Update (Ctx : in out Context; Bytes : Byte_Array)
@@ -56,7 +60,18 @@ is
 
 private
 
-   type Word32 is mod 2**32;
+   type Word32 is new Interfaces.Unsigned_32;
+
+   --  64-bit modular byte counter.  Modular arithmetic means the
+   --  counter wraps instead of overflowing, which matches the
+   --  FIPS 180-4 padding rule: the encoded bit count is the message
+   --  length modulo 2**64.
+   type Count is mod 2 ** 64;
+
+   --  Number of bytes held in the partial block buffer.  The subtype
+   --  bounds it to a partial block, so every pad-length computation
+   --  stays inside Natural range by construction.
+   subtype Buf_Count is Natural range 0 .. Block_Length - 1;
 
    type Word_Array_8 is array (1 .. 8) of Word32;
 
@@ -66,9 +81,9 @@ private
       H    : Word_Array_8 := (16#6A09E667#, 16#BB67AE85#, 16#3C6EF372#,
                               16#A54FF53A#, 16#510E527F#, 16#9B05688C#,
                               16#1F83D9AB#, 16#5BE0CD19#);
-      Len  : Long_Long_Integer := 0;
+      Len  : Count := 0;
       Buf  : Byte_Array_64 := (others => 0);
-      BufN : Natural := 0;
+      BufN : Buf_Count := 0;
    end record;
 
 end CRDT.Security.SHA256;

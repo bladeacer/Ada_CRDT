@@ -1,6 +1,7 @@
 with CRDT.Test_Support; use CRDT.Test_Support;
 with CRDT.Core;
 with CRDT.Rga;
+with CRDT.Sequences.Fugue;
 with Ada.Text_IO;       use Ada.Text_IO;
 
 package body Test_RGA_Features is
@@ -229,6 +230,55 @@ package body Test_RGA_Features is
          Put_Line ("[Tombstone GC] done.");
       end Test_Tombstone_GC;
 
+      procedure Test_Fugue_Tombstone_GC is
+         Max_RGA : constant Positive := 20;
+         package RGA_Str is new CRDT.Sequences.Fugue (Character, Max_RGA);
+         R       : RGA_Str.RGA (Max_RGA);
+      begin
+         New_Line;
+         Put_Line ("[Fugue Tombstone GC]");
+
+         RGA_Str.Insert (R, 1, (Replica => 1, Seq => 1, Depth => 0), 'A');
+         RGA_Str.Insert (R, 2, (Replica => 1, Seq => 2, Depth => 0), 'B');
+         RGA_Str.Insert (R, 3, (Replica => 1, Seq => 3, Depth => 0), 'C');
+
+         RunR.Check (RGA_Str.Size (R) = 3, "Fugue: before delete size = 3");
+         RunR.Check (RGA_Str.Count (R) = 3, "Fugue: before delete item count = 3");
+
+         RGA_Str.Delete (R, 2);
+         RunR.Check (RGA_Str.Size (R) = 3, "Fugue: tombstone still counts in Size");
+
+         RGA_Str.Compact (R);
+         RunR.Check (RGA_Str.Size (R) = 2, "Fugue: after compact size = 2");
+         RunR.Check (RGA_Str.Count (R) = 3, "Fugue: storage slots retained for reuse");
+         RunR.Check (RGA_Str.Get (R, 1) = 'A', "Fugue: Get (1) = 'A'");
+         RunR.Check (RGA_Str.Get (R, 2) = 'C', "Fugue: Get (2) = 'C'");
+
+         --  Freed slots must be reusable.  Document order follows the
+         --  Node_Id order (Replica, Seq, Depth): (1,4) sorts after
+         --  (1,3), so the reused-slot element lands at the end.
+         RGA_Str.Insert (R, 2, (Replica => 1, Seq => 4, Depth => 0), 'X');
+         RunR.Check (RGA_Str.Size (R) = 3, "Fugue: insert after GC reuses slot");
+         RunR.Check (RGA_Str.Get (R, 1) = 'A', "Fugue: Get (1) = 'A' after reuse");
+         RunR.Check (RGA_Str.Get (R, 2) = 'C', "Fugue: Get (2) = 'C' after reuse");
+         RunR.Check (RGA_Str.Get (R, 3) = 'X', "Fugue: Get (3) = 'X' (Id order)");
+
+         --  Merge still converges after GC.
+         declare
+            B : RGA_Str.RGA (Max_RGA);
+         begin
+            RGA_Str.Insert (B, 1, (Replica => 2, Seq => 5, Depth => 0), 'Z');
+            RGA_Str.Merge (R, B);
+            RunR.Check (RGA_Str.Size (R) = 4, "Fugue: merge after GC grows to 4");
+            RunR.Check (RGA_Str.Get (R, 1) = 'A', "Fugue: order kept after merge (1)");
+            RunR.Check (RGA_Str.Get (R, 2) = 'C', "Fugue: order kept after merge (2)");
+            RunR.Check (RGA_Str.Get (R, 3) = 'X', "Fugue: order kept after merge (3)");
+            RunR.Check (RGA_Str.Get (R, 4) = 'Z', "Fugue: order kept after merge (4)");
+         end;
+
+         Put_Line ("[Fugue Tombstone GC] done.");
+      end Test_Fugue_Tombstone_GC;
+
       procedure Test_Out_Of_Order_Delta is
          Max_RGA : constant Positive := 20;
          package RGA_Str is new CRDT.Rga (Character, Max_RGA);
@@ -293,6 +343,7 @@ package body Test_RGA_Features is
       Test_Structural_Splitting;
       Test_Delta_Sync;
       Test_Tombstone_GC;
+      Test_Fugue_Tombstone_GC;
       Test_Out_Of_Order_Delta;
    end Run;
 end Test_RGA_Features;

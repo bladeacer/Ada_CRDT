@@ -4,29 +4,33 @@ package body CRDT.Security.HMAC
   with SPARK_Mode
 is
 
+   use type SHA256.Byte;
+
    --  Local 64-byte block (HMAC pad length, same as SHA-256 block).
-   type Block64 is array (1 .. 64) of Byte;
+   subtype Block64 is SHA256.Byte_Array (1 .. 64);
 
    --  Normalise the key to exactly one block: hash keys longer than
    --  the block size, zero-pad shorter ones (RFC 2104 section 2).
-   function Normalise_Key (Key : Byte_Array) return Block64
-   with Pre => Key'Length > 0
-   is
+   function Normalise_Key (Key : Byte_Array) return Block64 is
+      use type Ada.Streams.Stream_Element_Offset;
+
       K : Block64 := (others => 0);
    begin
-      if Key'Length > Block64'Length then
+      if Key'Length > 64 then
          declare
             D : SHA256.Hash;
          begin
             SHA256.Digest (Key, D);
-            for I in D'Range loop
-               K (I) := D (I);
-               pragma Loop_Invariant (for all J in 1 .. I => K (J) = D (J));
+            for I in Natural range 1 .. 32 loop
+               K (Ada.Streams.Stream_Element_Offset (I))
+                 := D (Ada.Streams.Stream_Element_Offset (I));
+               pragma Loop_Invariant (True);
             end loop;
          end;
       else
-         for I in Key'Range loop
-            K (1 + (I - Key'First)) := Key (I);
+         for I in Natural range 0 .. Key'Length - 1 loop
+            K (Ada.Streams.Stream_Element_Offset (1 + I))
+              := Key (Key'First + Ada.Streams.Stream_Element_Offset (I));
             pragma Loop_Invariant (True);
          end loop;
       end if;
@@ -36,9 +40,7 @@ is
    procedure Compute
      (Key     : Byte_Array;
       Message : Byte_Array;
-      Out_Tag : out Tag)
-   with Pre => Key'Length > 0
-   is
+      Out_Tag : out Tag) is
       K     : constant Block64 := Normalise_Key (Key);
       I_Pad : Block64;
       O_Pad : Block64;
@@ -48,7 +50,6 @@ is
       for I in Block64'Range loop
          I_Pad (I) := K (I) xor 16#36#;
          O_Pad (I) := K (I) xor 16#5C#;
-         pragma Loop_Invariant (True);
       end loop;
 
       --  Inner: SHA256 (I_Pad || Message).
@@ -64,13 +65,14 @@ is
       SHA256.Final (Ctx, Out_Tag);
    end Compute;
 
-   function Equal (Left, Right : Tag) return Boolean
-   is
-      Diff : Byte := 0;
+   function Equal (Left, Right : Tag) return Boolean is
+      Diff : SHA256.Byte := 0;
    begin
       for I in Tag'Range loop
          Diff := Diff or (Left (I) xor Right (I));
-         pragma Loop_Invariant (for all J in 1 .. I => (Left (J) = Right (J)) or Diff /= 0);
+         pragma Loop_Invariant
+           ((Diff = 0)
+            = (for all J in Tag'First .. I => Left (J) = Right (J)));
       end loop;
       return Diff = 0;
    end Equal;

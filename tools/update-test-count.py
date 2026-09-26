@@ -50,6 +50,7 @@ CATEGORY_KEY: Dict[str, str] = {
     "Convergence: merge+skew+saturation": "convergence",
     "Fuzz: chaos+10k+partitions": "fuzz",
     "Game of Life: neighbors+blinker+sync+conv+mode": "gol",
+    "Security: sha256+hmac+lms": "security",
 }
 
 

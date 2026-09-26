@@ -162,6 +162,58 @@ package body Test_Engines is
             end;
          end;
 
+         --  Causal-history purging: per-peer watermark acknowledge.
+         --  The frontier is the minimum over registered peers; a peer
+         --  registers on its first Acknowledge_From call.
+         declare
+            use type CRDT.Core.Replica_Id;
+            Log : CRDT.Sync.Op_Based.Op_Log (Capacity => 100);
+         begin
+            CRDT.Sync.Op_Based.Append (Log, (Kind => CRDT.Sync.Op_Based.Op_Insert, Seq => 1, Node => 1, Position => 1));
+            CRDT.Sync.Op_Based.Append (Log, (Kind => CRDT.Sync.Op_Based.Op_Insert, Seq => 2, Node => 1, Position => 2));
+            CRDT.Sync.Op_Based.Append (Log, (Kind => CRDT.Sync.Op_Based.Op_Delete, Seq => 3, Node => 1, Del_Position => 1));
+
+            --  Peer 2 registers and confirms up to 3: the frontier is
+            --  that watermark, so the whole prefix is released.
+            CRDT.Sync.Op_Based.Acknowledge_From (Log, Peer => 2, From_Seq => 3);
+            RunR.Check (CRDT.Sync.Op_Based.Size (Log) = 0,
+                        "Purge: registered peer watermark releases its prefix");
+            RunR.Check (CRDT.Sync.Op_Based.Min_Unacked_Seq (Log) = 4,
+                        "Purge: frontier = watermark + 1");
+
+            --  A new operation and a second, slower peer.
+            CRDT.Sync.Op_Based.Append (Log, (Kind => CRDT.Sync.Op_Based.Op_Insert, Seq => 4, Node => 1, Position => 4));
+            RunR.Check (CRDT.Sync.Op_Based.Size (Log) = 1,
+                        "Purge: new op is unacknowledged");
+            CRDT.Sync.Op_Based.Acknowledge_From (Log, Peer => 3, From_Seq => 1);
+            RunR.Check (CRDT.Sync.Op_Based.Min_Unacked_Seq (Log) = 2,
+                        "Purge: frontier = slowest registered peer + 1");
+            RunR.Check (CRDT.Sync.Op_Based.Size (Log) = 1,
+                        "Purge: released prefix stays released");
+
+            --  Slow peer catches up; op 4 needs both peers.
+            CRDT.Sync.Op_Based.Acknowledge_From (Log, Peer => 3, From_Seq => 4);
+            RunR.Check (CRDT.Sync.Op_Based.Size (Log) = 1,
+                        "Purge: op 4 waits for the fastest peer too");
+            CRDT.Sync.Op_Based.Acknowledge_From (Log, Peer => 2, From_Seq => 4);
+            RunR.Check (CRDT.Sync.Op_Based.Size (Log) = 0,
+                        "Purge: op 4 released when all peers confirm");
+            RunR.Check (CRDT.Sync.Op_Based.Min_Unacked_Seq (Log) = 5,
+                        "Purge: frontier advances monotonically");
+
+            --  Purge physically reclaims the released history.
+            CRDT.Sync.Op_Based.Append (Log, (Kind => CRDT.Sync.Op_Based.Op_Insert, Seq => 5, Node => 1, Position => 5));
+            CRDT.Sync.Op_Based.Acknowledge_From (Log, Peer => 2, From_Seq => 5);
+            CRDT.Sync.Op_Based.Acknowledge_From (Log, Peer => 3, From_Seq => 5);
+            RunR.Check (CRDT.Sync.Op_Based.Size (Log) = 0,
+                        "Purge: op 5 acknowledged by both peers");
+            CRDT.Sync.Op_Based.Purge_Acknowledged (Log);
+            RunR.Check (CRDT.Sync.Op_Based.Log_Count (Log) = 0,
+                        "Purge: physical storage reclaimed after purge");
+            RunR.Check (CRDT.Sync.Op_Based.Min_Unacked_Seq (Log) = 6,
+                        "Purge: watermark table survives the purge");
+         end;
+
          Put_Line ("[Sync Layer] done.");
       end Test_Sync_Layer;
 
