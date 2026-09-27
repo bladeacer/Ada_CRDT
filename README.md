@@ -46,6 +46,8 @@ alr with crdt
 | Clock strategies | `CRDT.Clocks` | [docs](docs/api-docs/crdt-clocks.md) |
 | State-based sync | `CRDT.Sync.State_Based` | [docs](docs/api-docs/crdt-sync-state_based.md) |
 | Op-based sync | `CRDT.Sync.Op_Based` | [docs](docs/api-docs/crdt-sync-op_based.md) |
+| Sequence engines | `CRDT.Sequences` | [docs](docs/api-docs/crdt-sequences.md) |
+| Post-quantum security | `CRDT.Security` | [docs](docs/api-docs/crdt-security.md) |
 | Thread-safe wrappers | `CRDT.Protected` | [docs](docs/api-docs/crdt-protected.md) |
 | Bounded wrappers | `CRDT.Bounded` | [docs](docs/api-docs/crdt-bounded.md) |
 | HLC | `CRDT.HLC` | [docs](docs/api-docs/crdt-hlc.md) |
@@ -73,6 +75,16 @@ make test
 ---
 
 ## Documentation
+
+Usage guide (self-contained pages, new content, not just API):
+[docs/usage/index.md](docs/usage/index.md). The pages cover
+[getting started](docs/usage/getting-started.md),
+[sequence engines](docs/usage/engines.md),
+[clock strategies](docs/usage/clock-strategies.md),
+[sync layers](docs/usage/sync.md),
+[serialization](docs/usage/serialization.md),
+[security](docs/usage/security.md), and the
+[engine comparison](docs/usage/engine-comparison.md).
 
 Full API reference: [docs/api-docs/index.md](docs/api-docs/index.md)
 The reference is generated from docstring annotations via `make doc`. It covers

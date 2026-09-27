@@ -22,25 +22,20 @@ is
          begin
             SHA256.Digest (Key, D);
             for I in Natural range 1 .. 32 loop
-               K (Ada.Streams.Stream_Element_Offset (I))
-                 := D (Ada.Streams.Stream_Element_Offset (I));
+               K (Ada.Streams.Stream_Element_Offset (I)) := D (Ada.Streams.Stream_Element_Offset (I));
                pragma Loop_Invariant (True);
             end loop;
          end;
       else
          for I in Natural range 0 .. Key'Length - 1 loop
-            K (Ada.Streams.Stream_Element_Offset (1 + I))
-              := Key (Key'First + Ada.Streams.Stream_Element_Offset (I));
+            K (Ada.Streams.Stream_Element_Offset (1 + I)) := Key (Key'First + Ada.Streams.Stream_Element_Offset (I));
             pragma Loop_Invariant (True);
          end loop;
       end if;
       return K;
    end Normalise_Key;
 
-   procedure Compute
-     (Key     : Byte_Array;
-      Message : Byte_Array;
-      Out_Tag : out Tag) is
+   procedure Compute (Key : Byte_Array; Message : Byte_Array; Out_Tag : out Tag) is
       K     : constant Block64 := Normalise_Key (Key);
       I_Pad : Block64;
       O_Pad : Block64;
@@ -70,9 +65,7 @@ is
    begin
       for I in Tag'Range loop
          Diff := Diff or (Left (I) xor Right (I));
-         pragma Loop_Invariant
-           ((Diff = 0)
-            = (for all J in Tag'First .. I => Left (J) = Right (J)));
+         pragma Loop_Invariant ((Diff = 0) = (for all J in Tag'First .. I => Left (J) = Right (J)));
       end loop;
       return Diff = 0;
    end Equal;

@@ -344,7 +344,7 @@ verify-report:
 			echo "- **Generics** ($$generics_skipped units: \`Rga\`, \`Lww_Element_Sets\`, \`Lww_Sets\`, \`Sequences.*\`) and"; \
 			echo "  platform dependencies (wall clock, RNG, stream I/O) are excluded from formal proof"; \
 			echo "  by design (see \`AGENTS.md\` for rationale)"; \
-			echo "- **$$test_total test cases** pass across 9 categories -- all SPARK-analyzable units"; \
+			echo "- **$$test_total test cases** pass across 10 categories -- all SPARK-analyzable units"; \
 			echo "  are formally proved, and all code paths are exercised by the test harness"; \
 			} >> "$$tmp_index"; \
 			mv "$$tmp_index" "$$index_file"; \

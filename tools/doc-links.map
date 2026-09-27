@@ -1,4 +1,12 @@
 docs/api-docs/index.md	API reference
+docs/usage/index.md	Usage guide
+docs/usage/getting-started.md	Getting started
+docs/usage/engines.md	Sequence engines
+docs/usage/clock-strategies.md	Clock strategies
+docs/usage/sync.md	Sync layers
+docs/usage/serialization.md	Serialization
+docs/usage/security.md	Security
+docs/usage/engine-comparison.md	Engine comparison
 docs/compliance/index.md	DO-178C compliance
 docs/compliance/PSAC.md	PSAC (Plan for Software Aspects of Certification)
 docs/compliance/HLR.md	High-Level Requirements

@@ -19,6 +19,10 @@ src/sequences/crdt-sequences-naive	Flat linked-list engine
 src/sequences/crdt-sequences-fugue	BST anti-interleaving engine
 src/serialization/crdt-serialization	Protocol version router (V1/V2/V3 detection)
 src/serialization/crdt-serialization-legacy	V1 fixed-width reader
+src/security/crdt-security	Security root (post-quantum layer)
+src/security/crdt-security-sha256	SHA-256 hash (FIPS 180-4)
+src/security/crdt-security-hmac	HMAC-SHA-256 authentication (RFC 2104)
+src/security/crdt-security-lms	LMS signature verification (RFC 8554)
 src/sync/crdt-sync	Sync root (State_Vector type)
 src/sync/crdt-sync-op_based	Op-based (CmRDT) sync
 src/sync/crdt-sync-state_based	State-based (CvRDT) sync
@@ -30,6 +34,7 @@ src/tests/test_clocks	Lamport+Vector+Matrix+Lww_Sets (40 tests)
 src/tests/test_lattice	Lattice law check (8 tests)
 src/tests/test_rga_features	Interleave+split+delta+GC (40 tests)
 src/tests/test_serialization	V1+V2+byte-boundary (62 tests)
+src/tests/test_security	sha256+hmac+lms (15 tests)
 src/tests/test_engines	Yjs+Naive+Sync (23 tests)
 src/tests/test_convergence	Merge+skew+saturation (21 tests)
 src/tests/test_fuzz	Chaos+10k+partitions (10038 tests)

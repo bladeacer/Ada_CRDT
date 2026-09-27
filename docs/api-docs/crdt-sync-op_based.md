@@ -2,9 +2,15 @@
 
 Operation-Based (CmRDT) sync engine. Replicas broadcast granular, immutable mutation events. Downstream operations must be applied exactly once. Network trait: Hyper-low bandwidth consumption, ideal for ordered delivery channels (WebSockets, TCP/TLS streams). Requirements traceability: - HLR-SYNC-OP: Operation-based sync with bounded log - HLR-SYNC-ACK: Acknowledge + compact processed operations
 
-> **Note:** 16 public item(s) shown below; 2 private internal item(s) are in the `private` section.
+> **Note:** 17 public item(s) shown below; 3 private internal item(s) are in the `private` section.
 
 ## Types
+
+### type Boolean_Array
+
+```ada
+type Boolean_Array is array (Positive range <>) of Boolean;
+```
 
 ### type Op_Array
 
@@ -25,7 +31,8 @@ type Op_Log (Capacity : Positive) is record
 Ops   : Op_Array (1 .. Capacity);
 Count : Natural := 0;
 GC    : Natural := 0;
-Peer_Acks : Core.VTime (1 .. 8) := (others => 0);
+Peer_Acks   : Core.VTime (1 .. 8) := (others => 0);
+Peer_Active : Boolean_Array (1 .. 8) := (others => False);
 end record;
 ```
 
@@ -169,4 +176,5 @@ end record;
 ## Private Section
 
 - **type** `Op_Array`
+- **type** `Boolean_Array`
 - **type** `Op_Log`

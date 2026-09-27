@@ -27,6 +27,11 @@ src/
 |   |-- crdt-core.ads/.adb                    -- Core types: Replica_Id, Lamport_Time, HLC_Time, VTime
 |   |-- crdt-core-leb128.ads/.adb             -- LEB128 variable-length encoding
 |   `-- crdt-hlc.ads/.adb                     -- Hybrid Logical Clock
+|-- security/
+|   |-- crdt-security.ads                     -- Security root (post-quantum layer)
+|   |-- crdt-security-hmac.ads/.adb           -- HMAC-SHA-256 authentication (RFC 2104)
+|   |-- crdt-security-lms.ads/.adb            -- LMS signature verification (RFC 8554)
+|   `-- crdt-security-sha256.ads/.adb         -- SHA-256 hash (FIPS 180-4)
 |-- sequences/
 |   |-- crdt-sequences.ads                    -- Sequence engine root
 |   |-- crdt-sequences-fugue.ads/.adb         -- BST anti-interleaving engine
@@ -43,16 +48,17 @@ src/
 `-- tests/
     |-- crdt-test_support.ads/.adb            -- Test runner utilities
     |-- proof_instantiations.ads              -- SPARK proof instantiations (generic bodies)
-    |-- test_basic.ads/.adb                   -- PN+LWW+RGA+RGAs (10290 tests)
-    |-- test_clocks.ads/.adb                  -- Lamport+Vector+Matrix+Lww_Sets (10290 tests)
-    |-- test_convergence.ads/.adb             -- Merge+skew+saturation (10290 tests)
+    |-- test_basic.ads/.adb                   -- PN+LWW+RGA+RGAs (34 tests)
+    |-- test_clocks.ads/.adb                  -- Lamport+Vector+Matrix+Lww_Sets (40 tests)
+    |-- test_convergence.ads/.adb             -- Merge+skew+saturation (21 tests)
     |-- test_crdt.adb                         -- Main test harness
-    |-- test_engines.ads/.adb                 -- Yjs+Naive+Sync (10290 tests)
-    |-- test_fuzz.ads/.adb                    -- Chaos+10k+partitions (10290 tests)
-    |-- test_gol.ads/.adb                     -- Game of Life (10290 tests)
-    |-- test_lattice.ads/.adb                 -- Lattice law check (10290 tests)
-    |-- test_rga_features.ads/.adb            -- Interleave+split+delta+GC (10290 tests)
-    `-- test_serialization.ads/.adb           -- V1+V2+byte-boundary (10290 tests)
+    |-- test_engines.ads/.adb                 -- Yjs+Naive+Sync (23 tests)
+    |-- test_fuzz.ads/.adb                    -- Chaos+10k+partitions (10038 tests)
+    |-- test_gol.ads/.adb                     -- Game of Life (24 tests)
+    |-- test_lattice.ads/.adb                 -- Lattice law check (8 tests)
+    |-- test_rga_features.ads/.adb            -- Interleave+split+delta+GC (40 tests)
+    |-- test_security.ads/.adb                -- sha256+hmac+lms (15 tests)
+    `-- test_serialization.ads/.adb           -- V1+V2+byte-boundary (62 tests)
 ```
 <!-- agents-tree:end -->
 
@@ -63,7 +69,7 @@ src/
 | Target | What it does | How it works |
 |--------|-------------|--------------|
 | `build` | Compile library + tests | `alr build` (filters out `.sframe` linker noise) |
-| `test` | Build + run test suite (fuzz, convergence, GoL included) | `alr build && ./test_crdt` (all tests across 9 categories) |
+| `test` | Build + run test suite (fuzz, convergence, GoL included) | `alr build && ./test_crdt` (all tests across 10 categories) |
 | `check` | Pre-commit quality gate (ascii, changelog, links, spark-off, build, tests, SPARK proof, coverage, compliance, description, test-count, proof-status, doc-links) | `ascii-check` + `changelog-check` + `link-check` + `spark-off-check` + `build` + `test` + `prove` + `coverage-gate` + `compliance` + `description` + `test-count` + `proof-status` + `doc-links` in order |
 | `spark-off-check` | Verify every `SPARK_Mode => Off` location is listed in the spark-coverage report | `python3 tools/gen-coverage.py --check` (pure-static, no Alire needed) |
 | `covex` | Ensure the covex (adacovex) dev dependency is built | `alr exec -- adacovex --help`; builds via `alr build` if missing |
@@ -105,7 +111,7 @@ src/
   equivalents: [docs/ci-cd.md](docs/ci-cd.md).
 - `.github/workflows/release.yml` runs on `v*` tags: it builds + tests the crate
   and runs the SPARK proof gate via the `bladeacer/adacovex@v1` action
-  (Platinum, 100% docstrings, 10290 tests, 0 unproved), generates the
+  (Platinum, 100% docstrings, 10332 tests, 0 unproved), generates the
   proof-aware SBOM, attests the release artifacts with Sigstore
   (`actions/attest@v4`), publishes the GitHub release (`gh release create`)
   with changelog links + attestation URL, and updates the floating `v#` /
@@ -170,7 +176,7 @@ src/
 
 - **DAL-C** (Development Assurance Level C) means a failure may cause passenger
   inconvenience but NOT injury or loss of life.
-- 24 High-Level Requirements (HLRs) tracked via `-- - HLR-XXXX` tags in `.ads`
+- 27 High-Level Requirements (HLRs) tracked via `-- - HLR-XXXX` tags in `.ads`
   files. Validated by `make compliance` which checks:
   - Every source HLR tag has a corresponding entry in `docs/compliance/HLR.md`
   - Every HLR in `docs/compliance/HLR.md` has a matching source tag (no orphans)
@@ -275,16 +281,17 @@ CRDT.Clocks.Matrix             -- explicit Matrix strategy
 - Tests use `RunR.Check (Condition, "Message")` -- no external test framework
 - Main harness: `src/tests/test_crdt.adb` orchestrates all test modules
 - Test results written to both stdout and `test_result.md`
-- **10290 tests** across 9 categories:
-  - Basic: PN+LWW+RGA+RGAs (10290 tests)
-  - Clocks: Lamport+Vector+Matrix+Lww_Sets (10290 tests)
-  - Lattice Properties: law check (10290 tests)
-  - RGA Features: interleave+split+delta+GC (10290 tests)
-  - Serialization: V1+V2+byte-boundary (10290 tests)
-  - Engines: Yjs+Naive+Sync (10290 tests)
-  - Convergence: merge+skew+saturation (10290 tests)
-  - Fuzz: chaos+10k+partitions (10290 tests)
-  - Game of Life: neighbors+blinker+sync+conv+mode (10290 tests)
+- **10332 tests** across 10 categories:
+  - Basic: PN+LWW+RGA+RGAs (34 tests)
+  - Clocks: Lamport+Vector+Matrix+Lww_Sets (40 tests)
+  - Lattice Properties: law check (8 tests)
+  - RGA Features: interleave+split+delta+GC (56 tests)
+  - Serialization: V1+V2+byte-boundary (62 tests)
+  - Engines: Yjs+Naive+Sync (34 tests)
+  - Convergence: merge+skew+saturation (21 tests)
+  - Fuzz: chaos+10k+partitions (10038 tests)
+  - Game of Life: neighbors+blinker+sync+conv+mode (24 tests)
+  - Security: sha256+hmac+lms (15 tests)
 - Test files are `SPARK_Mode => Off` (test infrastructure is not formally proved)
 - Demo (`demo/demo_life.adb`) is also `SPARK_Mode => Off` by design -- it is
   a terminal application that instantiates generics, not a formal verification
@@ -351,6 +358,14 @@ third-party attributions.
 
 <!-- doc-links:begin -->
 - [API reference](docs/api-docs/index.md)
+- [Usage guide](docs/usage/index.md)
+- [Getting started](docs/usage/getting-started.md)
+- [Sequence engines](docs/usage/engines.md)
+- [Clock strategies](docs/usage/clock-strategies.md)
+- [Sync layers](docs/usage/sync.md)
+- [Serialization](docs/usage/serialization.md)
+- [Security](docs/usage/security.md)
+- [Engine comparison](docs/usage/engine-comparison.md)
 - [DO-178C compliance](docs/compliance/index.md)
 - [PSAC (Plan for Software Aspects of Certification)](docs/compliance/PSAC.md)
 - [High-Level Requirements](docs/compliance/HLR.md)
@@ -384,7 +399,7 @@ third-party attributions.
     (C1..Cn, H1..Hn); lists and detail lines indent with 3 spaces; proof/test
     statistics are presented as Markdown tables.
   - **Test Suite**: mandatory; reports the passing test count for the release
-    (e.g. `10290 tests passing`) and any new tests added.
+    (e.g. `10332 tests passing`) and any new tests added.
   - **Proof Results**: mandatory; reports SPARK proof statistics for the
     release (total/proved/justified/unproved VCs), as a table where multiple
     numbers are reported.

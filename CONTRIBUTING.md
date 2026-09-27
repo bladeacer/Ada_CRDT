@@ -50,7 +50,7 @@ Pull requests must follow these conventions.
     `--  @field`, `--  @formal` annotations (they feed `make doc`)
   - `--  - HLR-XXXX: description` tags in package headers where a requirement
     applies
-- Run the test suite: `make test` (all 10290 tests across 9 categories must
+- Run the test suite: `make test` (all 10332 tests across 10 categories must
   pass). If relevant, add tests in `src/tests/` using the existing
   `RunR.Check (Condition, "Message")` pattern.
 - If your change touches SPARK-analyzable code, run the proofs: `make prove`.

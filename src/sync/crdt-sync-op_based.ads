@@ -127,9 +127,9 @@ private
    type Boolean_Array is array (Positive range <>) of Boolean;
 
    type Op_Log (Capacity : Positive) is record
-      Ops   : Op_Array (1 .. Capacity);
-      Count : Natural := 0;
-      GC    : Natural := 0;
+      Ops         : Op_Array (1 .. Capacity);
+      Count       : Natural := 0;
+      GC          : Natural := 0;
       --  Highest Seq each registered peer has confirmed, and which
       --  slots are registered.  Causal-history purge uses the minimum
       --  over registered peers as the purge frontier.  A peer becomes

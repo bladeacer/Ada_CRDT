@@ -237,3 +237,36 @@ integer fields from legacy streams.
 **Source:** `src/serialization/crdt-serialization-legacy.ads`
 
 **Derived LLRs:** LLR-PROTO-LEGACY
+
+---
+
+## HLR-SEC-SHA256  --  SHA-256 Hash
+Provide the FIPS 180-4 SHA-256 hash with one-shot and streaming
+(Init/Update/Final) interfaces, for payload integrity and as the hash
+function of the HMAC and LMS layers.
+
+**Source:** `src/security/crdt-security-sha256.ads`, `src/security/crdt-security.ads`
+
+**Derived LLRs:** LLR-SEC-SHA256
+
+---
+
+## HLR-SEC-HMAC  --  HMAC-SHA-256 Authentication
+Compute HMAC-SHA-256 authentication tags over a shared symmetric key and
+compare tags in constant time, so replicas can authenticate state and
+sync payloads between peers.
+
+**Source:** `src/security/crdt-security-hmac.ads`, `src/security/crdt-security.ads`
+
+**Derived LLRs:** LLR-SEC-HMAC
+
+---
+
+## HLR-SEC-LMS  --  Post-Quantum LMS Verification
+Verify LM-OTS and LMS hash-based signatures (RFC 8554, NIST SP 800-208)
+against a public key before a merge is accepted.  Verification only by
+design: the library never holds signing key state.
+
+**Source:** `src/security/crdt-security-lms.ads`, `src/security/crdt-security.ads`
+
+**Derived LLRs:** LLR-SEC-LMS

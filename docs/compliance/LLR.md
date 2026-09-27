@@ -310,3 +310,48 @@ Proof: Verified by round-trip tests
 | `Serialization.Legacy.Read_Natural_V1` | Reads fixed-width Natural via 'Read |
 
 Proof: Verified by round-trip tests
+
+---
+
+## LLR-SEC-SHA256  --  SHA-256 Hash and Streaming
+
+**Parent HLR:** HLR-SEC-SHA256
+
+| Subprogram | Contract Summary |
+|---|---|
+| `SHA256.Init` | Sets the chaining value to Initial_Context |
+| `SHA256.Update` | Buffers and compresses input, 64-bit modular byte counter |
+| `SHA256.Final` | Applies the FIPS 180-4 padding rule and writes the 32-byte digest |
+| `SHA256.Digest` | One-shot hash over a message |
+
+Proof: Postcondition (Init), Depends (Update), full SPARK proof, no heap use
+
+---
+
+## LLR-SEC-HMAC  --  HMAC Tag Compute and Compare
+
+**Parent HLR:** HLR-SEC-HMAC
+
+| Subprogram | Contract Summary |
+|---|---|
+| `HMAC.Compute` | RFC 2104 two-pass hash over key and message |
+| `HMAC.Equal` | Constant-time tag comparison with a full functional postcondition |
+
+Proof: Precondition (Compute), Postcondition (Equal), full SPARK proof
+
+---
+
+## LLR-SEC-LMS  --  LMS Signature Verification
+
+**Parent HLR:** HLR-SEC-LMS
+
+| Subprogram | Contract Summary |
+|---|---|
+| `LMS.Verify_OTS` | Completes the Winternitz chains and compares the OTS public key (RFC 8554 algorithm 4a) |
+| `LMS.Verify` | Checks the typecodes, recomputes the leaf, and walks the Merkle path (RFC 8554 algorithms 4b + 6) |
+| `LMS.Compute_OTS_Public` | Derives the OTS public key from private key elements (reference, RFC 8554 algorithm 1) |
+| `LMS.Hash_LMS_Node` | RFC 8554 node hash with domain separators |
+| `LMS.OTS_Checksum` | LM-OTS checksum (RFC 8554 algorithm 2) |
+| `LMS.Leaf_Hash` / `LMS.Node_Hash` | Merkle leaf and internal node hashes (RFC 8554 section 5.3) |
+
+Proof: Preconditions, full SPARK proof, verified by RFC 8554 and SP 800-208 test vectors

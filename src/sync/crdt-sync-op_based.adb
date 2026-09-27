@@ -82,10 +82,7 @@ is
          if Min_Ack < Natural'Last and then Min_Ack > 0 then
             --  Move the GC watermark forward over the safely
             --  acknowledged prefix (ops are stored in Seq order).
-            while Log.GC < Log.Count
-              and then Log.GC + 1 <= Log.Capacity
-              and then Log.Ops (Log.GC + 1).Seq <= Min_Ack
-            loop
+            while Log.GC < Log.Count and then Log.GC + 1 <= Log.Capacity and then Log.Ops (Log.GC + 1).Seq <= Min_Ack loop
                Log.GC := Log.GC + 1;
             end loop;
          end if;
@@ -109,10 +106,7 @@ is
       end loop;
       if Min_Ack < Natural'Last and then Min_Ack > 0 then
          --  Release the prefix at or below the frontier.
-         while Log.GC < Log.Count
-           and then Log.GC + 1 <= Log.Capacity
-           and then Log.Ops (Log.GC + 1).Seq <= Min_Ack
-         loop
+         while Log.GC < Log.Count and then Log.GC + 1 <= Log.Capacity and then Log.Ops (Log.GC + 1).Seq <= Min_Ack loop
             Log.GC := Log.GC + 1;
          end loop;
       end if;

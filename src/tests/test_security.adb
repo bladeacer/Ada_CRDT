@@ -14,14 +14,11 @@ package body Test_Security is
 
    --  Hex constant helper: parse an ASCII hex string to bytes.
    function Hex (S : String) return Ada.Streams.Stream_Element_Array is
-      function Nybble (C : Character) return Ada.Streams.Stream_Element is
-         (case C is
-            when '0' .. '9' =>
-              Character'Pos (C) - Character'Pos ('0'),
-            when 'a' .. 'f' =>
-              Character'Pos (C) - Character'Pos ('a') + 10,
-            when others     =>
-              Character'Pos (C) - Character'Pos ('A') + 10);
+      function Nybble (C : Character) return Ada.Streams.Stream_Element
+      is (case C is
+            when '0' .. '9' => Character'Pos (C) - Character'Pos ('0'),
+            when 'a' .. 'f' => Character'Pos (C) - Character'Pos ('a') + 10,
+            when others     => Character'Pos (C) - Character'Pos ('A') + 10);
       Off : Natural := S'First;
    begin
       return R : Ada.Streams.Stream_Element_Array (1 .. S'Length / 2) do
@@ -35,13 +32,11 @@ package body Test_Security is
 
    function Img (B : Ada.Streams.Stream_Element_Array) return String is
       Hex_Digits : constant String := "0123456789abcdef";
-      R : String (1 .. 2 * Integer (B'Length));
+      R          : String (1 .. 2 * Integer (B'Length));
    begin
       for I in B'Range loop
-         R (2 * (Integer (I) - Integer (B'First)) + 1) :=
-           Hex_Digits (Natural (B (I)) / 16 + 1);
-         R (2 * (Integer (I) - Integer (B'First)) + 2) :=
-           Hex_Digits (Natural (B (I)) mod 16 + 1);
+         R (2 * (Integer (I) - Integer (B'First)) + 1) := Hex_Digits (Natural (B (I)) / 16 + 1);
+         R (2 * (Integer (I) - Integer (B'First)) + 2) := Hex_Digits (Natural (B (I)) mod 16 + 1);
          pragma Loop_Invariant (True);
       end loop;
       return R;
@@ -64,28 +59,18 @@ package body Test_Security is
 
          --  FIPS 180-4 test vectors.
          Digest (Hex (""), D);
-         RunR.Check
-           (Img (D) = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-            "SHA-256 empty message matches FIPS 180-4 vector");
+         RunR.Check (Img (D) = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "SHA-256 empty message matches FIPS 180-4 vector");
 
          Digest (Hex ("61"), D);  --  "a"
-         RunR.Check
-           (Img (D) = "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb",
-            "SHA-256 single byte matches FIPS 180-4 vector");
+         RunR.Check (Img (D) = "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb", "SHA-256 single byte matches FIPS 180-4 vector");
 
          Digest (Hex ("616263"), D);  --  "abc"
-         RunR.Check
-           (Img (D) = "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
-            "SHA-256 ""abc"" matches FIPS 180-4 vector");
+         RunR.Check (Img (D) = "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", "SHA-256 ""abc"" matches FIPS 180-4 vector");
 
          --  56-byte message crosses the two-block padding boundary.
          --  "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq"
-         Digest
-           (Hex ("6162636462636465636465666465666765666768666768696768696a68696a6b696a6b6c6a6b6c6d6b6c6d6e6c6d6e6f6d6e6f706e6f7071"),
-            D);
-         RunR.Check
-           (Img (D) = "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1",
-            "SHA-256 56-byte message matches FIPS 180-4 vector");
+         Digest (Hex ("6162636462636465636465666465666765666768666768696768696a68696a6b696a6b6c6a6b6c6d6b6c6d6e6c6d6e6f6d6e6f706e6f7071"), D);
+         RunR.Check (Img (D) = "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1", "SHA-256 56-byte message matches FIPS 180-4 vector");
 
          --  Streaming form must agree with the one-shot form.
          declare
@@ -111,47 +96,35 @@ package body Test_Security is
       procedure Test_HMAC_Vectors is
          use CRDT.Security.HMAC;
 
-         T : Tag;
-         Key_Short : constant Ada.Streams.Stream_Element_Array :=
-           Hex ("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
-         Data      : constant Ada.Streams.Stream_Element_Array :=
-           Hex ("4869205468657265");  --  "Hi There"
+         T         : Tag;
+         Key_Short : constant Ada.Streams.Stream_Element_Array := Hex ("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
+         Data      : constant Ada.Streams.Stream_Element_Array := Hex ("4869205468657265");  --  "Hi There"
       begin
          New_Line;
          Put_Line ("[Security.HMAC]");
 
          --  RFC 4231 test case 1.
          Compute (Key_Short, Data, T);
-         RunR.Check
-           (Img (T) = "b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7",
-            "HMAC-SHA-256 RFC 4231 case 1");
+         RunR.Check (Img (T) = "b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7", "HMAC-SHA-256 RFC 4231 case 1");
 
          --  RFC 4231 test case 2.
          declare
             Key : constant Ada.Streams.Stream_Element_Array := Hex ("4a656665");
-            Msg : constant Ada.Streams.Stream_Element_Array :=
-              Hex ("7768617420646f2079612077616e7420666f72206e6f7468696e673f");
+            Msg : constant Ada.Streams.Stream_Element_Array := Hex ("7768617420646f2079612077616e7420666f72206e6f7468696e673f");
             T2  : Tag;
          begin
             Compute (Key, Msg, T2);
-            RunR.Check
-              (Img (T2) = "5bdcc146bf60754e6a042426089575c75a003f089d2739839dec58b964ec3843",
-               "HMAC-SHA-256 RFC 4231 case 2");
+            RunR.Check (Img (T2) = "5bdcc146bf60754e6a042426089575c75a003f089d2739839dec58b964ec3843", "HMAC-SHA-256 RFC 4231 case 2");
          end;
 
          --  Long key (131 bytes) must be hashed first (RFC 4231 case 6).
          declare
-            Key : constant Ada.Streams.Stream_Element_Array (1 .. 131) :=
-              (others => 16#AA#);
-            Msg : constant Ada.Streams.Stream_Element_Array :=
-              Hex ("54657374205573696e67204c6172676572205468616e20426c6f636b2d"
-                   & "53697a65204b6579202d2048617368204b6579204669727374");
+            Key : constant Ada.Streams.Stream_Element_Array (1 .. 131) := (others => 16#AA#);
+            Msg : constant Ada.Streams.Stream_Element_Array := Hex ("54657374205573696e67204c6172676572205468616e20426c6f636b2d" & "53697a65204b6579202d2048617368204b6579204669727374");
             T3  : Tag;
          begin
             Compute (Key, Msg, T3);
-            RunR.Check
-              (Img (T3) = "60e431591ee0b67f0d8a26aacbf5b77f8e0bc6213728c5140546040f0ee37f54",
-               "HMAC-SHA-256 RFC 4231 case 6 (long key)");
+            RunR.Check (Img (T3) = "60e431591ee0b67f0d8a26aacbf5b77f8e0bc6213728c5140546040f0ee37f54", "HMAC-SHA-256 RFC 4231 case 6 (long key)");
          end;
 
          --  Constant-time comparison.
@@ -206,10 +179,7 @@ package body Test_Security is
 
          --  Sign a message with the deterministic private key.  The
          --  randomiser C is fixed so the test is reproducible.
-         function Make_OTS_Sig
-           (Q : Natural; X : L.OTS_Private_Key;
-            M : Ada.Streams.Stream_Element_Array) return L.OTS_Signature
-         is
+         function Make_OTS_Sig (Q : Natural; X : L.OTS_Private_Key; M : Ada.Streams.Stream_Element_Array) return L.OTS_Signature is
             Sig    : L.OTS_Signature := (others => 0);
             C      : constant L.N_String := (others => 16#42#);
             Ctx    : SHA.Context;
@@ -218,17 +188,19 @@ package body Test_Security is
             Cksm   : Natural;
             Qc     : L.Byte_Array (1 .. L.N_Length + 2);
          begin
-            Sig (1) := 0; Sig (2) := 0;
-            Sig (3) := 0; Sig (4) := L.Byte (L.LMOTS_SHA256_N32_W8);
+            Sig (1) := 0;
+            Sig (2) := 0;
+            Sig (3) := 0;
+            Sig (4) := L.Byte (L.LMOTS_SHA256_N32_W8);
             Sig (5 .. 4 + L.N_Length) := C;
 
             --  Recompute Q_Hash exactly as the verifier does.
             Pre (1 .. 16) := I;
-            Pre (17) := L.Byte ((Q / 2 ** 24) mod 256);
-            Pre (18) := L.Byte ((Q / 2 ** 16) mod 256);
-            Pre (19) := L.Byte ((Q / 2 ** 8) mod 256);
+            Pre (17) := L.Byte ((Q / 2**24) mod 256);
+            Pre (18) := L.Byte ((Q / 2**16) mod 256);
+            Pre (19) := L.Byte ((Q / 2**8) mod 256);
             Pre (20) := L.Byte (Q mod 256);
-            Pre (21) := L.Byte ((L.D_MESG / 2 ** 8) mod 256);
+            Pre (21) := L.Byte ((L.D_MESG / 2**8) mod 256);
             Pre (22) := L.Byte (L.D_MESG mod 256);
             Pre (23 .. 22 + L.N_Length) := C;
             SHA.Init (Ctx);
@@ -238,30 +210,22 @@ package body Test_Security is
 
             Cksm := L.OTS_Checksum (Q_Hash);
             Qc (1 .. L.N_Length) := Q_Hash;
-            Qc (L.N_Length + 1) := L.Byte ((Cksm / 2 ** 8) mod 256);
+            Qc (L.N_Length + 1) := L.Byte ((Cksm / 2**8) mod 256);
             Qc (L.N_Length + 2) := L.Byte (Cksm mod 256);
 
             for J in 0 .. L.P - 1 loop
                declare
-                  A : constant Natural :=
-                    Natural (Qc (Qc'First + Ada.Streams.Stream_Element_Offset (J)));
+                  A : constant Natural := Natural (Qc (Qc'First + Ada.Streams.Stream_Element_Offset (J)));
                   Z : L.N_String := X (J);
                begin
                   declare
-                     U32 : constant L.Byte_Array (1 .. 4) :=
-                       (L.Byte ((Q / 2 ** 24) mod 256),
-                        L.Byte ((Q / 2 ** 16) mod 256),
-                        L.Byte ((Q / 2 ** 8) mod 256),
-                        L.Byte (Q mod 256));
-                     U16 : constant L.Byte_Array (1 .. 2) :=
-                       (L.Byte ((J / 2 ** 8) mod 256),
-                        L.Byte (J mod 256));
+                     U32 : constant L.Byte_Array (1 .. 4) := (L.Byte ((Q / 2**24) mod 256), L.Byte ((Q / 2**16) mod 256), L.Byte ((Q / 2**8) mod 256), L.Byte (Q mod 256));
+                     U16 : constant L.Byte_Array (1 .. 2) := (L.Byte ((J / 2**8) mod 256), L.Byte (J mod 256));
                   begin
                      for Step in 1 .. A loop
                         declare
                            Ctx : SHA.Context;
-                           U8  : constant L.Byte_Array (1 .. 1) :=
-                             (1 => L.Byte (Step mod 256));
+                           U8  : constant L.Byte_Array (1 .. 1) := (1 => L.Byte (Step mod 256));
                         begin
                            SHA.Init (Ctx);
                            SHA.Update (Ctx, I);
@@ -274,8 +238,7 @@ package body Test_Security is
                         pragma Loop_Invariant (True);
                      end loop;
                   end;
-                  Sig (Ada.Streams.Stream_Element_Offset (5 + L.N_Length + J * L.N_Length)
-                       .. Ada.Streams.Stream_Element_Offset (4 + L.N_Length + (J + 1) * L.N_Length)) := Z;
+                  Sig (Ada.Streams.Stream_Element_Offset (5 + L.N_Length + J * L.N_Length) .. Ada.Streams.Stream_Element_Offset (4 + L.N_Length + (J + 1) * L.N_Length)) := Z;
                end;
                pragma Loop_Invariant (True);
             end loop;
@@ -306,8 +269,7 @@ package body Test_Security is
          end Make_Pub;
 
          Pub : constant L.Public_Key := Make_Pub;
-         K0  : constant L.N_String :=
-           L.Compute_OTS_Public (I, 0, Make_Priv (0));
+         K0  : constant L.N_String := L.Compute_OTS_Public (I, 0, Make_Priv (0));
          M   : constant Ada.Streams.Stream_Element_Array := Hex ("68656c6c6f");
          Sig : L.OTS_Signature;
 
@@ -317,15 +279,13 @@ package body Test_Security is
 
          --  Round trip: sign with leaf 0, verify against the public key.
          Sig := Make_OTS_Sig (0, Make_Priv (0), M);
-         RunR.Check (L.Verify_OTS (L.LMOTS_SHA256_N32_W8, I, 0, M, Sig, K0),
-                     "LMS: valid OTS signature verifies");
+         RunR.Check (L.Verify_OTS (L.LMOTS_SHA256_N32_W8, I, 0, M, Sig, K0), "LMS: valid OTS signature verifies");
 
          --  Tampered message must fail.
          declare
             M2 : constant Ada.Streams.Stream_Element_Array := Hex ("68656c6c69");
          begin
-            RunR.Check (not L.Verify_OTS (L.LMOTS_SHA256_N32_W8, I, 0, M2, Sig, K0),
-                        "LMS: tampered message fails OTS verification");
+            RunR.Check (not L.Verify_OTS (L.LMOTS_SHA256_N32_W8, I, 0, M2, Sig, K0), "LMS: tampered message fails OTS verification");
          end;
 
          --  Tampered signature byte must fail.
@@ -333,20 +293,17 @@ package body Test_Security is
             Bad : L.OTS_Signature := Sig;
          begin
             Bad (Bad'First + 100) := Bad (Bad'First + 100) xor 1;
-            RunR.Check (not L.Verify_OTS (L.LMOTS_SHA256_N32_W8, I, 0, M, Bad, K0),
-                        "LMS: tampered signature fails OTS verification");
+            RunR.Check (not L.Verify_OTS (L.LMOTS_SHA256_N32_W8, I, 0, M, Bad, K0), "LMS: tampered signature fails OTS verification");
          end;
 
          --  Wrong leaf number must fail (signature bound to q = 0).
-         RunR.Check (not L.Verify_OTS (L.LMOTS_SHA256_N32_W8, I, 1, M, Sig, K0),
-                     "LMS: wrong leaf number fails OTS verification");
+         RunR.Check (not L.Verify_OTS (L.LMOTS_SHA256_N32_W8, I, 1, M, Sig, K0), "LMS: wrong leaf number fails OTS verification");
 
          --  Wrong tree identifier must fail.
          declare
             I2 : constant L.Byte_Array (1 .. 16) := (others => 16#5A#);
          begin
-            RunR.Check (not L.Verify_OTS (L.LMOTS_SHA256_N32_W8, I2, 0, M, Sig, K0),
-                        "LMS: wrong tree identifier fails OTS verification");
+            RunR.Check (not L.Verify_OTS (L.LMOTS_SHA256_N32_W8, I2, 0, M, Sig, K0), "LMS: wrong tree identifier fails OTS verification");
          end;
 
          Put_Line ("[Security.LMS] done.");

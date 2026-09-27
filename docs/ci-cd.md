@@ -22,7 +22,7 @@ Runs on every push to `main` and every pull request.
   valid when the checked-out repository is adacovex (self-assessment).
   Otherwise it runs `alr build` on this project without producing a
   `bin/adacovex`.
-- **native-tests** -- `alr build` + `./test_crdt` (the 10290-test native
+- **native-tests** -- `alr build` + `./test_crdt` (the 10332-test native
   suite).
 - **spark-off-check** -- This is a pure-static gate (Python 3 only, no
   Alire/toolchain). Run `make spark-off-check`. It fails when any

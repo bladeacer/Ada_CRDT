@@ -128,7 +128,7 @@ All core specs use `SPARK_Mode` (On) at package level. The following packages ha
 
 ## Public vs Private Interface Count
 
-- Public subprograms: **184**
+- Public subprograms: **189**
 - Private subprograms: **24**
 
 ### Per-package breakdown
@@ -150,8 +150,9 @@ All core specs use `SPARK_Mode` (On) at package level. The following packages ha
   - `src/core/crdt-core.ads`: 6 subprograms
   - `src/core/crdt-hlc.ads`: 4 subprograms
   - `src/security/crdt-security-hmac.ads`: 2 subprograms
-  - `src/security/crdt-security-lms.ads`: 2 subprograms
+  - `src/security/crdt-security-lms.ads`: 7 subprograms
   - `src/security/crdt-security-sha256.ads`: 6 subprograms
+  - `src/security/crdt-security.ads`: 0 subprograms
   - `src/sequences/crdt-sequences-fugue.ads`: 17 subprograms
   - `src/sequences/crdt-sequences-naive.ads`: 18 subprograms
   - `src/sequences/crdt-sequences-yjs.ads`: 19 subprograms
@@ -183,6 +184,7 @@ All core specs use `SPARK_Mode` (On) at package level. The following packages ha
   - `src/security/crdt-security-hmac.ads`: 0 subprograms
   - `src/security/crdt-security-lms.ads`: 0 subprograms
   - `src/security/crdt-security-sha256.ads`: 0 subprograms
+  - `src/security/crdt-security.ads`: 0 subprograms
   - `src/sequences/crdt-sequences-fugue.ads`: 0 subprograms
   - `src/sequences/crdt-sequences-naive.ads`: 2 subprograms
   - `src/sequences/crdt-sequences-yjs.ads`: 0 subprograms

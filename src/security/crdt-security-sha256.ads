@@ -46,7 +46,7 @@ is
    --  @param Ctx    Context to update.
    --  @param Bytes  Input bytes.
    procedure Update (Ctx : in out Context; Bytes : Byte_Array)
-   with Depends => (Ctx =>+ Bytes);
+   with Depends => (Ctx => +Bytes);
 
    --  Finish the stream and write the 32-byte digest.
    --  @param Ctx    Context to finish.
@@ -66,7 +66,7 @@ private
    --  counter wraps instead of overflowing, which matches the
    --  FIPS 180-4 padding rule: the encoded bit count is the message
    --  length modulo 2**64.
-   type Count is mod 2 ** 64;
+   type Count is mod 2**64;
 
    --  Number of bytes held in the partial block buffer.  The subtype
    --  bounds it to a partial block, so every pad-length computation
@@ -78,9 +78,7 @@ private
    type Byte_Array_64 is array (1 .. Block_Length) of Byte;
 
    type Context is record
-      H    : Word_Array_8 := (16#6A09E667#, 16#BB67AE85#, 16#3C6EF372#,
-                              16#A54FF53A#, 16#510E527F#, 16#9B05688C#,
-                              16#1F83D9AB#, 16#5BE0CD19#);
+      H    : Word_Array_8 := (16#6A09E667#, 16#BB67AE85#, 16#3C6EF372#, 16#A54FF53A#, 16#510E527F#, 16#9B05688C#, 16#1F83D9AB#, 16#5BE0CD19#);
       Len  : Count := 0;
       Buf  : Byte_Array_64 := (others => 0);
       BufN : Buf_Count := 0;

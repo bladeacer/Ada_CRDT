@@ -87,11 +87,7 @@ is
    --  @param D    Two-byte domain separator.
    --  @param Rest Chained value.
    --  @return The next chain element.
-   function Hash_LMS_Node
-     (I    : Byte_Array;
-      R    : Natural;
-      D    : Natural;
-      Rest : Byte_Array) return N_String
+   function Hash_LMS_Node (I : Byte_Array; R : Natural; D : Natural; Rest : Byte_Array) return N_String
    with Pre => I'Length = 16;
 
    --  LM-OTS checksum of a message hash (RFC 8554 algorithm 2).
@@ -105,11 +101,8 @@ is
    --  @param Q  Leaf number.
    --  @param X  Private key elements.
    --  @return The OTS public key K.
-   function Compute_OTS_Public
-     (I : Byte_Array;
-      Q : Natural;
-      X : OTS_Private_Key) return N_String
-   with Pre => I'Length = 16 and then Q <= 2 ** 31 - 1;
+   function Compute_OTS_Public (I : Byte_Array; Q : Natural; X : OTS_Private_Key) return N_String
+   with Pre => I'Length = 16 and then Q <= 2**31 - 1;
 
    --  LMS leaf hash T (2^h + q) = H (... || D_LEAF || OTS_K)
    --  (RFC 8554 section 5.3).
@@ -117,11 +110,8 @@ is
    --  @param Q      Leaf number.
    --  @param OTS_K  OTS public key for that leaf.
    --  @return The leaf node value.
-   function Leaf_Hash
-     (I     : Byte_Array;
-      Q     : Natural;
-      OTS_K : N_String) return N_String
-   with Pre => I'Length = 16 and then Q < 2 ** H;
+   function Leaf_Hash (I : Byte_Array; Q : Natural; OTS_K : N_String) return N_String
+   with Pre => I'Length = 16 and then Q < 2**H;
 
    --  LMS internal node hash
    --  T (r) = H (... || D_INTR || T (2r) || T (2r+1)) (RFC 8554 section 5.3).
@@ -130,12 +120,8 @@ is
    --  @param Left      Left child value.
    --  @param Right     Right child value.
    --  @return The internal node value.
-   function Node_Hash
-     (I        : Byte_Array;
-      Node_Num : Natural;
-      Left     : N_String;
-      Right    : N_String) return N_String
-   with Pre => I'Length = 16 and then Node_Num in 1 .. 2 ** H - 1;
+   function Node_Hash (I : Byte_Array; Node_Num : Natural; Left : N_String; Right : N_String) return N_String
+   with Pre => I'Length = 16 and then Node_Num in 1 .. 2**H - 1;
 
    --  Verify an LM-OTS one-time signature against the expected OTS
    --  public key (RFC 8554 algorithm 4a).
@@ -146,14 +132,8 @@ is
    --  @param Sig         LM-OTS signature.
    --  @param Expected_K  Expected OTS public key K for this leaf.
    --  @return True when the signature completes to Expected_K.
-   function Verify_OTS
-     (Pub_Type   : Natural;
-      I          : Byte_Array;
-      Q          : Natural;
-      Message    : Byte_Array;
-      Sig        : OTS_Signature;
-      Expected_K : N_String) return Boolean
-   with Pre => I'Length = 16 and then Q <= 2 ** 31 - 1;
+   function Verify_OTS (Pub_Type : Natural; I : Byte_Array; Q : Natural; Message : Byte_Array; Sig : OTS_Signature; Expected_K : N_String) return Boolean
+   with Pre => I'Length = 16 and then Q <= 2**31 - 1;
 
    --  Verify an LMS signature over a message with a public key
    --  (RFC 8554 algorithms 4b + 6).
@@ -161,9 +141,6 @@ is
    --  @param Message  Signed message bytes.
    --  @param Sig      LMS signature.
    --  @return True when the signature is valid for this key.
-   function Verify
-     (Pub     : Public_Key;
-      Message : Byte_Array;
-      Sig     : LMS_Signature) return Boolean;
+   function Verify (Pub : Public_Key; Message : Byte_Array; Sig : LMS_Signature) return Boolean;
 
 end CRDT.Security.LMS;

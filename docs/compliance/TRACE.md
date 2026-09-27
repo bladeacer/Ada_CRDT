@@ -30,3 +30,6 @@ source is the HLR tags in `.ads` files plus the LLR mapping in `LLR.md`.
 | HLR-PROTO-HEADER | `src/serialization/crdt-serialization.ads` |
 | HLR-PROTO-DISPATCH | `src/serialization/crdt-serialization.ads` |
 | HLR-PROTO-LEGACY | `src/serialization/crdt-serialization-legacy.ads` |
+| HLR-SEC-SHA256 | `src/security/crdt-security-sha256.ads`, `src/security/crdt-security.ads` |
+| HLR-SEC-HMAC | `src/security/crdt-security-hmac.ads`, `src/security/crdt-security.ads` |
+| HLR-SEC-LMS | `src/security/crdt-security-lms.ads`, `src/security/crdt-security.ads` |

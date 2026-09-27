@@ -22,6 +22,8 @@ COMPONENTS = [
     ("Clock strategies", "crdt-clocks"),
     ("State-based sync", "crdt-sync-state_based"),
     ("Op-based sync", "crdt-sync-op_based"),
+    ("Sequence engines", "crdt-sequences"),
+    ("Post-quantum security", "crdt-security"),
     ("Thread-safe wrappers", "crdt-protected"),
     ("Bounded wrappers", "crdt-bounded"),
     ("HLC", "crdt-hlc"),

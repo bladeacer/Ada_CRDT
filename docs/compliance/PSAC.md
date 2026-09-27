@@ -62,7 +62,7 @@ The project follows a V-style life cycle tailored for a library crate:
 3.  **Design and implementation**: The package specs contain Ada 2012 code
     with SPARK contracts (pre/post, depends, type invariants).
 4.  **Verification**: Formal proof with GNATprove (primary evidence) plus
-    a runtime test harness (10290 test cases across 9 categories).
+    a runtime test harness (10332 test cases across 10 categories).
 5.  **Release**: Versioned changelogs, tag-based releases, and automated
     compliance checks via the Makefile.
 
@@ -136,9 +136,9 @@ where the toolchain allows.
 ### 6.2 Runtime Testing
 
 - The test harness (`src/tests/`, driven by `src/tests/test_crdt.adb`) runs
-  10290 test cases. The cases span 9 categories: basic, clocks, lattice
-  properties, RGA features, serialization, engines, convergence, fuzz, and
-  Game of Life.
+  10332 test cases. The cases span 10 categories: basic, clocks, lattice
+  properties, RGA features, serialization, engines, convergence, fuzz,
+  Game of Life, and security.
 - Test modules follow a common runner pattern (`RunR.Check`). They use no
   external test framework. The results are written to `test_result.md`.
 - Fuzz and partition tests exercise convergence and serialization under

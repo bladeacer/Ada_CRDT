@@ -17,15 +17,23 @@ technical word in any doc, docstring, or changelog.
 
 ## Using CRDT
 
-- [API reference](api-docs/index.md) -- the generated package
-  documentation. It covers all public and private entities.
-- [Engine comparison](engine-comparison.md) -- how the Yjs, Naive, and
+- [Usage guide](usage/index.md) -- the self-contained user guide. Start at
+  [Getting started](usage/getting-started.md).
+- [Sequence engines](usage/engines.md) -- how to pick and run the Yjs, Naive,
+  and Fugue engines, and their garbage-collection behaviour.
+- [Engine comparison](usage/engine-comparison.md) -- how the Yjs, Naive, and
   Fugue sequence engines compare with the upstream Yjs and Automerge
   designs, and which robustness gaps remain.
-- [Clock strategies](clock-strategies.md) -- Lamport, Vector, and Matrix
-  clocks, the uniform interface, and how to pick a default.
-- [Post-quantum security](security.md) -- the SHA-256, HMAC, and LMS
+- [Clock strategies](usage/clock-strategies.md) -- Lamport, Vector, and
+  Matrix clocks, the uniform interface, and how to pick a default.
+- [Sync layers](usage/sync.md) -- state-based versus operation-based sync,
+  and the acknowledgement and purge lifecycle for op logs.
+- [Serialization](usage/serialization.md) -- the V1/V2/V3 wire formats and
+  the migration helpers.
+- [Security](usage/security.md) -- the SHA-256, HMAC, and LMS
   signature packages and how to verify signed replica state.
+- [API reference](api-docs/index.md) -- the generated package
+  documentation. It covers all public and private entities.
 
 ## Maintainer references
 
@@ -50,10 +58,15 @@ generated API reference with `make doc`.
 :maxdepth: 1
 :hidden:
 
+usage/index
+usage/getting-started
+usage/engines
+usage/clock-strategies
+usage/sync
+usage/serialization
+usage/security
+usage/engine-comparison
 api-docs/index
-engine-comparison
-clock-strategies
-security
 ```
 
 ```{toctree}

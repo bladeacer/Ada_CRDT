@@ -17,3 +17,12 @@ The Yjs chunk engine follows the design of the Yjs project's sequence type. The
 Fugue binary-search-tree engine follows the Fugue anti-interleaving algorithm.
 Neither project's source code is vendored; only the algorithms inform the
 design.
+
+## Cryptographic specification references
+
+The `CRDT.Security` layer implements published cryptographic specifications:
+FIPS 180-4 for SHA-256, RFC 2104 for HMAC-SHA-256, and RFC 8554 with NIST
+SP 800-208 for the LM-OTS/LMS signature verification. RFC 4231 supplies the
+HMAC test vectors in the test suite. The project includes no code from these
+documents; see `docs/THIRD_PARTY_NOTICES.md` for the full notice and the role
+of each specification.

@@ -109,8 +109,10 @@ begin
    Write_Row (Standard_Output, "Security", R_Security, "sha256+hmac+lms");
    HR;
 
-   Total_Passed := R_Basic.Passed + R_Clocks.Passed + R_Lattice.Passed + R_RGA_Features.Passed + R_Serialization.Passed + R_Engines.Passed + R_Convergence.Passed + R_Fuzz.Passed + R_GoL.Passed + R_Security.Passed;
-   Total_Failed := R_Basic.Failed + R_Clocks.Failed + R_Lattice.Failed + R_RGA_Features.Failed + R_Serialization.Failed + R_Engines.Failed + R_Convergence.Failed + R_Fuzz.Failed + R_GoL.Failed + R_Security.Failed;
+   Total_Passed :=
+     R_Basic.Passed + R_Clocks.Passed + R_Lattice.Passed + R_RGA_Features.Passed + R_Serialization.Passed + R_Engines.Passed + R_Convergence.Passed + R_Fuzz.Passed + R_GoL.Passed + R_Security.Passed;
+   Total_Failed :=
+     R_Basic.Failed + R_Clocks.Failed + R_Lattice.Failed + R_RGA_Features.Failed + R_Serialization.Failed + R_Engines.Failed + R_Convergence.Failed + R_Fuzz.Failed + R_GoL.Failed + R_Security.Failed;
 
    --  Also write to file for README integration
    declare

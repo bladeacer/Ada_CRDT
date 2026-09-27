@@ -33,10 +33,7 @@ is
    --                  size is hashed first per RFC 2104).
    --  @param Message  Bytes to authenticate.
    --  @param Out_Tag  32-byte authentication tag.
-   procedure Compute
-     (Key     : Byte_Array;
-      Message : Byte_Array;
-      Out_Tag : out Tag)
+   procedure Compute (Key : Byte_Array; Message : Byte_Array; Out_Tag : out Tag)
    with Pre => Key'Length > 0;
 
    --  Constant-time tag comparison.
@@ -46,7 +43,6 @@ is
    --  @param Right  Expected tag.
    --  @return True when both tags are identical.
    function Equal (Left, Right : Tag) return Boolean
-   with Post =>
-     Equal'Result = (for all I in Tag'Range => Left (I) = Right (I));
+   with Post => Equal'Result = (for all I in Tag'Range => Left (I) = Right (I));
 
 end CRDT.Security.HMAC;
