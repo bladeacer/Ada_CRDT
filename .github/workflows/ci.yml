@@ -8,10 +8,17 @@ on:
 permissions:
   contents: read
 
+# Superseded runs are cancelled: a push that lands while a pull request is
+# open makes the pull-request run obsolete, and a proof run costs minutes.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   assessment:
     name: SPARK proof + assessment (DAL-C)
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v7
       # build: false downloads the adacovex release binary. `build: true` is
@@ -28,29 +35,61 @@ jobs:
           # Loop unrolling off: keeps GNATprove's purely-informational
           # "cannot unroll loop (too many loop iterations)" notices out of
           # the log (Find_Actor / Value / LEB128 and the generic
-          # instantiations emit them); proof-neutral: 589/589 VCs proved.
+          # instantiations emit them); proof-neutral: 972/972 VCs proved.
           prove-no-loop-unrolling: true
           # Quiet (benign-info suppression) is the default; CI passes
           # --verbose so its output stays authoritative.
           verbose: true
+          # The same thresholds release.yml enforces. Without them the
+          # assessment only reports: a dropped docstring, a lower SPARK
+          # level, an unproved check, or a lost test would pass CI and
+          # surface for the first time on a release tag.
+          require-spark: Platinum
+          require-docstrings: 100
+          require-tests: 10332
+          require-proof: 100
 
   native-tests:
     name: Build + native test suite
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
       - uses: alire-project/setup-alire@latest
         with:
           version: '2.1.1'
           toolchain: 'gnat_native=15.2.1 gprbuild'
+          cache: true
       - name: Build
         run: alr build
       - name: Run test suite
         run: ./test_crdt
 
+  static-gates:
+    # Pure-Python gates (no Alire, no toolchain): charset, prose rules,
+    # changelog format, link resolution, and the generated doc-links block.
+    # `make check` runs the same set, but only locally; this job keeps a
+    # contributor from merging prose that fails the gate.
+    name: Static documentation gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - name: ASCII charset
+        run: make ascii-check
+      - name: Changelog format
+        run: make changelog-check
+      - name: Link and anchor resolution
+        run: make link-check
+      - name: Prose rules (paragraph, spacing, em dash, line cap)
+        run: make docs-check
+      - name: AGENTS.md doc-links block in sync
+        run: python3 tools/update-doc-links.py --check
+
   spark-off-check:
     name: SPARK_Mode Off verification
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v7
       # Pure-static gate (Python 3 only, no Alire/toolchain): every
@@ -60,12 +99,18 @@ jobs:
         run: make spark-off-check
 
   coverage-gate:
+    # Release baseline: docstring coverage against the last release tag. The
+    # per-PR delta against the base commit lives in pr-check.yml, so running
+    # both on a pull request would assess the same regression twice.
     name: Docstring coverage gate (vs last release tag)
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          fetch-tags: true
       - name: Resolve previous release tag
         id: prev-tag
         run: |
@@ -85,3 +130,44 @@ jobs:
           gnat-version: 15.2.1
           build: false
           coverage-delta: ${{ steps.prev-tag.outputs.prev }}
+
+  summary:
+    name: CI summary
+    if: always()
+    needs: [assessment, native-tests, static-gates, spark-off-check, coverage-gate]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Write CI summary
+        shell: bash
+        env:
+          ASSESS: ${{ needs.assessment.result }}
+          TESTS: ${{ needs.native-tests.result }}
+          STATIC: ${{ needs.static-gates.result }}
+          OFFOFF: ${{ needs.spark-off-check.result }}
+          GATE: ${{ needs.coverage-gate.result }}
+        run: |
+          set -euo pipefail
+          FAILED=0
+          {
+            echo '## CI summary'
+            echo ''
+            echo '| Job | Result |'
+            echo '|-----|--------|'
+            echo "| SPARK proof + assessment (DAL-C) | $ASSESS |"
+            echo "| Build + native test suite | $TESTS |"
+            echo "| Static documentation gates | $STATIC |"
+            echo "| SPARK_Mode Off verification | $OFFOFF |"
+            echo "| Docstring coverage gate (push only) | $GATE |"
+            echo ''
+          } >> "$GITHUB_STEP_SUMMARY"
+          for R in "$ASSESS" "$TESTS" "$STATIC" "$OFFOFF" "$GATE"; do
+            if [ "$R" = "failure" ]; then
+              FAILED=1
+              echo "::error::A CI job failed -- see the failing job logs and its adacovex assessment summary." >&2
+            fi
+          done
+          if [ "$FAILED" -ne 0 ]; then
+            echo '**CI FAILED: one or more jobs did not pass.**' >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          echo 'All CI jobs passed.' >> "$GITHUB_STEP_SUMMARY"

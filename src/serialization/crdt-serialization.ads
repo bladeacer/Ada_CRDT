@@ -1,6 +1,6 @@
 --  Protocol version router and canonical deserialisation dispatcher.
 --  Auto-detect V1, V2, and V3 wire formats by inspecting the first
---  header bytes.  Route the subsequent field reads through the correct decoder.
+--  header bytes. Route the subsequent field reads through the correct decoder.
 --
 --  This allows users of old library versions to serialise data.
 --  Newer library versions can read and auto-migrate it.
@@ -54,7 +54,7 @@ is
    --  Migrate a header from any protocol version to V3.
    --  Read the version-agnostic header from Source and write a
    --  V3-encoded header (version 3 + clock kind + LEB128 Total +
-   --  LEB128 Count) to Dest.  V1/V2 data is auto-detected and
+   --  LEB128 Count) to Dest. V1/V2 data is auto-detected and
    --  promoted to V3, and V3 data passes through with its clock kind
    --  preserved from the source.
    --  After this call Source is positioned after the original header
@@ -78,7 +78,7 @@ is
    --  Migrate a header from any protocol version to V2.
    --  Read the version-agnostic header from Source and write a
    --  V2-encoded header (LEB128 Protocol_Version + LEB128 Total +
-   --  LEB128 Count) to Dest.  After this call:
+   --  LEB128 Count) to Dest. After this call:
    --     * Source is positioned just after the original header
    --     * Dest has a fresh V2 header and is ready for field writes
    --  @param Source  Input stream with V1 or V2 payload.

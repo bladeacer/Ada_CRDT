@@ -1,4 +1,4 @@
-# Engine Comparison
+# Engine comparison with Yjs and Automerge
 
 This page compares the three sequence engines of this library with the
 upstream designs that inspired them: the Yjs project and the Automerge
@@ -87,6 +87,16 @@ Know these limits before you deploy a sequence workload:
 Interleaving is a user-visible defect in collaborative text. Choose Fugue
 for text edit fields where two people type at the same position. Choose Yjs
 for long documents and append-mostly logs, where its chunk compression
-minimises memory. Keep Naive for tests and teaching. All three pass the
+minimises memory. Keep Naive for tests and teaching.
+
+All three pass the
 same convergence tests in this repository, so you can switch engines as your
 workload changes.
+
+## See also
+
+- [Sequence engines](engines.md) -- the engine contract and the selection
+  guidance.
+- [Containers, wrappers, and the hybrid logical clock](containers-and-wrappers.md)
+  -- the bounded wrapper for a sequence.
+- [API reference](../api-docs/crdt-rga.md) -- the engine generic parameters.

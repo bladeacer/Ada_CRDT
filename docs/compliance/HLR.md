@@ -1,3 +1,6 @@
+<!-- no-crdt-docs-loc -->
+<!-- The requirement register: 27 hand-written HLR entries. One entry per
+     requirement is the content, and the traceability gate reads this file. -->
 # High-Level Requirements
 
 ## HLR-CORE-TS  --  Timestamp Operations
@@ -82,7 +85,7 @@ Return the net value (P - N) of a PN-Counter across all replicas.
 
 ## HLR-CNTR-OP  --  PN-Counter Increment/Decrement
 Increment or decrement a PN-Counter by a given amount under a given
-Lamport timestamp.  Track per-replica contributions.
+Lamport timestamp. Track per-replica contributions.
 
 **Source:** `src/crdt-pn_counters.ads`
 
@@ -120,7 +123,7 @@ Query whether an element is present in a Last-Writer-Wins element set
 ---
 
 ## HLR-LWW-ADD  --  LWW Set Add
-Add an element with a Lamport timestamp.  Overwrites any previous
+Add an element with a Lamport timestamp. Overwrites any previous
 add or remove for the same element.
 
 **Source:** `src/crdt-lww_element_sets.ads`
@@ -130,7 +133,7 @@ add or remove for the same element.
 ---
 
 ## HLR-LWW-REMOVE  --  LWW Set Remove
-Remove an element with a Lamport timestamp.  Overwrites any previous
+Remove an element with a Lamport timestamp. Overwrites any previous
 add or remove for the same element.
 
 **Source:** `src/crdt-lww_element_sets.ads`
@@ -161,7 +164,7 @@ and V3 (clock-kind-prefixed LEB128) wire formats with auto-detection on read.
 
 ## HLR-SYNC-OP  --  Operation-Based Sync
 Maintain a bounded operation log with Append, Acknowledge, and Compact
-operations.  Log entries carry Lamport timestamps and are garbage-collected
+operations. Log entries carry Lamport timestamps and are garbage-collected
 when acknowledged by all peers.
 
 **Source:** `src/sync/crdt-sync-op_based.ads`
@@ -182,7 +185,7 @@ compact the log, removing acknowledged entries that are no longer needed.
 
 ## HLR-SYNC-STATE  --  State-Based Sync
 Compare replica states via vector-clock comparison and merge remote
-state into local state.  Supports delta-based partial exchange.
+state into local state. Supports delta-based partial exchange.
 
 **Source:** `src/sync/crdt-sync-state_based.ads`
 
@@ -264,7 +267,7 @@ sync payloads between peers.
 
 ## HLR-SEC-LMS  --  Post-Quantum LMS Verification
 Verify LM-OTS and LMS hash-based signatures (RFC 8554, NIST SP 800-208)
-against a public key before a merge is accepted.  Verification only by
+against a public key before a merge is accepted. Verification only by
 design: the library never holds signing key state.
 
 **Source:** `src/security/crdt-security-lms.ads`, `src/security/crdt-security.ads`

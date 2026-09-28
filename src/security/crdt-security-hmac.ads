@@ -1,8 +1,8 @@
 --  HMAC-SHA-256 message authentication (RFC 2104).
---  Constant-time tag comparison.  No heap use.
+--  Constant-time tag comparison. No heap use.
 --
 --  HMAC authenticates replica state and sync payloads between peers
---  that share a symmetric key (psk-style deployment).  It authenticates
+--  that share a symmetric key (psk-style deployment). It authenticates
 --  but does not prove origin to third parties; use the LMS package for
 --  non-repudiable signatures.
 --

@@ -70,7 +70,7 @@ src/
 |--------|-------------|--------------|
 | `build` | Compile library + tests | `alr build` (filters out `.sframe` linker noise) |
 | `test` | Build + run test suite (fuzz, convergence, GoL included) | `alr build && ./test_crdt` (all tests across 10 categories) |
-| `check` | Pre-commit quality gate (ascii, changelog, links, spark-off, build, tests, SPARK proof, coverage, compliance, description, test-count, proof-status, doc-links) | `ascii-check` + `changelog-check` + `link-check` + `spark-off-check` + `build` + `test` + `prove` + `coverage-gate` + `compliance` + `description` + `test-count` + `proof-status` + `doc-links` in order |
+| `check` | Pre-commit quality gate (ascii, changelog, links, prose, spark-off, build, tests, SPARK proof, coverage, compliance, description, test-count, proof-status, doc-links) | `ascii-check` + `changelog-check` + `link-check` + `docs-check` + `spark-off-check` + `build` + `test` + `prove` + `coverage-gate` + `compliance` + `description` + `test-count` + `proof-status` + `doc-links` in order |
 | `spark-off-check` | Verify every `SPARK_Mode => Off` location is listed in the spark-coverage report | `python3 tools/gen-coverage.py --check` (pure-static, no Alire needed) |
 | `covex` | Ensure the covex (adacovex) dev dependency is built | `alr exec -- adacovex --help`; builds via `alr build` if missing |
 | `prove` | SPARK formal verification + badge regeneration | `adacovex prove --target=. --dal=C --emit-svg=docs/badges/` |
@@ -80,6 +80,7 @@ src/
 | `doc` | Generate Markdown API docs + changelog index | `gnatdoc` -> RST -> `tools/rst2md.py` -> `docs/api-docs/` |
 | `compliance` | DO-178C traceability + Quick Reference link validation + auto-generate report | Scans source HLR tags, validates HLR.md coverage, checks README links, runs verify-report |
 | `link-check` | Verify every markdown link + GitHub-style anchor resolves | `python3 tools/check-links.py` (pure-static, no Alire needed) |
+| `docs-check` | Enforce the prose gate: four-sentence paragraph cap, one space after a sentence, no em dash, no Latin abbreviation, and a soft 250-line cap | `python3 tools/check-docs.py` (pure-static, no Alire needed; `--fix` collapses sentence double spaces, and `tools/para-split.py --fix` inserts the paragraph breaks) |
 | `ascii-check` | Enforce ASCII-only charset across source files | `LC_ALL=C grep` for bytes > 0x7E |
 | `fmt` | Format all Ada sources with gnatformat | `alr exec -- gnatformat -P crdt.gpr -U` (swaps in `alire-dev.toml` automatically) |
 | `release` | Tag + publish new version | Updates metadata, commits, tags, pushes |
@@ -123,7 +124,7 @@ src/
   `gnatdoc_bin`, `gnatformat_bin`, `covex`, and the `test_crdt` executable
   (the test suite binary is a development artifact and is not published)
 - GNAT toolchain managed automatically by Alire
-- Version: defined in `alire.toml` (currently 1.14.0), mirrors in `index/ad/crdt/` and `alire/releases/`
+- Version: defined in `alire.toml` (currently 1.15.0), mirrors in `index/ad/crdt/` and `alire/releases/`
 
 ### Compiler Flags (from `crdt.gpr`)
 
@@ -143,7 +144,7 @@ src/
 | `gnatprove` | `make prove` | Alire dev dependency (`alire-dev.toml`) |
 | `gnatformat_bin` | `make fmt` | Alire dev dependency (`alire-dev.toml`) |
 | `gnatdoc_bin` | `make doc` | Alire dev dependency (`alire-dev.toml`) |
-| Python 3 | `make doc`, `make link-check` | Runs `tools/rst2md.py`, `tools/gen-coverage.py`, and `tools/check-links.py` |
+| Python 3 | `make doc`, `make link-check`, `make docs-check` | Runs `tools/rst2md.py`, `tools/gen-coverage.py`, `tools/check-links.py`, and `tools/check-docs.py` |
 | `sha256sum` | `make verify-report` | Content hashing for deterministic output (part of coreutils) |
 | POSIX tools (sed, awk, grep) | Various Makefile targets | Standard on any Linux system |
 
@@ -295,9 +296,11 @@ CRDT.Clocks.Matrix             -- explicit Matrix strategy
 - Test files are `SPARK_Mode => Off` (test infrastructure is not formally proved)
 - Demo (`demo/demo_life.adb`) is also `SPARK_Mode => Off` by design -- it is
   a terminal application that instantiates generics, not a formal verification
-  target. It covers 3-replica Game of Life synchronization using LWW sets and
-  RGA sequences across all sequence engines (Yjs, Naive, Fugue) and clock
-  strategies (Lamport, Vector, Matrix).
+  target. It covers 3-replica Game of Life synchronization using LWW sets for
+  cell state and Yjs RGA for text rows. `m` toggles the grid between a matrix
+  and a Yjs RGA, and `c` cycles the clock strategy through Lamport, Vector, and
+  Matrix. The Naive and Fugue engines are covered by the test suite, not by the
+  demo.
 
 ### Documentation
 
@@ -363,9 +366,16 @@ third-party attributions.
 - [Sequence engines](docs/usage/engines.md)
 - [Clock strategies](docs/usage/clock-strategies.md)
 - [Sync layers](docs/usage/sync.md)
-- [Serialization](docs/usage/serialization.md)
+- [Serialisation](docs/usage/serialization.md)
 - [Security](docs/usage/security.md)
 - [Engine comparison](docs/usage/engine-comparison.md)
+- [Containers, wrappers, and the hybrid logical clock](docs/usage/containers-and-wrappers.md)
+- [Quality gates and make targets](docs/contributing/quality-gates.md)
+- [AI and LLM usage](docs/contributing/llm-usage.md)
+- [Site transparency](docs/site-transparency.md)
+- [Badges](docs/badges/index.md)
+- [Proof records](docs/proof/index.md)
+- [Proof ledger (gnatprove 16.1.0)](docs/proof/16.1.0-ledger.md)
 - [DO-178C compliance](docs/compliance/index.md)
 - [PSAC (Plan for Software Aspects of Certification)](docs/compliance/PSAC.md)
 - [High-Level Requirements](docs/compliance/HLR.md)
@@ -374,7 +384,6 @@ third-party attributions.
 - [Verification results](docs/compliance/VERIFICATION.md)
 - [Changelogs](docs/changelogs/index.md)
 - [V1->V2 Migration guide](docs/changelogs/crdt-1.4.0-migration.md)
-- [Proof ledger (gnatprove 16.1.0)](docs/proof/16.1.0-ledger.md)
 - [Readme](README.md)
 - [Contributing](CONTRIBUTING.md)
 - [Agent guide](AGENTS.md)

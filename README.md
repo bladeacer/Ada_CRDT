@@ -1,8 +1,12 @@
+<!-- no-crdt-docs-loc -->
+<!-- The project overview: badge set, feature tables, code samples, the
+     quick reference generated from the API docs, and the build table. Its
+     length is that content, not prose that grew by accident. -->
 [![crdt Alire crate badge](https://img.shields.io/endpoint?url=https://alire.ada.dev/badges/crdt.json)](https://alire.ada.dev/crates/crdt)
-![SPARK](docs/badges/spark.svg)
-![DO-178C](docs/badges/do178c.svg)
-![Tests](docs/badges/tests.svg)
-![docs](docs/badges/docs.svg)
+[![SPARK](docs/badges/spark.svg)](https://ada-crdt.readthedocs.io/en/latest/badges/index.html)
+[![DO-178C](docs/badges/do178c.svg)](https://ada-crdt.readthedocs.io/en/latest/badges/index.html)
+[![Tests](docs/badges/tests.svg)](https://ada-crdt.readthedocs.io/en/latest/compliance/VERIFICATION.html)
+[![docs](docs/badges/docs.svg)](https://ada-crdt.readthedocs.io/en/latest/badges/index.html)
 
 ![Ada CRDTs logo](./ada_logo.png)
 
@@ -18,6 +22,14 @@ The canonical repository is on
 because of Codeberg terms-of-service changes on AI-assisted code. We do not
 accept issues or pull requests there. Submit your proposed changes on GitHub
 instead.
+
+The documentation is deployed at
+[ada-crdt.readthedocs.io](https://ada-crdt.readthedocs.io/en/latest/). The site
+carries no tracking script and no cookie, and it shows no paid advertisement
+and no flyout menu. Read the
+[site transparency page](https://ada-crdt.readthedocs.io/en/latest/site-transparency.html)
+for the full statement, including the search box and the hosting provider's
+aggregate page-view counting.
 
 ## LLM Usage disclosure
 
@@ -39,18 +51,18 @@ alr with crdt
 
 | Component | Package | API Docs |
 |-----------|---------|----------|
-| PN-Counter | `CRDT.Pn_Counters` | [docs](docs/api-docs/crdt-pn_counters.md) |
-| LWW Set (Lamport, **deprecated**) | `CRDT.Lww_Element_Sets` | [docs](docs/api-docs/crdt-lww_element_sets.md) |
-| LWW Set (any clock) | `CRDT.Lww_Sets` | [docs](docs/api-docs/crdt-lww_sets.md) |
-| RGA Sequence | `CRDT.Rga` | [docs](docs/api-docs/crdt-rga.md) |
-| Clock strategies | `CRDT.Clocks` | [docs](docs/api-docs/crdt-clocks.md) |
-| State-based sync | `CRDT.Sync.State_Based` | [docs](docs/api-docs/crdt-sync-state_based.md) |
-| Op-based sync | `CRDT.Sync.Op_Based` | [docs](docs/api-docs/crdt-sync-op_based.md) |
-| Sequence engines | `CRDT.Sequences` | [docs](docs/api-docs/crdt-sequences.md) |
-| Post-quantum security | `CRDT.Security` | [docs](docs/api-docs/crdt-security.md) |
-| Thread-safe wrappers | `CRDT.Protected` | [docs](docs/api-docs/crdt-protected.md) |
-| Bounded wrappers | `CRDT.Bounded` | [docs](docs/api-docs/crdt-bounded.md) |
-| HLC | `CRDT.HLC` | [docs](docs/api-docs/crdt-hlc.md) |
+| PN-Counter | `CRDT.Pn_Counters` | [docs](https://ada-crdt.readthedocs.io/en/latest/api-docs/crdt-pn_counters.html) |
+| LWW Set (Lamport, **deprecated**) | `CRDT.Lww_Element_Sets` | [docs](https://ada-crdt.readthedocs.io/en/latest/api-docs/crdt-lww_element_sets.html) |
+| LWW Set (any clock) | `CRDT.Lww_Sets` | [docs](https://ada-crdt.readthedocs.io/en/latest/api-docs/crdt-lww_sets.html) |
+| RGA Sequence | `CRDT.Rga` | [docs](https://ada-crdt.readthedocs.io/en/latest/api-docs/crdt-rga.html) |
+| Clock strategies | `CRDT.Clocks` | [docs](https://ada-crdt.readthedocs.io/en/latest/api-docs/crdt-clocks.html) |
+| State-based sync | `CRDT.Sync.State_Based` | [docs](https://ada-crdt.readthedocs.io/en/latest/api-docs/crdt-sync-state_based.html) |
+| Op-based sync | `CRDT.Sync.Op_Based` | [docs](https://ada-crdt.readthedocs.io/en/latest/api-docs/crdt-sync-op_based.html) |
+| Sequence engines | `CRDT.Sequences` | [docs](https://ada-crdt.readthedocs.io/en/latest/api-docs/crdt-sequences.html) |
+| Post-quantum security | `CRDT.Security` | [docs](https://ada-crdt.readthedocs.io/en/latest/api-docs/crdt-security.html) |
+| Thread-safe wrappers | `CRDT.Protected` | [docs](https://ada-crdt.readthedocs.io/en/latest/api-docs/crdt-protected.html) |
+| Bounded wrappers | `CRDT.Bounded` | [docs](https://ada-crdt.readthedocs.io/en/latest/api-docs/crdt-bounded.html) |
+| HLC | `CRDT.HLC` | [docs](https://ada-crdt.readthedocs.io/en/latest/api-docs/crdt-hlc.html) |
 
 ### Local Index
 
@@ -76,31 +88,49 @@ make test
 
 ## Documentation
 
-Usage guide (self-contained pages, new content, not just API):
-[docs/usage/index.md](docs/usage/index.md). The pages cover
-[getting started](docs/usage/getting-started.md),
-[sequence engines](docs/usage/engines.md),
-[clock strategies](docs/usage/clock-strategies.md),
-[sync layers](docs/usage/sync.md),
-[serialization](docs/usage/serialization.md),
-[security](docs/usage/security.md), and the
-[engine comparison](docs/usage/engine-comparison.md).
+The full index lives at
+[ada-crdt.readthedocs.io](https://ada-crdt.readthedocs.io/en/latest/). Highlights:
 
-Full API reference: [docs/api-docs/index.md](docs/api-docs/index.md)
-The reference is generated from docstring annotations via `make doc`. It covers
-all public and private entities.
+| Reference | Description |
+|-----------|-------------|
+| [Usage guide](https://ada-crdt.readthedocs.io/en/latest/usage/index.html) | Self-contained user guide: engines, clocks, sync, serialisation, security |
+| [Getting started](https://ada-crdt.readthedocs.io/en/latest/usage/getting-started.html) | Install path, first PN-Counter, LWW set, and sync loop |
+| [Sequence engines](https://ada-crdt.readthedocs.io/en/latest/usage/engines.html) | Yjs, Naive, and Fugue engines, and their garbage collection |
+| [Engine comparison](https://ada-crdt.readthedocs.io/en/latest/usage/engine-comparison.html) | Engine robustness against upstream Yjs and Automerge |
+| [Clock strategies](https://ada-crdt.readthedocs.io/en/latest/usage/clock-strategies.html) | Lamport, Vector, and Matrix clocks, and how to pick a default |
+| [Sync layers](https://ada-crdt.readthedocs.io/en/latest/usage/sync.html) | State-based versus operation-based sync, and the op-log lifecycle |
+| [Serialisation](https://ada-crdt.readthedocs.io/en/latest/usage/serialization.html) | The V1, V2, and V3 wire formats, and the migration helpers |
+| [Security](https://ada-crdt.readthedocs.io/en/latest/usage/security.html) | SHA-256, HMAC, and LMS signature verification |
+| [Containers and wrappers](https://ada-crdt.readthedocs.io/en/latest/usage/containers-and-wrappers.html) | Bounded wrappers, protected types, multi-RGA, and the HLC |
+| [API reference](https://ada-crdt.readthedocs.io/en/latest/api-docs/index.html) | Auto-generated package docs, public and private entities |
+| [SPARK coverage](https://ada-crdt.readthedocs.io/en/latest/api-docs/crdt-spark-coverage.html) | Every `SPARK_Mode => Off` location with its justification |
+| [Quality gates](https://ada-crdt.readthedocs.io/en/latest/contributing/quality-gates.html) | Every `make` target and what each gate proves |
+| [AI and LLM usage](https://ada-crdt.readthedocs.io/en/latest/contributing/llm-usage.html) | Disclosure, the evidence, and the bar a change must meet |
+| [DO-178C compliance](https://ada-crdt.readthedocs.io/en/latest/compliance/index.html) | PSAC, HLR, LLR, traceability, and verification results |
+| [Proof records](https://ada-crdt.readthedocs.io/en/latest/proof/index.html) | The verified-condition ledger, and why a unit is skipped |
+| [Site transparency](https://ada-crdt.readthedocs.io/en/latest/site-transparency.html) | Search, traffic analytics, advertising, and the flyout menu |
+| [Changelog](https://ada-crdt.readthedocs.io/en/latest/changelogs/index.html) | Release history |
+| [CI/CD](https://ada-crdt.readthedocs.io/en/latest/ci-cd.html) | The workflows and their local equivalents |
 
-DO-178C compliance artifacts (PSAC, HLR, LLR, traceability):
-[docs/compliance/index.md](docs/compliance/index.md).
+## Badges
 
-CI/CD workflows, jobs, and their local equivalents:
-[docs/ci-cd.md](docs/ci-cd.md).
+The badges above report the current release state, and each badge links to the
+page that carries the full data:
+
+| Badge | Source | What it reports |
+|-------|--------|-----------------|
+| Alire | [the Alire index](https://alire.ada.dev/crates/crdt) | The published crate version on the Alire community index |
+| SPARK | [the badges page](https://ada-crdt.readthedocs.io/en/latest/badges/index.html) | The proof level and the verification-condition counts |
+| DO-178C | [the badges page](https://ada-crdt.readthedocs.io/en/latest/badges/index.html) | The DAL-C assessment result |
+| Tests | [VERIFICATION.md](https://ada-crdt.readthedocs.io/en/latest/compliance/VERIFICATION.html) | The passing test count per category |
+| docs | [the badges page](https://ada-crdt.readthedocs.io/en/latest/badges/index.html) | The docstring coverage of the public subprograms |
 
 ## Upgrading
 
-See [changelogs](docs/changelogs/index.md) and
-[migration guide](docs/changelogs/crdt-1.4.0-migration.md) before bumping
-your `alire.toml` dependency. Wire format is auto-detected (V1/V2/V3).
+See the [changelogs](https://ada-crdt.readthedocs.io/en/latest/changelogs/index.html)
+and the [migration guide](https://ada-crdt.readthedocs.io/en/latest/changelogs/crdt-1.4.0-migration.html)
+before you bump your `alire.toml` dependency. Wire format is auto-detected
+(V1/V2/V3).
 
 ---
 
@@ -109,7 +139,7 @@ your `alire.toml` dependency. Wire format is auto-detected (V1/V2/V3).
 ### PN-Counter (Actor Map)
 
 Per-replica increments/decrements. Fixed memory (3 replicas = 3 slots),
-regardless of op count. See [API docs](docs/api-docs/crdt-pn_counters.md)
+regardless of op count. See [API docs](https://ada-crdt.readthedocs.io/en/latest/api-docs/crdt-pn_counters.html)
 for full interface reference.
 
 ```ada
@@ -129,7 +159,7 @@ Package: `CRDT.Pn_Counters`
 ### LWW-Clocked-Set (any clock strategy)
 
 Last-Writer-Wins set parameterised over any clock strategy
-(Lamport, Vector, or Matrix). See [API docs](docs/api-docs/crdt-lww_sets.md)
+(Lamport, Vector, or Matrix). See [API docs](https://ada-crdt.readthedocs.io/en/latest/api-docs/crdt-lww_sets.html)
 for full interface reference.
 
 ```ada
@@ -155,7 +185,7 @@ Package: `CRDT.Lww_Sets` (generic over any `CRDT.Clocks.*` strategy)
 
 ### RGA Sequence
 
-Three backend engines, same API. See [API docs](docs/api-docs/index.md) for
+Three backend engines, same API. See [API docs](https://ada-crdt.readthedocs.io/en/latest/api-docs/index.html) for
 full details.
 
 ```ada
@@ -200,8 +230,8 @@ package S is new CRDT.Sequences.Naive (Character, 100);
 
 ### Sync Layer
 
-See [API docs](docs/api-docs/crdt-sync-state_based.md) and
-[docs](docs/api-docs/crdt-sync-op_based.md) for full interface reference.
+See [state-based sync](https://ada-crdt.readthedocs.io/en/latest/api-docs/crdt-sync-state_based.html) and
+[op-based sync](https://ada-crdt.readthedocs.io/en/latest/api-docs/crdt-sync-op_based.html) for the full interface reference.
 
 State-based (CvRDT) with delta sync and HLC:
 
@@ -251,6 +281,11 @@ R : Bnd.Sequence;
 | `CRDT.Core` | `Replica_Id`, `Lamport_Time`, `Protocol_Version`, VTime types |
 | `CRDT.HLC` | Hybrid Logical Clock (physical + logical timestamp) |
 | `CRDT.Rgas` | Multi-RGA container |
+| `CRDT.Bounded` | Compile-time bounded wrappers for the containers |
+| `CRDT.Protected` | Thread-safe protected types for the containers |
+
+See [containers, wrappers, and the hybrid logical clock](https://ada-crdt.readthedocs.io/en/latest/usage/containers-and-wrappers.html)
+for when to use each wrapper.
 
 ### HLC Example
 
@@ -312,10 +347,13 @@ rolling upgrades.
 | Command | Action |
 |---------|--------|
 | `make build` | Build library + tests |
-| `make test` | Run test suite (see [test results](test_result.md)) |
+| `make check` | Full pre-commit gate: ascii, changelog, links, prose, SPARK coverage, build, tests, proof, coverage, compliance |
+| `make test` | Run test suite (see [the test results](https://ada-crdt.readthedocs.io/en/latest/compliance/VERIFICATION.html)) |
+| `make docs-check` | Prose gate: paragraph cap, sentence spacing, em dash, Latin abbreviation, line cap |
+| `make link-check` | Verify every markdown link and anchor resolves |
 | `make prove` | SPARK proofs via `alr gnatprove` |
 | `make demo` | Run Conway Game of Life Demo |
-| `make doc` | Generate Markdown API docs (See [API docs](docs/api-docs/index.md) |
+| `make doc` | Generate Markdown API docs (see [the API reference](https://ada-crdt.readthedocs.io/en/latest/api-docs/index.html)) |
 | `make clean` | Remove build artifacts |
 
 Prerequisites: [Alire](https://alire.ada.dev) (manages GNAT automatically),
@@ -345,12 +383,14 @@ Core packages (`CRDT.Core`, `CRDT.Pn_Counters`, `CRDT.Clocks.*`) are
 SPARK-proven at the **Gold** level (Stone + Bronze + Silver + Gold). Current
 proof statistics are auto-generated by `make compliance`. See
 `docs/compliance/VERIFICATION.md`. Generics (Sequences, LWW, RGA) depend on
-their instantiations. Platform dependencies (wall clock, RNG, stream I/O) are
+their instantiations.
+
+Platform dependencies (wall clock, RNG, stream I/O) are
 excluded from formal proof. Runtime assertions (`-gnata`) give defensive
 coverage for generic bodies.
 
 SPARK_Mode coverage (every `SPARK_Mode => Off` location with justification):
-[docs/api-docs/crdt-spark-coverage.md](docs/api-docs/crdt-spark-coverage.md).
+[the SPARK coverage page](https://ada-crdt.readthedocs.io/en/latest/api-docs/crdt-spark-coverage.html).
 
 ---
 
@@ -393,6 +433,11 @@ We welcome contributions. Please read our
 [Code of Conduct](./CODE_OF_CONDUCT.md) before you open an issue or pull
 request. Use the issue templates in `.github/ISSUE_TEMPLATE/` for bug reports,
 feature requests, and security reports.
+
+The [quality gates page](https://ada-crdt.readthedocs.io/en/latest/contributing/quality-gates.html)
+lists every `make` target and what each gate proves, and the
+[AI and LLM usage page](https://ada-crdt.readthedocs.io/en/latest/contributing/llm-usage.html)
+states the disclosure and the bar a generated change must meet.
 
 ## License
 

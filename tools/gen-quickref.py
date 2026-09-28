@@ -6,6 +6,11 @@ line is the package name (`# CRDT.X`). This script rewrites the
 `### Quick Reference` table in README.md from those files, so the table
 cannot drift from the generated docs. Run via `make doc` (api-docs target).
 Exits non-zero if a referenced API doc is missing or lacks a package header.
+
+The table links to the deployed Read the Docs site, not to the repository
+paths. The badge image column stays on the relative path, because the SVG
+files are not part of the Sphinx build and are not served from the deployed
+site.
 """
 
 import os
@@ -13,6 +18,7 @@ import sys
 
 README = "README.md"
 API_DIR = "docs/api-docs"
+DOCS_BASE = "https://ada-crdt.readthedocs.io/en/latest"
 
 COMPONENTS = [
     ("PN-Counter", "crdt-pn_counters"),
@@ -52,7 +58,10 @@ def fill_table():
         if not os.path.isfile(os.path.join(API_DIR, stem + ".md")):
             sys.stderr.write("gen-quickref: missing %s/%s.md\n" % (API_DIR, stem))
             sys.exit(1)
-        lines.append("| %s | `%s` | [docs](%s/%s.md) |" % (display, package_of(stem), API_DIR, stem))
+        lines.append(
+            "| %s | `%s` | [docs](%s/api-docs/%s.html) |"
+            % (display, package_of(stem), DOCS_BASE, stem)
+        )
     lines.append("")
     return lines
 

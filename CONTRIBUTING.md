@@ -61,6 +61,12 @@ Pull requests must follow these conventions.
     for the next release (`docs/changelogs/`) following the canonical format
   - `make compliance` -- HLR traceability, README link check, and verification
     report regeneration
+  - `make docs-check` -- the prose rules for the documentation and for the
+    comment text of every Ada source: four sentences per paragraph, one space
+    after a sentence, no em dash, no Latin abbreviation, and the 250-line soft
+    cap. Run `python3 tools/check-docs.py --fix` for the spacing and
+    `python3 tools/para-split.py --fix` for the paragraph breaks
+- Or run `make check`, which runs every gate in the order CI runs them.
 - Only edit parts of the source code where necessary.
 - Test that the added features or fixes work as intended.
 - Clear variable names.

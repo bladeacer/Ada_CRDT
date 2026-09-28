@@ -13,7 +13,7 @@ package CRDT.Security
   with SPARK_Mode
 is
 
-   --  Security level note.  SHA-256 with n = 32 gives classical
+   --  Security level note. SHA-256 with n = 32 gives classical
    --  128-bit pre-image strength and post-quantum 64-bit (Grover).
    --  The LM-OTS/LMS verification layer rests only on pre-image
    --  resistance, so it stays secure against a quantum attacker.

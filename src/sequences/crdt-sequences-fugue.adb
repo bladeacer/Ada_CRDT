@@ -289,7 +289,7 @@ is
    --  Unlink node Idx from the BST and return it to the free list.
    --  Standard binary-search-tree deletion: a node with two children is
    --  replaced by its in-order successor node (contents swapped), which
-   --  has at most one child.  Iterative, no recursion, no rebalancing:
+   --  has at most one child. Iterative, no recursion, no rebalancing:
    --  the tree shape may degrade but the in-order sequence is preserved,
    --  which is the only property Merge, Get, and iterators rely on.
    procedure Unlink_Node (R : in out RGA; Idx : Natural) is
@@ -384,7 +384,7 @@ is
    begin
       --  Collect the nodes to remove first: unlinking swaps contents
       --  and rewrites links, so a live traversal during unlinking
-      --  would visit shifted nodes.  Two passes keep it correct.
+      --  would visit shifted nodes. Two passes keep it correct.
       --  Pass 1: unlink every deleted node by identity.
       for I in 1 .. R.Count loop
          if R.Items (I).Deleted then

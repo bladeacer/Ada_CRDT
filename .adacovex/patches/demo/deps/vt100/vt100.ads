@@ -7,7 +7,7 @@
 --    * proof overlay (adacovex prove): the SPARK_Mode => On aspect on the
 --      package declaration brings the vendored unit into proof scope, and
 --      the Pre contract on Scroll_Screen pins the intended scroll-region
---      invariant.  The vendored bodies call Ada.Text_IO (SPARK_Mode Off),
+--      invariant. The vendored bodies call Ada.Text_IO (SPARK_Mode Off),
 --      so gnatprove skips the I/O bodies by design and the unit is
 --      reported out of proof scope -- it never drags the target's proof
 --      level down.

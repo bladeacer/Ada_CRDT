@@ -54,16 +54,16 @@ instantiation time. There is no heap allocation for CRDT data.
 
 The project follows a V-style life cycle tailored for a library crate:
 
-1.  **Planning**: This PSAC, `HLR.md`, and `LLR.md` define requirements
+1. **Planning**: This PSAC, `HLR.md`, and `LLR.md` define requirements
     and verification strategy.
-2.  **Requirements**: `HLR.md` states the high-level requirements. Source
+2. **Requirements**: `HLR.md` states the high-level requirements. Source
     `.ads` files tag them as `--  - HLR-XXXX`. `LLR.md` maps each HLR to Ada
     subprograms.
-3.  **Design and implementation**: The package specs contain Ada 2012 code
+3. **Design and implementation**: The package specs contain Ada 2012 code
     with SPARK contracts (pre/post, depends, type invariants).
-4.  **Verification**: Formal proof with GNATprove (primary evidence) plus
+4. **Verification**: Formal proof with GNATprove (primary evidence) plus
     a runtime test harness (10332 test cases across 10 categories).
-5.  **Release**: Versioned changelogs, tag-based releases, and automated
+5. **Release**: Versioned changelogs, tag-based releases, and automated
     compliance checks via the Makefile.
 
 ## 4. Software Life Cycle Environment

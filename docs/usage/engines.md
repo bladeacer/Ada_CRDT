@@ -1,4 +1,4 @@
-# Sequence Engines
+# Sequence engines: Yjs, Naive, and Fugue
 
 The RGA sequence type ships with three interchangeable backend engines. All
 three implement the same API surface: `Insert`, `Delete`, `Merge`,
@@ -72,6 +72,17 @@ find such a causal round.
 Start with the default Yjs engine. It handles most workloads well and has no
 extra constraints. Choose Fugue when concurrent typing at one position is a
 core scenario. Choose Naive when you need the simplest possible structure or
-when sequences stay short. The
+when sequences stay short.
+
+The
 [engine comparison page](engine-comparison.md) compares the robustness of
 each engine with the upstream Yjs and Automerge designs.
+
+## See also
+
+- [Containers, wrappers, and the hybrid logical clock](containers-and-wrappers.md)
+  -- the bounded wrapper for a sequence, and the thread-safe protected type.
+- [Engine comparison](engine-comparison.md) -- the robustness of each engine
+  against the upstream Yjs and Automerge designs.
+- [Serialisation](serialization.md) -- write a sequence to a stream and read it
+  back.

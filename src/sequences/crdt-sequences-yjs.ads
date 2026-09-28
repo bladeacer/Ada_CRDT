@@ -144,7 +144,7 @@ package CRDT.Sequences.Yjs with SPARK_Mode is
    --  Array of per-replica max-sequence entries.
    type Replica_Max_Seq_Array is array (Positive range <>) of Replica_Max_Seq;
 
-   --  Compute the state vector.  Record the maximum sequence number per
+   --  Compute the state vector. Record the maximum sequence number per
    --  replica for delta sync.
    --  @param R      The sequence to analyse.
    --  @param SV     Output array of per-replica max seq values.

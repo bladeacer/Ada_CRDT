@@ -124,7 +124,7 @@ package CRDT.Sequences.Fugue with SPARK_Mode is
    --  Node_Id ordering are preserved) and returned to the free list for
    --  reuse by later Insert/Merge calls.
    --  Limit: call Compact only when no peer can still deliver a Delete
-   --  or Merge for a removed Node_Id.  A later Delete_Node for a node
+   --  or Merge for a removed Node_Id. A later Delete_Node for a node
    --  reclaimed here does nothing, and a later Merge re-inserts the
    --  deleted item as alive, which breaks convergence until all peers
    --  compact in the same causal round.

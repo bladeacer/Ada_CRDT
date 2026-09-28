@@ -1,4 +1,4 @@
-# Sync Layers
+# Sync layers: state-based and operation-based
 
 The library ships two sync layers. Both are CRDT-correct: replicas converge
 no matter how messages reorder, repeat, or pause. They differ in what they
@@ -111,3 +111,10 @@ Containers compose with either layer: merge the containers with the same
 cadence as the sync state. The
 [serialization page](serialization.md) explains how the wire format carries
 either layer's payloads.
+
+## See also
+
+- [Containers, wrappers, and the hybrid logical clock](containers-and-wrappers.md)
+  -- take a `Snapshot` of a protected container and send it with `Merge`.
+- [Serialisation](serialization.md) -- the wire formats for both layers.
+- [Security](security.md) -- authenticate a message before you apply it.

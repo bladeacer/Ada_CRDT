@@ -7,7 +7,7 @@ with CRDT.Clocks;
 --  hardcoded VTime + HLC.
 --
 --  The state vector is an array of Clock_Time values, one per replica slot.
---  Merge applies Max element-wise.  Comparison operations use the
+--  Merge applies Max element-wise. Comparison operations use the
 --  strategy's "<", "=", ">" operators.
 --
 --  Requirements traceability:
@@ -53,7 +53,7 @@ package CRDT.Sync.State_Based.Clocked with SPARK_Mode is
    procedure Merge (Local : in out Replica_State; Remote : Replica_State)
    with Pre => Local.Max_Replicas = Remote.Max_Replicas, Depends => (Local => (Local, Remote));
 
-   --  Compute the delta.  Count the local clocks that exceed Remote_SV.
+   --  Compute the delta. Count the local clocks that exceed Remote_SV.
    --  @param Local      Local replica state.
    --  @param Remote_SV  Remote clock timestamp.
    --  @return  Count of replicas where local clock is ahead of remote.

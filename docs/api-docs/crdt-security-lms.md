@@ -1,13 +1,13 @@
 # CRDT.Security.LMS
 
 LM-OTS and LMS hash-based signature verification (RFC 8554,
-NIST SP 800-208 approved).  Post-quantum: security rests only on
+NIST SP 800-208 approved). Post-quantum: security rests only on
 the pre-image resistance of SHA-256, so a quantum computer does not
 break it the way it breaks RSA and ECDSA.
 
 Verify-only by design: signing requires stateful one-time private
 keys that must never be reused, and this library never holds secret
-key state.  Peers sign CRDT state offline (a hardware token, a
+key state. Peers sign CRDT state offline (a hardware token, a
 signing service) and replicas verify with the public key before a
 Merge is accepted.
 

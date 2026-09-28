@@ -1,3 +1,6 @@
+<!-- no-crdt-docs-loc -->
+<!-- The requirement mapping: one LLR row per Ada subprogram. The row count is
+     the traceability evidence, and the compliance gate reads this file. -->
 # Low-Level Requirements
 
 Each LLR traces to its parent HLR. It identifies the Ada subprogram(s)

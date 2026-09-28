@@ -1,4 +1,4 @@
-# Getting Started
+# Getting started: install and first programs
 
 ## Install
 
@@ -103,6 +103,32 @@ Containers and sync layers compose: put the set or counter in your replica
 record, call `Merge` on both the container and the sync state, and the
 replica state converges.
 
+## Watch it converge
+
+The repository carries a terminal demo that runs Conway's Game of Life on three
+replicas in one process. Each replica keeps its own grid and exchanges state
+with the other two, so the three views converge on the same grid while you
+watch.
+
+```bash
+make demo
+```
+
+| Key | Action |
+|-----|--------|
+| `q` | Quit |
+| `p` | Pause and resume the simulation |
+| `r` | Reset the grid and the clocks |
+| `m` | Toggle the grid between a matrix and a Yjs RGA |
+| `c` | Cycle the clock strategy through Lamport, Vector, and Matrix |
+
+The `m` key is the interesting one. It moves the grid from a plain Ada matrix
+into a Yjs RGA and back, and the three replicas keep their cells. Toggle it
+while the simulation runs to watch the sequence engine carry the state.
+
+The demo is a scratch program, not a supported API. Use the packages above in
+your own code.
+
 ## Build and test your project
 
 ```bash
@@ -112,3 +138,13 @@ alr build
 Every container uses pre-allocated bounded storage. Size the `Capacity` and
 `Max_Actors` discriminants to your worst-case replica and element counts,
 and the library allocates no heap at run time.
+
+## See also
+
+- [Sequence engines](engines.md) -- choose an engine for your sequences.
+- [Clock strategies](clock-strategies.md) -- choose a clock for your sets.
+- [Sync layers](sync.md) -- connect two replicas.
+- [Containers, wrappers, and the hybrid logical clock](containers-and-wrappers.md)
+  -- fix the capacity of each container, and share one between tasks.
+- [Quality gates and make targets](../contributing/quality-gates.md) -- run the
+  suite, the proof, and the reports.

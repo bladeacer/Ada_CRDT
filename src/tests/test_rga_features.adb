@@ -254,7 +254,7 @@ package body Test_RGA_Features is
          RunR.Check (RGA_Str.Get (R, 1) = 'A', "Fugue: Get (1) = 'A'");
          RunR.Check (RGA_Str.Get (R, 2) = 'C', "Fugue: Get (2) = 'C'");
 
-         --  Freed slots must be reusable.  Document order follows the
+         --  Freed slots must be reusable. Document order follows the
          --  Node_Id order (Replica, Seq, Depth): (1,4) sorts after
          --  (1,3), so the reused-slot element lands at the end.
          RGA_Str.Insert (R, 2, (Replica => 1, Seq => 4, Depth => 0), 'X');

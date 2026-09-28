@@ -53,7 +53,9 @@ wall-clock time.
 Reading V1 data is automatic. `Read_Header` detects V1 and V2 and dispatches
 `Read_Natural` accordingly. Existing reader code needs no changes. The library
 always writes V2 (LEB128). Use `CRDT.Serialization.Legacy.Read_Natural_V1` to
-write V1 for legacy peers (not recommended). See
+write V1 for legacy peers (not recommended).
+
+See
 `docs/changelogs/crdt-1.4.0-migration.md` for a worked example.
 
 ## Test Suite
@@ -78,7 +80,9 @@ No HLR tags yet -- DO-178C traceability was introduced in 1.5.0.
 ## Breaking Changes
 
 None. V1 protocol data is read transparently. No source-code changes are
-needed. All V2 data continues to work unchanged. Rebuild your project with
+needed. All V2 data continues to work unchanged.
+
+Rebuild your project with
 `alr update crdt`.
 
 ## Version

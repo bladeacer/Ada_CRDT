@@ -1,4 +1,4 @@
-# Security
+# Security: SHA-256, HMAC, and LMS verification
 
 The `CRDT.Security` packages add integrity and authenticity to replica
 state exchange. Three packages, three levels:
@@ -117,3 +117,10 @@ public-key material without holding secrets.
 The test vectors come from RFC 4231 (HMAC) and the RFC 8554 worked examples.
 See the normative reference list in
 [the third-party notices](../THIRD_PARTY_NOTICES.md).
+
+## See also
+
+- [Sync layers](sync.md) -- authenticate a message before you apply it.
+- [Third-party notices](../THIRD_PARTY_NOTICES.md) -- the normative references
+  for the test vectors.
+- [API reference](../api-docs/index.md) -- the exact package contracts.

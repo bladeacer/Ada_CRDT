@@ -63,7 +63,9 @@ No HLR tags -- DO-178C traceability was introduced in 1.5.0.
 ## Breaking Changes
 
 None. New serialised data uses LEB128 (V2) format. Old V1-format data cannot
-be read by this version. Upgrade to 1.4.0 for automatic V1 compatibility. All
+be read by this version. Upgrade to 1.4.0 for automatic V1 compatibility.
+
+All
 APIs remain backward compatible at the Ada source level.
 
 ## Version

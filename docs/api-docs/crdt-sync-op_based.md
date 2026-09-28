@@ -28,9 +28,9 @@ type Op_Kind is (Op_Insert, Op_Delete, Op_Increment, Op_Decrement);
 
 ```ada
 type Op_Log (Capacity : Positive) is record
-Ops   : Op_Array (1 .. Capacity);
-Count : Natural := 0;
-GC    : Natural := 0;
+Ops         : Op_Array (1 .. Capacity);
+Count       : Natural := 0;
+GC          : Natural := 0;
 Peer_Acks   : Core.VTime (1 .. 8) := (others => 0);
 Peer_Active : Boolean_Array (1 .. 8) := (others => False);
 end record;

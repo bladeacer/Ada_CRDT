@@ -25,7 +25,7 @@ is
    end Hash_Node;
 
    --  Coefficient extraction: the i-th w-bit digit of Q
-   --  (RFC 8554 section 3.1.3).  W = 8, so one byte per digit.
+   --  (RFC 8554 section 3.1.3). W = 8, so one byte per digit.
    --  The formal is the statically constrained N_String: gnatprove
    --  cannot bound indexing arithmetic for an unconstrained array
    --  formal, while a static length reduces every check to a constant
@@ -118,10 +118,10 @@ is
    end Node_Hash;
 
    --  Parse a big-endian unsigned 32-bit integer from a statically
-   --  bounded 4-byte slice.  The result is Long_Long_Integer because a
+   --  bounded 4-byte slice. The result is Long_Long_Integer because a
    --  full 32-bit unsigned value does not fit in Natural on every
    --  supported target; callers narrow it to Natural once a range
-   --  check has bounded the value.  The formal is the statically
+   --  check has bounded the value. The formal is the statically
    --  constrained U32_BE subtype: gnatprove cannot bound indexing or
    --  overflow checks for an unconstrained array formal, while a
    --  static length of 4 makes every check a constant computation

@@ -86,12 +86,12 @@ is
    with Post => Log_GC (Log) = 0 and then Log_Count (Log) <= Log.Capacity, Depends => (Log => Log);
 
    --  Raise the acknowledgement watermark for one peer and move the
-   --  purge frontier to the smallest registered-peer watermark.  The
+   --  purge frontier to the smallest registered-peer watermark. The
    --  causal prefix up to the frontier is safe to purge because every
    --  registered peer has confirmed delivery of it.
-   --  Contract: call this for every live peer.  A peer registers on
+   --  Contract: call this for every live peer. A peer registers on
    --  its first call; peers outside the fixed 8-slot table are
-   --  ignored.  Retiring a peer means the application keeps
+   --  ignored. Retiring a peer means the application keeps
    --  acknowledging on its behalf or rebuilds the log.
    --  @param Log        Operation log to update.
    --  @param Peer       Peer whose watermark to record.
@@ -100,9 +100,9 @@ is
    with Depends => (Log => (Log, Peer, From_Seq));
 
    --  Physically remove every operation acknowledged by all
-   --  registered peers.  Purge recomputes the causal frontier from the
+   --  registered peers. Purge recomputes the causal frontier from the
    --  per-peer watermark table itself (the minimum over registered
-   --  peers), releases that prefix, and compacts the storage.  It is
+   --  peers), releases that prefix, and compacts the storage. It is
    --  the companion of Acknowledge_From for callers that want the
    --  frontier to be derived from the peer table rather than from the
    --  GC marker, and it leaves the watermark table intact so the
@@ -112,7 +112,7 @@ is
    with Post => Log_GC (Log) = 0 and then Log_Count (Log) <= Log.Capacity, Depends => (Log => Log);
 
    --  Smallest Seq that is still unacknowledged by at least one
-   --  registered peer (the purge frontier).  0 when no peer has
+   --  registered peer (the purge frontier). 0 when no peer has
    --  registered or when every logged operation is acknowledged by
    --  every registered peer.
    --  @param Log  Operation log to query.
@@ -131,9 +131,9 @@ private
       Count       : Natural := 0;
       GC          : Natural := 0;
       --  Highest Seq each registered peer has confirmed, and which
-      --  slots are registered.  Causal-history purge uses the minimum
-      --  over registered peers as the purge frontier.  A peer becomes
-      --  registered on its first Acknowledge_From call.  May change
+      --  slots are registered. Causal-history purge uses the minimum
+      --  over registered peers as the purge frontier. A peer becomes
+      --  registered on its first Acknowledge_From call. May change
       --  between minor versions (internal state).
       Peer_Acks   : Core.VTime (1 .. 8) := (others => 0);
       Peer_Active : Boolean_Array (1 .. 8) := (others => False);

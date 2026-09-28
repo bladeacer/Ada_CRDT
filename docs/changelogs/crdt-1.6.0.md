@@ -41,7 +41,9 @@ now fully provably safe, completing the serialization proof goals.
 Removed force-unpause (`S.N1.Paused := False`) from the M-key mode switch
 handler. Previously each switch burst all 3 nodes into simultaneous evolution.
 Repeated switches compounded the effect. Sync now happens for display
-conversion only. Nodes keep their individual pause states.
+conversion only.
+
+Nodes keep their individual pause states.
 
 Removed `S.Gen := 0` from the mode switch. The generation counter tracks actual
 evolution without jumping back to zero on display-mode change.

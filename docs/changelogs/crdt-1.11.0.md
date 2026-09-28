@@ -51,14 +51,18 @@ unproved, 34 analysed units. SPARK assurance is Stone + Bronze + Silver +
 Gold + Platinum across all SPARK-analyzable units. Generics (10 units)
 and platform dependencies (100 `SPARK_Mode => Off` locations) remain excluded
 by design. The proof patch is merged into the proof tree and the run is
-exercised end to end. VT100 is out of the analysed closure. No VC counts move.
+exercised end to end.
+
+VT100 is out of the analysed closure. No VC counts move.
 
 ## Traceability
 
 No new HLRs are added. The 24 HLR tags are unchanged. The patch covers a
 vendored demo dependency through the proof pipeline (adacovex `HLR-PROVE`
 machinery) and carries no HLR tags itself. Compliance artifacts were not
-regenerated. The assessment output is unchanged (DAL-C, Platinum).
+regenerated.
+
+The assessment output is unchanged (DAL-C, Platinum).
 
 ## Breaking Changes
 

@@ -41,7 +41,9 @@ v1.17.0) and the `lccst` server (`lccst_verify`: test OK, build OK).
      `procedure Alloc_Item (R : in out RGA; Idx : out Natural)` plus
      a package-level `Invariant`, `Loop_Invariant`, and
      `Loop_Variant (Increases => Steps)`. RGA/Yjs/Fugue need the same
-      triad plus `Invariant`-augmented pres on every mutator. An
+triad plus `Invariant`-augmented pres on every mutator.
+
+An
       estimated +150 VCs (RGA), +150 VCs (Yjs), +120 VCs (Fugue) and
      400+ lines each, deferred to keep 0 unproved. **Evidence**: a
      full `CRDT.Rga` refactor to the Naive pattern (procedure-form
@@ -57,7 +59,9 @@ v1.17.0) and the `lccst` server (`lccst_verify`: test OK, build OK).
      `Capacity+Capacity` and `Invariant` preservation on `Rgas.Merge`,
      all fixable with tighter `Invariant` bounds and
       `Loop_Invariant (Invariant(Target))`. This confirms the debt is
-      provable when restructured. It is not yet 0-unproved. The
+provable when restructured. It is not yet 0-unproved.
+
+The
      refactored file was **reverted** to `SPARK_Mode => Off` to keep
      **Platinum 576, 0 unproved** for 1.12.0.
 
@@ -134,7 +138,9 @@ SPARK-analyzable units. Generics (10 units) and platform
 dependencies (98 `SPARK_Mode => Off` locations: wall clock, RNG, stream
 I/O, test harness, plus the 2 Naive accessors and 3-engine debt) remain
 excluded by design. The ledger adds **+13 VCs** for the two newly proved Naive
-helpers (`Find_Pos` 10/10, `"="` 12/12). The remaining two accessors
+helpers (`Find_Pos` 10/10, `"="` 12/12).
+
+The remaining two accessors
 (`Element`/`Get`) and the three engines (~420 VCs) are still deferred. The
 lccst trial (1223/77 to 1183/77 full On, 955/35 partial Off)
 shows the pattern closes the debt.
@@ -158,7 +164,9 @@ shows the pattern closes the debt.
 No new HLRs are added. The 24 HLR tags are unchanged. The ledger lives under
 `docs/proof/` and is not a DO-178C artifact. It references the existing
 HLR coverage (see `docs/compliance/HLR.md` and `make compliance`) and
-the adacovex `HLR-PROVE` proof-patch machinery. Compliance artifacts
+the adacovex `HLR-PROVE` proof-patch machinery.
+
+Compliance artifacts
 were not regenerated. The assessment output is unchanged (DAL-C,
 Platinum).
 

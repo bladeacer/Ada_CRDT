@@ -1,7 +1,7 @@
 # CRDT.Security.SHA256
 
 SHA-256 hash (FIPS 180-4), pure SPARK buffer interface.
-One-shot and streaming (Init/Update/Final) forms.  No heap use.
+One-shot and streaming (Init/Update/Final) forms. No heap use.
 
 Used by the post-quantum verification layer (CRDT.Security.*) as the
 hash function H for LM-OTS/LMS (RFC 8554) and as the HMAC-SHA-256
@@ -42,9 +42,7 @@ type Byte_Array_64 is array (1 .. Block_Length) of Byte;
 
 ```ada
 type Context is record
-H    : Word_Array_8 := (16#6A09E667#, 16#BB67AE85#, 16#3C6EF372#,
-16#A54FF53A#, 16#510E527F#, 16#9B05688C#,
-16#1F83D9AB#, 16#5BE0CD19#);
+H    : Word_Array_8 := (16#6A09E667#, 16#BB67AE85#, 16#3C6EF372#, 16#A54FF53A#, 16#510E527F#, 16#9B05688C#, 16#1F83D9AB#, 16#5BE0CD19#);
 Len  : Count := 0;
 Buf  : Byte_Array_64 := (others => 0);
 BufN : Buf_Count := 0;
@@ -54,7 +52,7 @@ end record;
 ### type Count
 
 ```ada
-type Count is mod 2 ** 64;
+type Count is mod 2**64;
 ```
 
 ### type Hash

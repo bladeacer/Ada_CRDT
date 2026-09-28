@@ -201,8 +201,14 @@ def replacements(m: Metrics) -> List[Tuple[Pattern[str], str]]:
         # JSON API sample response.
         (re.compile(r'"total_vcs":\d+'), f'"total_vcs":{t}'),
         (re.compile(r'"proved_vcs":\d+'), f'"proved_vcs":{p}'),
-        # docs/compliance/VERIFICATION.md table rows: handle proved counts
-        (re.compile(r"Total checks \| \d+"), f"Total checks | {t}"),
+        # Current-metrics table row, e.g. docs/compliance/VERIFICATION.md
+        # "| Total checks | 972 |".  The lookahead anchors the rule to a row
+        # whose data cell is the last cell on the line, so a release-to-release
+        # comparison row such as "| Total checks | 589 | 972 |" keeps the
+        # previous release's number: that row is a historical record, and the
+        # rewrite would otherwise overwrite the baseline it compares against.
+        (re.compile(r"Total checks \| \d+(?=\s*\|\s*$)"),
+         f"Total checks | {t}"),
     ]
 
 

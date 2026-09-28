@@ -1,4 +1,4 @@
-# Serialization
+# Serialisation: the V1, V2, and V3 wire formats
 
 Every serialised CRDT payload starts with a header that names the wire
 format version. A reader detects the version from the first bytes, so old
@@ -77,3 +77,11 @@ older formats. Convert archived data to V3 when you touch it, and new
 writes carry the strategy byte from the start. The
 [V1 to V2 migration guide](../changelogs/crdt-1.4.0-migration.md) records
 the one-time breaking change in the protocol history.
+
+## See also
+
+- [Containers, wrappers, and the hybrid logical clock](containers-and-wrappers.md)
+  -- the state you write to a stream.
+- [Sync layers](sync.md) -- the payloads that a stream carries.
+- [V1 to V2 migration guide](../changelogs/crdt-1.4.0-migration.md) -- the
+  one-time breaking change in the protocol history.

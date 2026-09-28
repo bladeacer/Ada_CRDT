@@ -159,7 +159,7 @@ is
       --  The byte counter is a 64-bit modular value incremented once
       --  per streamed byte: modular arithmetic wraps instead of
       --  overflowing, and the wrap matches the 64-bit bit-length
-      --  field of the FIPS 180-4 padding rule.  Counting inside the
+      --  field of the FIPS 180-4 padding rule. Counting inside the
       --  loop keeps 'Length and bound-difference arithmetic out of
       --  this unit: gnatprove cannot bound that arithmetic for an
       --  unconstrained array formal, while a modular per-byte

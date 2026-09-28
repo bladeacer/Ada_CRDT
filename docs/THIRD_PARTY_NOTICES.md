@@ -3,6 +3,28 @@
 This file records the licence notices for third-party material that this project
 vendors or builds upon. See `docs/CREDITS.md` for the high-level attributions.
 
+## Documentation toolchain and hosting
+
+The manual under `docs/` is built and served by the components below. The
+project includes none of their source code. The pages under `docs/` are offered
+under the same MIT licence as the rest of the project.
+
+| Component | Role | Upstream | Licence |
+|---|---|---|---|
+| Sphinx | The documentation generator. It runs `sphinx-build` over `docs/` and writes the static site. | https://www.sphinx-doc.org/ | BSD 2-Clause |
+| Furo | The Sphinx theme. It pulls no web font and no image, so the site loads no external resource. | https://github.com/pradyunsg/furo | MIT |
+| MyST (myst-parser) | The Markdown parser. It reads the `docs/*.md` pages without converting them to reStructuredText. | https://myst-parser.readthedocs.io/ | MIT |
+| Read the Docs | The hosting provider. It builds the manual and serves it at `https://ada-crdt.readthedocs.io/`, and it counts page views in aggregate. | https://readthedocs.org/ | Hosting service, terms at https://about.readthedocs.com/terms-of-service/ |
+
+The Read the Docs hosting injects its own link-preview popup into the pages. The
+project restyles that popup in `docs/_static/rtd-linkpreviews.css` and adds no
+code of its own. The hosting provider also injects its analytics and its
+advertising slots. The project has disabled paid advertising and the flyout
+menu in the provider dashboard, and the project adds no analytics tag.
+
+The
+reader-facing statement is in `docs/site-transparency.md`.
+
 ## SimpleEnglish skill
 
 The `skills/simple-english/` directory is a vendored copy of the open-source

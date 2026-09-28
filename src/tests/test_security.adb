@@ -177,7 +177,7 @@ package body Test_Security is
             return X;
          end Make_Priv;
 
-         --  Sign a message with the deterministic private key.  The
+         --  Sign a message with the deterministic private key. The
          --  randomiser C is fixed so the test is reproducible.
          function Make_OTS_Sig (Q : Natural; X : L.OTS_Private_Key; M : Ada.Streams.Stream_Element_Array) return L.OTS_Signature is
             Sig    : L.OTS_Signature := (others => 0);

@@ -40,7 +40,7 @@ is
    procedure Merge (Local : in out Replica_State; Remote : Replica_State)
    with Depends => (Local => (Local, Remote));
 
-   --  Compute the delta.  Count the replicas where the local vector clock
+   --  Compute the delta. Count the replicas where the local vector clock
    --  entry exceeds the remote entry.
    --  @param Local      Local replica state.
    --  @param Remote_SV  Remote state vector.

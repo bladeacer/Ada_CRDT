@@ -1,4 +1,4 @@
-# Clock Strategies
+# Clock strategies: Lamport, Vector, and Matrix
 
 A clock strategy is a generic parameter of `CRDT.Lww_Sets` and the clocked
 sync layers. All strategies implement one uniform interface: a comparison
@@ -85,3 +85,10 @@ wall-clock reading with a logical counter, so timestamps stay close to real
 time and still respect causality. Use it in the state-based sync layer and
 anywhere you must order events from replicas with skewed physical clocks.
 See [the API reference](../api-docs/crdt-hlc.md) for the contracts.
+
+## See also
+
+- [Containers, wrappers, and the hybrid logical clock](containers-and-wrappers.md)
+  -- the HLC, which combines a wall-clock reading with a logical counter.
+- [Sync layers](sync.md) -- the state-based layer that uses the HLC.
+- [API reference](../api-docs/crdt-clocks.md) -- the clock strategy interface.

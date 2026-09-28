@@ -1,4 +1,4 @@
-.PHONY: help build test check covex prove coverage-gate description verify-report compliance changelog-check ascii-check link-check spark-off-check fmt doc sbom demo bump-version release publish clean proof-status test-count agents-tree doc-links test-publish
+.PHONY: help build test check covex prove coverage-gate description verify-report compliance changelog-check ascii-check link-check docs-check spark-off-check fmt doc sbom demo bump-version release publish clean proof-status test-count agents-tree doc-links test-publish
 
 .DEFAULT_GOAL := help
 
@@ -21,6 +21,9 @@ help:
 	@echo '  compliance    HLR traceability check + auto-generate verification report'
 	@echo '  changelog-check  Validate changelog format (canonical C#/H# style)'
 	@echo '  link-check    Verify every markdown link + anchor resolves (tools/check-links.py)'
+	@echo '  docs-check    Enforce the prose gate: four-sentence paragraph cap, one space'
+	@echo '                after a sentence, no em dash, no Latin abbreviation, and a'
+	@echo '                250-line soft cap (tools/check-docs.py; --fix normalises)'
 	@echo '  ascii-check   Enforce ASCII-only charset across all source files'
 	@echo '  spark-off-check Verify every SPARK_Mode => Off location is in the spark-coverage report'
 	@echo '                  (gen-coverage.py --check)'
@@ -64,7 +67,7 @@ test: build
 # proof-status) verify that no live file carries a stale metric after
 # `make test` / `make prove` refreshed them -- same pattern as sibling
 # adacovex `make check`.
-check: ascii-check changelog-check link-check fmt doc spark-off-check build test prove coverage-gate compliance description
+check: ascii-check changelog-check link-check docs-check fmt doc spark-off-check build test prove coverage-gate compliance description
 	@echo "=== Quality gate: test counts in sync ==="; python3 tools/update-test-count.py --check
 	@echo "=== Quality gate: proof metrics in sync ==="; python3 tools/update-proof-status.py --check
 	@echo "=== Quality gate: doc links ==="; python3 tools/update-doc-links.py --check
@@ -503,6 +506,18 @@ ascii-check:
 link-check:
 	@echo "=== Markdown link verification ==="; \
 	python3 tools/check-links.py
+
+# Prose gate: four-sentence paragraph cap, one space after a sentence, no em
+# dash, no Latin abbreviation, and a soft 250-line cap that a reference page
+# can opt out of with a `no-crdt-docs-loc` marker. Covers docs/ (minus the
+# generated api-docs), README.md, AGENTS.md, CONTRIBUTING.md, and the comment
+# text of every Ada source under src/ plus .adacovex/patches/. `python3
+# tools/check-docs.py --fix` collapses the sentence double spaces, and
+# `python3 tools/para-split.py --fix` inserts the blank lines for the paragraph
+# cap. Mirrors the sibling adacovex gate; see docs/contributing/quality-gates.md.
+docs-check:
+	@echo "=== Documentation prose check ==="; \
+	python3 tools/check-docs.py
 
 fmt:
 	@echo "=== Formatting Ada sources with gnatformat ==="; \

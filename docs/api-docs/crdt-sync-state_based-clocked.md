@@ -6,7 +6,7 @@ clock strategy's Clock_Time for replica state tracking instead of a
 hardcoded VTime + HLC.
 
 The state vector is an array of Clock_Time values, one per replica slot.
-Merge applies Max element-wise.  Comparison operations use the
+Merge applies Max element-wise. Comparison operations use the
 strategy's "<", "=", ">" operators.
 
 Requirements traceability:

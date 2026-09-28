@@ -27,7 +27,7 @@ package CRDT.Sequences.Naive with SPARK_Mode is
    type RGA (Capacity : Positive) is private;
 
    --  Structural invariant of the RGA. See the private part for the
-   --  definition.  It is exposed so public operations can state Pre/Post that
+   --  definition. It is exposed so public operations can state Pre/Post that
    --  keep the engine structurally safe at every entry and exit.
    --  @param R  The sequence to examine.
    --  @return True when the RGA satisfies its structural invariant.

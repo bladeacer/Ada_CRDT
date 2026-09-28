@@ -4,9 +4,16 @@ docs/usage/getting-started.md	Getting started
 docs/usage/engines.md	Sequence engines
 docs/usage/clock-strategies.md	Clock strategies
 docs/usage/sync.md	Sync layers
-docs/usage/serialization.md	Serialization
+docs/usage/serialization.md	Serialisation
 docs/usage/security.md	Security
 docs/usage/engine-comparison.md	Engine comparison
+docs/usage/containers-and-wrappers.md	Containers, wrappers, and the hybrid logical clock
+docs/contributing/quality-gates.md	Quality gates and make targets
+docs/contributing/llm-usage.md	AI and LLM usage
+docs/site-transparency.md	Site transparency
+docs/badges/index.md	Badges
+docs/proof/index.md	Proof records
+docs/proof/16.1.0-ledger.md	Proof ledger (gnatprove 16.1.0)
 docs/compliance/index.md	DO-178C compliance
 docs/compliance/PSAC.md	PSAC (Plan for Software Aspects of Certification)
 docs/compliance/HLR.md	High-Level Requirements
@@ -15,7 +22,6 @@ docs/compliance/TRACE.md	Traceability matrix
 docs/compliance/VERIFICATION.md	Verification results
 docs/changelogs/index.md	Changelogs
 docs/changelogs/crdt-1.4.0-migration.md	V1->V2 Migration guide
-docs/proof/16.1.0-ledger.md	Proof ledger (gnatprove 16.1.0)
 README.md	Readme
 CONTRIBUTING.md	Contributing
 AGENTS.md	Agent guide

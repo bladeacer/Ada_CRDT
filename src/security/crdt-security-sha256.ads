@@ -1,5 +1,5 @@
 --  SHA-256 hash (FIPS 180-4), pure SPARK buffer interface.
---  One-shot and streaming (Init/Update/Final) forms.  No heap use.
+--  One-shot and streaming (Init/Update/Final) forms. No heap use.
 --
 --  Used by the post-quantum verification layer (CRDT.Security.*) as the
 --  hash function H for LM-OTS/LMS (RFC 8554) and as the HMAC-SHA-256
@@ -28,7 +28,7 @@ is
    --  32-byte SHA-256 digest.
    subtype Hash is Byte_Array (1 .. Hash_Length);
 
-   --  Streaming state.  Internal block buffering included.
+   --  Streaming state. Internal block buffering included.
    type Context is private;
 
    --  Default (initial) chaining value of the context.
@@ -39,7 +39,7 @@ is
    procedure Init (Ctx : out Context)
    with Post => Ctx = Initial_Context;
 
-   --  Feed bytes into the streaming context.  Accepts input of any
+   --  Feed bytes into the streaming context. Accepts input of any
    --  length: the internal byte counter is a 64-bit modular value, so
    --  it wraps exactly like the 64-bit bit-length field of the
    --  SHA-256 padding rule and can never overflow.
@@ -62,13 +62,13 @@ private
 
    type Word32 is new Interfaces.Unsigned_32;
 
-   --  64-bit modular byte counter.  Modular arithmetic means the
+   --  64-bit modular byte counter. Modular arithmetic means the
    --  counter wraps instead of overflowing, which matches the
    --  FIPS 180-4 padding rule: the encoded bit count is the message
    --  length modulo 2**64.
    type Count is mod 2**64;
 
-   --  Number of bytes held in the partial block buffer.  The subtype
+   --  Number of bytes held in the partial block buffer. The subtype
    --  bounds it to a partial block, so every pad-length computation
    --  stays inside Natural range by construction.
    subtype Buf_Count is Natural range 0 .. Block_Length - 1;
