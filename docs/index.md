@@ -3,6 +3,11 @@
 This page is the index for all CRDT documentation. Pick a section
 relevant to you, or read the pages in the order below.
 
+**Read [Site transparency](site-transparency.md) first.** The page is the
+first entry in the sidebar, so you can reach it from every page. It states
+what the deployed manual records when you read it: search, traffic analytics,
+advertising, and the flyout menu.
+
 All documentation uses British English and ASD-STE100 Simplified Technical
 English. The controlled Technical Names dictionary lives in
 [STE100 Technical Names](ste100-technical-names.md). Use it before you use a
@@ -49,12 +54,6 @@ technical word in any doc, docstring, or changelog.
 - [Contributing guide](https://github.com/bladeacer/Ada_CRDT/blob/main/CONTRIBUTING.md)
   -- the process, the review rules, and the changelog format.
 
-## This documentation site
-
-- [Site transparency](site-transparency.md) -- what the deployed manual
-  records when you read it: search, traffic analytics, advertising, and the
-  flyout menu. Read this page first if you care about tracking.
-
 ## Maintainer references
 
 - [Proof records](proof/index.md) -- the verified-condition ledger, the current
@@ -81,6 +80,14 @@ maintainers. Build the generated API reference with `make doc`, and read the
 records about a reader.
 
 ```{toctree}
+:caption: Read this first
+:maxdepth: 1
+:hidden:
+
+site-transparency
+```
+
+```{toctree}
 :caption: Using CRDT
 :maxdepth: 1
 :hidden:
@@ -104,14 +111,6 @@ api-docs/index
 
 contributing/quality-gates
 contributing/llm-usage
-```
-
-```{toctree}
-:caption: This documentation site
-:maxdepth: 1
-:hidden:
-
-site-transparency
 ```
 
 ```{toctree}
