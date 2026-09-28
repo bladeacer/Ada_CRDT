@@ -93,21 +93,29 @@ jobs:
           CUR="${VERSION#v}"
           PREV=$(git tag --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | grep -v "^$VERSION$" | head -1 || true)
           PREV_NUM="${PREV#v}"
-          # Every changelog from the last release tag up to this version.
-          CHANGELOGS=""
-          for f in docs/changelogs/crdt-*.md; do
+          # Every changelog from the last release tag up to this version,
+          # newest first (version sort, not glob order).
+          CHANGELOGS=$(for f in docs/changelogs/crdt-*.md; do
             v="${f#docs/changelogs/crdt-}"
             v="${v%.md}"
+            # Skip non-release pages, such as the migration guide.
+            case "$v" in
+              *[!0-9.]*) continue ;;
+            esac
             if [ -n "$PREV_NUM" ]; then
               # Skip versions at or below the previous release.
               [ "$(printf '%s\n%s\n' "$v" "$PREV_NUM" | sort -V | head -1)" != "$v" ] || continue
             fi
             # Skip anything newer than this version (should not happen).
             [ "$(printf '%s\n%s\n' "$v" "$CUR" | sort -V | tail -1)" = "$CUR" ] || continue
-            CHANGELOGS="$CHANGELOGS
-          - https://github.com/${{ github.repository }}/blob/main/docs/changelogs/crdt-$v.md"
-          done
-          BODY="**Changelogs**$CHANGELOGS"
+            printf '%s\n' "$v"
+          done | sort -V -r | while read -r v; do
+            # The docs live on Read the Docs (the Sphinx site built from
+            # docs/); each release's changelog has a stable page there.
+            printf -- '- https://ada-crdt.readthedocs.io/en/latest/changelogs/crdt-%s.html\n' "$v"
+          done)
+          BODY="**Changelogs**
+          $CHANGELOGS"
           ASSETS=(dist/crdt-$VERSION.tar.gz dist/sbom-$VERSION.json dist/test_result-$VERSION.md)
           if [ -n "$PREV" ]; then
             BODY="$BODY

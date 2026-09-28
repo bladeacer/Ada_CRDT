@@ -87,8 +87,10 @@ Runs on `v*` tags. Builds and publishes the release artifacts:
 
 The release-note step lists the changelog entries
 (`docs/changelogs/crdt-*.md`). It shows entries available in the tree
-between the previous release tag and the released version. The list is
-derived from the changelog files present, not from git tags.
+between the previous release tag and the released version, newest first.
+The list is derived from the changelog files present, not from git tags.
+Each entry links to the changelog page on the deployed manual
+(<https://ada-crdt.readthedocs.io/>), not to the file on GitHub.
 
 ## Local equivalents
 
