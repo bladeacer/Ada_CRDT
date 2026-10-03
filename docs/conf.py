@@ -84,6 +84,24 @@ html_static_path = ["_static"]
 html_css_files = ["rtd-linkpreviews.css"]
 
 # ---------------------------------------------------------------------------
+# Sidebar drawer reveals the open entry
+# ---------------------------------------------------------------------------
+#
+# The manual is a page per section, so the global toctree is taller than the
+# drawer. A reader who clicks a late entry lands on a page whose own entry
+# sits below the drawer's fold, and the drawer stays where it was, so the
+# sidebar click looks like it went nowhere. Furo reveals its right-hand table
+# of contents only, so nothing else moves the drawer.
+#
+# sidebar-reveal.js scrolls the open entry into the drawer. The drawer
+# (.sidebar-scroll) is the only element it moves: the page itself stays at its
+# own top, the script never scrolls the window, and an entry already in view
+# leaves the drawer where it is. It is the same contract the sibling adacovex
+# manual uses, so both manuals behave alike.
+
+html_js_files = ["sidebar-reveal.js"]
+
+# ---------------------------------------------------------------------------
 # Search
 # ---------------------------------------------------------------------------
 #

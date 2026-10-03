@@ -8,6 +8,11 @@ first entry in the sidebar, so you can reach it from every page. It states
 what the deployed manual records when you read it: search, traffic analytics,
 advertising, and the flyout menu.
 
+The manual is a page per section, so the sidebar tree is taller than the
+drawer that holds it. The sidebar brings the entry for the page you are on
+into view when a page loads, so a click on a late entry never looks like it
+went nowhere. Only the drawer moves: the page itself stays at its own top.
+
 All documentation uses British English and ASD-STE100 Simplified Technical
 English. The controlled Technical Names dictionary lives in
 [STE100 Technical Names](ste100-technical-names.md). Use it before you use a
