@@ -3,17 +3,17 @@
   "specVersion": "1.5",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-09-28T11:02:07",
+    "timestamp": "2026-10-03T06:04:47",
     "tools": [
-      {"vendor": "bladeacer", "name": "adacovex", "version": "1.54.0"}
+      {"vendor": "bladeacer", "name": "adacovex", "version": "1.56.0"}
     ],
     "component": {
       "type": "application",
-      "bom-ref": "pkg:alire/crdt@1.15.0",
+      "bom-ref": "pkg:alire/crdt@1.16.0",
       "name": "crdt",
-      "version": "1.15.0",
+      "version": "1.16.0",
       "language": "Ada; Python; C",
-      "purl": "pkg:alire/crdt@1.15.0",
+      "purl": "pkg:alire/crdt@1.16.0",
       "licenses": [{"license": {"id": "MIT"}}],
       "description": "CRDT library for Ada/SPARK",
       "externalReferences": [{"url": "https://github.com/bladeacer/ada_crdt", "type": "website"}],
@@ -79,31 +79,28 @@
       },
     {
       "type": "library",
-      "bom-ref": "pkg:pypi/sphinx@9.1.0",
+      "bom-ref": "pkg:pypi/sphinx",
       "name": "sphinx",
-      "version": "9.1.0",
       "language": "Python",
-      "purl": "pkg:pypi/sphinx@9.1.0",
+      "purl": "pkg:pypi/sphinx",
       "description": "Python package referenced by the project (requirements.txt)",
       "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "dev"}]
       },
     {
       "type": "library",
-      "bom-ref": "pkg:pypi/myst-parser@5.1.0",
+      "bom-ref": "pkg:pypi/myst-parser",
       "name": "myst-parser",
-      "version": "5.1.0",
       "language": "Python",
-      "purl": "pkg:pypi/myst-parser@5.1.0",
+      "purl": "pkg:pypi/myst-parser",
       "description": "Python package referenced by the project (requirements.txt)",
       "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "dev"}]
       },
     {
       "type": "library",
-      "bom-ref": "pkg:pypi/furo@2025.12.19",
+      "bom-ref": "pkg:pypi/furo",
       "name": "furo",
-      "version": "2025.12.19",
       "language": "Python",
-      "purl": "pkg:pypi/furo@2025.12.19",
+      "purl": "pkg:pypi/furo",
       "description": "Python package referenced by the project (requirements.txt)",
       "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "dev"}]
       },
@@ -147,7 +144,7 @@
       "type": "library",
       "bom-ref": "pkg:generic/git",
       "name": "git",
-      "version": "2.55.0",
+      "version": "2.56.0",
       "purl": "pkg:generic/git",
       "description": "System tool referenced by the project (dev dependency)",
       "properties": [{"name": "adacovex:proof_level", "value": "Not proved"}, {"name": "adacovex:dep_scope", "value": "system"}]
@@ -173,8 +170,8 @@
   ],
   "dependencies": [
     {
-      "ref": "pkg:alire/crdt@1.15.0",
-      "dependsOn": ["pkg:alire/covex@1.48.0", "pkg:alire/gnatdoc_bin@26.0.0", "pkg:alire/gnatformat_bin@26.0.0", "pkg:alire/gnatprove@16.1.0", "pkg:gpr/vt100", "pkg:pypi/sphinx@9.1.0", "pkg:pypi/myst-parser@5.1.0", "pkg:pypi/furo@2025.12.19", "pkg:generic/python", "pkg:generic/make", "pkg:generic/alr", "pkg:generic/python3", "pkg:generic/git", "pkg:generic/npm", "pkg:generic/bash"]
+      "ref": "pkg:alire/crdt@1.16.0",
+      "dependsOn": ["pkg:alire/covex@1.48.0", "pkg:alire/gnatdoc_bin@26.0.0", "pkg:alire/gnatformat_bin@26.0.0", "pkg:alire/gnatprove@16.1.0", "pkg:gpr/vt100", "pkg:pypi/sphinx", "pkg:pypi/myst-parser", "pkg:pypi/furo", "pkg:generic/python", "pkg:generic/make", "pkg:generic/alr", "pkg:generic/python3", "pkg:generic/git", "pkg:generic/npm", "pkg:generic/bash"]
     }
   ]
 }
